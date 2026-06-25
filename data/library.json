@@ -1,0 +1,2431 @@
+{
+  "1": {
+    "term": "EOD",
+    "category": "business",
+    "extended": "End of day (EOD), end of business (EOB), close of business (COB), close of play (COP), or end of play (EOP) is the end of the trading day in financial markets, the point when trading ceases. In some markets it is actually defined as the point in time a few minutes prior to the actual cessation of trading, when the regular traders' orders are no longer received.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/End_of_day"
+  },
+  "2": {
+    "term": "COB",
+    "category": "business",
+    "extended": "End of day (EOD), end of business (EOB), close of business (COB), close of play (COP), or end of play (EOP) is the end of the trading day in financial markets, the point when trading ceases. In some markets it is actually defined as the point in time a few minutes prior to the actual cessation of trading, when the regular traders' orders are no longer received.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/End_of_day"
+  },
+  "3": {
+    "term": "EOW",
+    "category": "business",
+    "extended": "Eowyn Ivey is an American author based in Alaska. She was a finalist for the Pulitzer Prize for Fiction in 2013 for her debut novel The Snow Child.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Eowyn_Ivey"
+  },
+  "4": {
+    "term": "OKR",
+    "category": "business",
+    "extended": "Objectives and key results is a goal-setting framework used by individuals, teams, and organizations to define measurable goals and track their outcomes. The development of OKR is generally attributed to Andrew Grove who introduced the approach to Intel in the 1970s and documented the framework in his 1983 book High Output Management.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Objectives_and_key_results"
+  },
+  "5": {
+    "term": "KPI",
+    "category": "business",
+    "extended": "A performance indicator or key performance indicator (KPI) is a type of performance measurement used to evaluate the success of an organization, activity, project, or process in achieving defined objectives. KPIs provide a focus for strategic and operational improvement, support evidence-based decision-making, and help organizations identify and monitor factors critical to performance.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Performance_indicator"
+  },
+  "6": {
+    "term": "ROI",
+    "category": "business",
+    "extended": "Return on investment (ROI) or return on costs (ROC) is the ratio between net income or profit to investment. A high ROI means the investment's gains compare favorably to its cost. As a performance measure, ROI is used to evaluate the efficiency of an investment or to compare the efficiencies of several different investments. In economic terms, it is one way of relating profits to capital invested.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Return_on_investment"
+  },
+  "7": {
+    "term": "EBITDA",
+    "category": "business",
+    "extended": "Earnings before interest, taxes, depreciation, and amortization, commonly known as EBITDA, is a measure of a company's profitability of the operating business only, before any effects of indebtedness, state-mandated payments, and costs required to maintain its asset base. It is derived by subtracting from revenues all costs of the operating business but not decline in asset value, cost of borrowing and obligations to governments. Although certain leases have been capitalised on the balance sheet since IFRS 16, its expenses are often still adjusted back into EBITDA given they are deemed operational in nature.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Earnings_before_interest%2C_taxes%2C_depreciation_and_amortization"
+  },
+  "8": {
+    "term": "CAGR",
+    "category": "business",
+    "extended": "Compound annual growth rate (CAGR) is a business, economics and investing term representing the mean annualized growth rate for compounding values over a given time period. CAGR smooths the effect of volatility of periodic values that can render arithmetic means less meaningful. It is particularly useful to compare growth rates of various data values, such as revenue growth of companies, or of economic values, over time.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Compound_annual_growth_rate"
+  },
+  "9": {
+    "term": "CapEx",
+    "category": "business",
+    "extended": "Capital expenditure or capital expense is the money an organization or corporate entity spends to buy, maintain, or improve its fixed assets, such as buildings, vehicles, equipment or land. It is considered a capital expenditure when funds are spent to purchase a new asset or to extend the useful life of existing assets, such as major structural repairs or upgrades.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Capital_expenditure"
+  },
+  "10": {
+    "term": "OpEx",
+    "category": "business",
+    "extended": "OPEX is a Portuguese financial services company headquartered in Lisbon that consults clients regarding mergers and acquisitions, capital raising, and general operations. The firm launched an over-the-counter exchange known as PEX in 2003 to provide a trading environment for the securities of small and mid-cap Portuguese companies.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/OPEX_(Stock_Exchange)"
+  },
+  "11": {
+    "term": "P&L",
+    "category": "business",
+    "extended": "Profit and Loss Sharing refers to Sharia-compliant forms of equity financing such as mudarabah and musharakah. These mechanisms comply with the religious prohibition on interest on loans that most Muslims subscribe to. Mudarabah (مضاربة) refers to \"trustee finance\" or passive partnership contract, while Musharakah refers to equity participation contract. Other sources include sukuk and direct equity investment as types of PLS.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Profit_and_loss_sharing"
+  },
+  "12": {
+    "term": "B2B",
+    "category": "business",
+    "extended": "Business-to-Business — selling products or services to other companies rather than consumers.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=B2B"
+  },
+  "13": {
+    "term": "B2C",
+    "category": "business",
+    "extended": "Business-to-Consumer — selling directly to individual end users.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=B2C"
+  },
+  "14": {
+    "term": "SaaS",
+    "category": "business",
+    "extended": "Software as a Service — software delivered over the internet on a subscription.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=SaaS"
+  },
+  "15": {
+    "term": "ARR",
+    "category": "business",
+    "extended": "A revenue stream is a source of revenue of a company, other organization, or regional or national economy.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Revenue_stream"
+  },
+  "16": {
+    "term": "MRR",
+    "category": "business",
+    "extended": "Monthly Recurring Revenue — the predictable subscription revenue earned each month.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=MRR"
+  },
+  "17": {
+    "term": "CAC",
+    "category": "business",
+    "extended": "Customer acquisition cost (CAC) is the cost of persuading a customer to purchase a product or service. As an important business metric, customer acquisition costs are often related to customer lifetime value.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Customer_acquisition_cost"
+  },
+  "18": {
+    "term": "LTV",
+    "category": "business",
+    "extended": "In marketing, customer lifetime value, lifetime customer value (LCV), or life-time value (LTV) is an estimation and prediction of the net profit that a customer contributes to during the entire future relationship with a business. The prediction model can have varying levels of sophistication and accuracy, ranging from a crude heuristic to the use of complex predictive analytics techniques.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Customer_lifetime_value"
+  },
+  "19": {
+    "term": "churn",
+    "category": "business",
+    "extended": "The rate at which customers stop using or paying for a product.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=churn"
+  },
+  "20": {
+    "term": "runway",
+    "category": "business",
+    "extended": "How many months a company can keep operating before it runs out of cash.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=runway"
+  },
+  "21": {
+    "term": "burn rate",
+    "category": "business",
+    "extended": "How fast a company is spending its cash reserves, usually measured per month.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=burn%20rate"
+  },
+  "22": {
+    "term": "GTM",
+    "category": "business",
+    "extended": "Go To Market — the plan for how a product reaches and sells to customers.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=GTM"
+  },
+  "23": {
+    "term": "TAM",
+    "category": "business",
+    "extended": "Total Addressable Market — the total revenue opportunity if you captured 100% of demand.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=TAM"
+  },
+  "24": {
+    "term": "SAM",
+    "category": "business",
+    "extended": "Samsung Group is a South Korean multinational manufacturing conglomerate headquartered in the Samsung Town office complex in Seoul. The group consists of numerous affiliated businesses, most of which operate under the Samsung brand, and is the largest chaebol. As of 2024, Samsung has the world's fifth-highest brand value.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Samsung"
+  },
+  "25": {
+    "term": "SOM",
+    "category": "business",
+    "extended": "A target market is a group of customers within a business's serviceable available market at which a business aims its product features, marketing efforts and pricing. A target market is a subset of the total market for a product or service. The serviceable obtainable market (SOM) is a subset of a target market.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Target_market"
+  },
+  "26": {
+    "term": "NDA",
+    "category": "business",
+    "extended": "A non-disclosure agreement (NDA), also known as a confidentiality agreement (CA), confidential disclosure agreement (CDA), proprietary information agreement (PIA), or secrecy agreement (SA), is a legal contract or part of a contract between at least two parties that outlines confidential material, knowledge, or information that the parties wish to share with one another for certain purposes, but wish to restrict access to. Doctor–patient confidentiality, attorney–client privilege, priest–penitent privilege and bank–client confidentiality agreements are examples of NDAs, which are often not enshrined in a written contract between the parties.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Non-disclosure_agreement"
+  },
+  "27": {
+    "term": "MOU",
+    "category": "business",
+    "extended": "A memorandum of understanding (MoU) is a type of agreement between two (bilateral) or more (multilateral) parties. It expresses a convergence of will between the parties, indicating an intended common line of action. It is often used either in cases where parties do not imply a legal commitment or in situations where the parties cannot create a legally enforceable agreement. It is a more formal alternative to a gentlemen's agreement.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Memorandum_of_understanding"
+  },
+  "28": {
+    "term": "SOW",
+    "category": "business",
+    "extended": "In project management, a statement of work (SOW) is a narrative description of a project's work requirement. It defines project-specific activities, deliverables and timelines for a vendor providing services to the client. The SOW typically also includes detailed requirements and pricing, with standard regulatory and governance terms and conditions. It is often an important accompaniment to a master service agreement or request for proposal (RFP).",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Statement_of_work"
+  },
+  "29": {
+    "term": "RFP",
+    "category": "business",
+    "extended": "A request for proposal (RFP) is a form of reverse auction, initiated by an organisation interested in the procurement of a service or product, that solicits a business proposal from potential suppliers. It is usually part of a complex sales process, and made through a bidding process.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Request_for_proposal"
+  },
+  "30": {
+    "term": "FYI",
+    "category": "business",
+    "extended": "\"FYI\" is a common abbreviation of \"for your information\". The term, originally a wire service abbreviation used by journalists, is commonly used in emails, instant messaging and other messages to indicate an informational message or explanatory statement that does not suggest any action or require a response. The abbreviation is also commonly used in spoken conversations.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/FYI"
+  },
+  "31": {
+    "term": "FY",
+    "category": "business",
+    "extended": "Fiscal Year — a company's 12-month accounting period, which may not match the calendar year.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=FY"
+  },
+  "32": {
+    "term": "headcount",
+    "category": "business",
+    "extended": "The number of employees, or the budgeted number of roles a team is allowed to hire.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=headcount"
+  },
+  "33": {
+    "term": "synergy",
+    "category": "business",
+    "extended": "The idea that combined efforts produce more value than the parts would separately (often used ironically).",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=synergy"
+  },
+  "34": {
+    "term": "circle back",
+    "category": "business",
+    "extended": "To return to a topic or person later rather than dealing with it now.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=circle%20back"
+  },
+  "35": {
+    "term": "low-hanging fruit",
+    "category": "business",
+    "extended": "The easiest wins that take little effort for a quick result.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=low-hanging%20fruit"
+  },
+  "36": {
+    "term": "move the needle",
+    "category": "business",
+    "extended": "To make a noticeable, measurable difference to a key metric.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=move%20the%20needle"
+  },
+  "37": {
+    "term": "boil the ocean",
+    "category": "business",
+    "extended": "To attempt something impossibly large in scope; a warning against over-reaching.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=boil%20the%20ocean"
+  },
+  "38": {
+    "term": "take it offline",
+    "category": "business",
+    "extended": "To move a side discussion out of the current meeting and handle it separately.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=take%20it%20offline"
+  },
+  "39": {
+    "term": "touch base",
+    "category": "business",
+    "extended": "This is an alphabetical list of common English-language idioms based on baseball, excluding the extended metaphor referring to sex, and including illustrative examples for each entry. Particularly American English has been enriched by expressions derived from the game of baseball.See also the Glossary of baseball terms for the jargon of the game itself, as used by participants, fans, reporters, announcers, and analysts of the game.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Glossary_of_English-language_idioms_derived_from_baseball"
+  },
+  "40": {
+    "term": "deep dive",
+    "category": "business",
+    "extended": "Deep Diver was an Irish-bred, British-trained Thoroughbred racehorse and sire. As a two-year-old in 1971 he won seven of his eleven races including the Brocklesby Stakes, July Stakes, Prix d'Arenberg, Cornwallis Stakes and Prix du Petit Couvert. In the following year he took time to reproduce his best form but emerged as the best sprinter in Europe with decisive wins in the Nunthorpe Stakes and Prix de l'Abbaye. Timeform rated Deep Diver the best racehorse of his generation in Europe at both two and three years of age. He has been retrospectively rated as one of the best British-trained sprinters of the 20th century. Deep Diver stood as a breeding stallion in Ireland, Australia and Japan but had little success as a sire of winners.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Deep_Diver_(horse)"
+  },
+  "41": {
+    "term": "bandwidth",
+    "category": "business",
+    "extended": "In business slang, a person's available time and capacity to take on more work.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=bandwidth"
+  },
+  "42": {
+    "term": "stakeholder",
+    "category": "business",
+    "extended": "Anyone with an interest in or influence over a project's outcome.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=stakeholder"
+  },
+  "43": {
+    "term": "blocker",
+    "category": "business",
+    "extended": "Something preventing work from progressing until it's resolved.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=blocker"
+  },
+  "44": {
+    "term": "action item",
+    "category": "business",
+    "extended": "A specific task assigned to someone with an expected outcome, often from a meeting.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=action%20item"
+  },
+  "45": {
+    "term": "deliverable",
+    "category": "business",
+    "extended": "A tangible output a project is expected to produce and hand over.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=deliverable"
+  },
+  "46": {
+    "term": "scope creep",
+    "category": "business",
+    "extended": "The gradual, uncontrolled expansion of a project's requirements beyond the original plan.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=scope%20creep"
+  },
+  "47": {
+    "term": "north star",
+    "category": "business",
+    "extended": "The single guiding metric or goal that aligns a team's efforts.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=north%20star"
+  },
+  "48": {
+    "term": "table stakes",
+    "category": "business",
+    "extended": "In poker and other gambling games, table stakes is a rule that a player may bet no more money than they had on the table at the beginning of that hand; they cannot go back to their pocket for more money once a hand is dealt. This limits the amount that a player can lose, while also limiting the amount other players may have to bet. In between hands, a player is free to re-buy or add on so long as their entire stack after the re-buy or add-on does not exceed the maximum buy-in.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Table_stakes"
+  },
+  "49": {
+    "term": "value prop",
+    "category": "business",
+    "extended": "In marketing, a value proposition is the economic value that a company or product delivers to its market segment of customers. The phrase was coined by McKinsey consultants Michael Lanning and Edward Michaels in 1988.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Value_proposition"
+  },
+  "50": {
+    "term": "ICP",
+    "category": "business",
+    "extended": "The ICP Savannah is a high-wing, single-engine, ultralight with side-by-side seating for two produced in Italy by ICP srl. It has sold in large numbers, particularly in Europe. The Savannah is in production, sold in both kit and ready-to-fly form.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/ICP_Savannah"
+  },
+  "51": {
+    "term": "NPS",
+    "category": "business",
+    "extended": "Net Promoter Score — a metric of how likely customers are to recommend you.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=NPS"
+  },
+  "52": {
+    "term": "upsell",
+    "category": "business",
+    "extended": "Selling an existing customer a higher tier or larger version of what they already buy.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=upsell"
+  },
+  "53": {
+    "term": "cross-sell",
+    "category": "business",
+    "extended": "Selling an existing customer an additional, complementary product.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=cross-sell"
+  },
+  "54": {
+    "term": "EOM",
+    "category": "business",
+    "extended": "End Of Message — marks that the whole note fits in the subject line; also End Of Month in finance.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=EOM"
+  },
+  "55": {
+    "term": "paradigm shift",
+    "category": "business",
+    "extended": "A fundamental change in approach or in the underlying assumptions of a field.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=paradigm%20shift"
+  },
+  "56": {
+    "term": "boots on the ground",
+    "category": "business",
+    "extended": "People physically present doing the actual hands-on work.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=boots%20on%20the%20ground"
+  },
+  "57": {
+    "term": "value add",
+    "category": "business",
+    "extended": "Value added is a term in economics for calculating the difference between market value of a product or service, and the sum value of its constituents. It is relatively expressed by the supply-demand curve for specific units of sale. Value added is distinguished from the accounting term added value which measures only the financial profits earned upon transformational processes for specific items of sale that are available on the market.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Value_added"
+  },
+  "58": {
+    "term": "mission critical",
+    "category": "business",
+    "extended": "A mission critical factor of a system is any factor that is essential to business, organizational, or governmental operations. Failure or disruption of mission critical factors would have a serious impact on business, organization, or government operations, and can even cause social turmoil and catastrophes.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Mission_critical"
+  },
+  "59": {
+    "term": "dry powder",
+    "category": "business",
+    "extended": "A dry-powder inhaler (DPI) is a device that delivers medication to the lungs in the form of a dry powder. DPIs are commonly used to treat respiratory diseases such as asthma, bronchitis, emphysema and COPD, although DPIs have also been used in the treatment of diabetes mellitus.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Dry-powder_inhaler"
+  },
+  "60": {
+    "term": "tailwind",
+    "category": "business",
+    "extended": "A headwind is a wind that blows against the direction of travel of an object, while a tailwind blows in the direction of travel. A headwind decreases the object's speed and increases the time required to reach its destination, while a tailwind has the opposite effect.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Headwind_and_tailwind"
+  },
+  "61": {
+    "term": "headwind",
+    "category": "business",
+    "extended": "An adverse external condition that slows growth or progress.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=headwind"
+  },
+  "62": {
+    "term": "circle the wagons",
+    "category": "business",
+    "extended": "To unite and rally defensively in response to a threat or criticism.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=circle%20the%20wagons"
+  },
+  "63": {
+    "term": "peel the onion",
+    "category": "business",
+    "extended": "To examine a problem one layer at a time to reach the core.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=peel%20the%20onion"
+  },
+  "64": {
+    "term": "elephant in the room",
+    "category": "business",
+    "extended": "An obvious, major problem that everyone is avoiding talking about.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=elephant%20in%20the%20room"
+  },
+  "65": {
+    "term": "best practice",
+    "category": "business",
+    "extended": "A method widely accepted as the most effective proven way to do something.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=best%20practice"
+  },
+  "66": {
+    "term": "ballpark",
+    "category": "business",
+    "extended": "A rough, approximate estimate.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=ballpark"
+  },
+  "67": {
+    "term": "bring to the table",
+    "category": "business",
+    "extended": "The value, skills or resources someone contributes to an effort.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=bring%20to%20the%20table"
+  },
+  "68": {
+    "term": "drill down",
+    "category": "business",
+    "extended": "Data drilling refers to any of various operations and transformations on tabular, relational, and multidimensional data. The term has widespread use in various contexts, but is primarily associated with specialized software designed specifically for data analysis.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Data_drilling"
+  },
+  "69": {
+    "term": "ducks in a row",
+    "category": "business",
+    "extended": "To get everything organized and properly prepared before acting.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=ducks%20in%20a%20row"
+  },
+  "70": {
+    "term": "game changer",
+    "category": "business",
+    "extended": "Game Changer is a 2025 Indian Telugu-language political action drama film directed by Shankar, in his Telugu debut, and produced by Dil Raju under Sri Venkateswara Creations. The film stars Ram Charan in dual roles, alongside Kiara Advani, Anjali, S. J. Suryah, Srikanth, Sunil, Jayaram and Samuthirakani.\nThe film featured original score and soundtrack was composed by Thaman S. While cinematography and editing were handled by Tirru and Shameer Muhammed and Ruben respectively.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Game_Changer_(film)"
+  },
+  "71": {
+    "term": "hard stop",
+    "category": "business",
+    "extended": "The Hard Stop is a 2015 British documentary film, written and produced by George Amponsah and Dionne Walker, about the aftermath of the death of Mark Duggan, a young black man who lost his life at the hands of the Metropolitan Police in Tottenham, north London, in 2011 during a \"hard stop\" when officers \"pulled out in front of Duggan's speeding cab, ready for confrontation\" with the armed Duggan. A peaceful protest about the event escalated into several days of rioting that spread across London and beyond, and for a time made news headlines around the world.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/The_Hard_Stop"
+  },
+  "72": {
+    "term": "in the weeds",
+    "category": "business",
+    "extended": "Diner lingo is a kind of American verbal slang used by cooks and chefs in diners and diner-style restaurants, and by the wait staff to communicate their orders to the cooks. Usage of terms with similar meaning, propagated by oral culture within each establishment, may vary by region or even among restaurants in the same locale.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Diner_lingo"
+  },
+  "73": {
+    "term": "leverage",
+    "category": "business",
+    "extended": "In finance, leverage, also known as gearing, is any technique involving borrowing funds to buy an investment.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Leverage_(finance)"
+  },
+  "74": {
+    "term": "pivot",
+    "category": "business",
+    "extended": "A deliberate, fundamental change in strategy or direction.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=pivot"
+  },
+  "75": {
+    "term": "ramp up",
+    "category": "business",
+    "extended": "To increase or accelerate activity, output or staffing.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=ramp%20up"
+  },
+  "76": {
+    "term": "run it up the flagpole",
+    "category": "business",
+    "extended": "To float an idea to others to gauge their reaction.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=run%20it%20up%20the%20flagpole"
+  },
+  "77": {
+    "term": "secret sauce",
+    "category": "business",
+    "extended": "The proprietary ingredient or advantage that makes something uniquely work.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=secret%20sauce"
+  },
+  "78": {
+    "term": "single source of truth",
+    "category": "business",
+    "extended": "In information science and information technology, single source of truth (SSOT) architecture, or single point of truth (SPOT) architecture, for information systems is the practice of structuring information models and associated data schemas such that every data element is mastered in only one place, providing data normalization to a canonical form.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Single_source_of_truth"
+  },
+  "79": {
+    "term": "swim lane",
+    "category": "business",
+    "extended": "A clearly bounded area of responsibility or ownership.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=swim%20lane"
+  },
+  "80": {
+    "term": "think outside the box",
+    "category": "business",
+    "extended": "Thinking outside the box is an idiom that means to think differently, unconventionally, or from a new perspective. The phrase also often refers to novel or creative thinking.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Thinking_outside_the_box"
+  },
+  "81": {
+    "term": "wheelhouse",
+    "category": "business",
+    "extended": "One's area of expertise, strength or comfort.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=wheelhouse"
+  },
+  "82": {
+    "term": "win-win",
+    "category": "business",
+    "extended": "In game theory, a win–win game or win–win scenario is a situation that produces a mutually beneficial outcome for two or more parties. It is also called a positive-sum game as it is the opposite of a zero-sum game. If a win–win scenario is not achieved, the scenario becomes a win-lose or lose–lose situation, since it has caused failure for at least one of the parties.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Win%E2%80%93win_game"
+  },
+  "83": {
+    "term": "thirty-thousand-foot view",
+    "category": "business",
+    "extended": "A high-level overview that ignores the fine details.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=thirty-thousand-foot%20view"
+  },
+  "84": {
+    "term": "back of the envelope",
+    "category": "business",
+    "extended": "A quick, rough calculation done without precise data.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=back%20of%20the%20envelope"
+  },
+  "85": {
+    "term": "bleeding edge",
+    "category": "business",
+    "extended": "The very newest and riskiest technology or approach, ahead of the leading edge.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=bleeding%20edge"
+  },
+  "86": {
+    "term": "core competency",
+    "category": "business",
+    "extended": "A company's defining strength — the thing it does better than rivals.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=core%20competency"
+  },
+  "87": {
+    "term": "double-click",
+    "category": "business",
+    "extended": "A double-click is the act of pressing a computer mouse button twice quickly without moving the mouse. Double-clicking allows two different actions to be associated with the same mouse button. It was developed by Tim Mott of Xerox Palo Alto Research Center. Often, single-clicking selects an object while a double-click selects the next object up in the selection hierarchy, or executes the function associated with that object. Following a link in a modern web browser is accomplished with only a single click, requiring the use of a second mouse button, \"click and hold\" delay, or modifier key to gain access to actions other than following the link. On touchscreens, the double-click is called \"double-tap\"; it's not used as much as double-click, but typically it functions as a zoom feature.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Double-click"
+  },
+  "88": {
+    "term": "sea change",
+    "category": "business",
+    "extended": "Sea Change is the eighth studio album by American musician Beck, released on September 24, 2002, by Geffen Records. Recorded over a two-month period in Los Angeles with producer Nigel Godrich, the album features themes of heartbreak and desolation, solitude, and loneliness. For the album, much of Beck's trademark cryptic and ironic lyrics were replaced by simpler, more sincere lyrics. He also eschewed the heavy sampling of his previous albums for live instrumentation. Beck cited the breakup with his longtime girlfriend as the major influence on the album.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Sea_Change_(album)"
+  },
+  "89": {
+    "term": "thought leader",
+    "category": "business",
+    "extended": "Someone regarded as an authority whose ideas shape opinion in a field.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=thought%20leader"
+  },
+  "90": {
+    "term": "quick win",
+    "category": "business",
+    "extended": "An easy, fast success that builds momentum or goodwill.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=quick%20win"
+  },
+  "91": {
+    "term": "cadence",
+    "category": "business",
+    "extended": "The regular rhythm at which meetings, releases or check-ins happen.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=cadence"
+  },
+  "92": {
+    "term": "level set",
+    "category": "business",
+    "extended": "In mathematics, a level set of a real-valued function f of n real variables is a set where the function takes on a given constant value c, that is:",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Level_set"
+  },
+  "93": {
+    "term": "put a pin in it",
+    "category": "business",
+    "extended": "To pause a topic deliberately and come back to it later.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=put%20a%20pin%20in%20it"
+  },
+  "94": {
+    "term": "actionable",
+    "category": "business",
+    "extended": "In law, a cause of action or right of action, is a set of facts sufficient to justify suing to obtain money or property, or to justify the enforcement of a legal right against another party. The term also refers to the legal theory upon which a plaintiff brings suit. The legal document which carries a claim is often called 'claim form' or 'particulars of claim' in English law, or a 'complaint' in U.S. federal practice and in many U.S. states. In Ireland, this document can be called a 'claim notice.' It can be any communication notifying the party to whom it is addressed of an alleged fault which resulted in damages, often expressed in the amount of money the receiving party should pay/reimburse.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Cause_of_action"
+  },
+  "95": {
+    "term": "disruption",
+    "category": "business",
+    "extended": "Innovation that radically upends an existing market or way of doing things.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=disruption"
+  },
+  "96": {
+    "term": "alignment",
+    "category": "business",
+    "extended": "Getting people to agree on and pull toward the same direction or priorities.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=alignment"
+  },
+  "97": {
+    "term": "buy-in",
+    "category": "business",
+    "extended": "In poker and gaming, \"buying in\" is the process of entering a tournament that requires an up-front payment. The size of the payment, otherwise known as the \"buy in\", determines the total winning prize pool and also contains a fee, otherwise known as the rake, that is paid to the house.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Buying_in_(poker)"
+  },
+  "98": {
+    "term": "due diligence",
+    "category": "business",
+    "extended": "Due diligence is the investigation or exercise of care that a reasonable business or person is normally expected to take before entering into an agreement or contract with another party or an act with a certain standard of care.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Due_diligence"
+  },
+  "99": {
+    "term": "product-market fit",
+    "category": "business",
+    "extended": "The point where a product clearly satisfies strong demand in a real market.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=product-market%20fit"
+  },
+  "100": {
+    "term": "moat",
+    "category": "business",
+    "extended": "A durable competitive advantage that protects a business from rivals.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=moat"
+  },
+  "101": {
+    "term": "flywheel",
+    "category": "business",
+    "extended": "A self-reinforcing loop where each success makes the next one easier.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=flywheel"
+  },
+  "102": {
+    "term": "unit economics",
+    "category": "business",
+    "extended": "The revenue and cost of a single unit (one customer or sale), showing if the model scales profitably.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=unit%20economics"
+  },
+  "103": {
+    "term": "heavy lift",
+    "category": "business",
+    "extended": "In transportation, heavy lift refers to the handling and installation of heavy items which are indivisible, and of weights generally accepted to be over 100 tons and of widths/heights of more than 100 meters. These oversized items are transported from one place to another, then lifted or installed into place. Characteristic for heavy-lift goods is the absence of standardization, which requires individual transport planning.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Heavy_lift"
+  },
+  "104": {
+    "term": "raise the bar",
+    "category": "business",
+    "extended": "Raise the bar is an Icelandic documentary about the controversial journey of a girls basketball team under the direction of coach Brynjar Karl Sigurðsson.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Raise_the_Bar_(film)"
+  },
+  "334": {
+    "term": "API",
+    "category": "tech",
+    "extended": "An application programming interface (API) is a connection between computers or between computer programs. It is a type of software interface, offering a service to other pieces of software. A document or standard that describes how to build such a connection or interface is called an API specification. A computer system that meets this standard is said to implement or expose an API. The term API may refer either to the specification or to the implementation.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/API"
+  },
+  "335": {
+    "term": "SDK",
+    "category": "tech",
+    "extended": "Sidekick cell adhesion molecule 1 is a protein that in humans is encoded by the SDK1 gene.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/SDK1"
+  },
+  "336": {
+    "term": "CLI",
+    "category": "tech",
+    "extended": "A command-line interface (CLI), also known as a command-line shell, is a means of interacting with software via commands – each formatted as a line of text. The concept of interacting with a computer via text evolved over two decades, transitioning from physical hardware to sophisticated software. Before the CLI, computers were programmed using physical switches or punched cards. The shift toward a \"command\" style interaction began with the use of Teleprinters (Teletypes). Early systems like the Whirlwind I (1951) at MIT began utilizing typewriter-like inputs for direct control, moving away from batch processing where you'd hand a stack of cards to an operator and wait hours for a result. Devices like the Teletype Model 33, introduced in 1963, allowed operators to type a command and receive a printed response from the computer.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Command-line_interface"
+  },
+  "337": {
+    "term": "GUI",
+    "category": "tech",
+    "extended": "A graphical user interface, or GUI, is a form of user interface that allows users to interact with electronic devices through graphical icons and visual indicators such as secondary notation. In many applications, GUIs are used instead of text-based UIs, which are based on typed command labels or text navigation. GUIs were introduced in reaction to the perceived steep learning curve of command-line interfaces (CLIs), which require commands to be typed on a computer keyboard.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Graphical_user_interface"
+  },
+  "338": {
+    "term": "CI/CD",
+    "category": "tech",
+    "extended": "Continuous Integration / Continuous Delivery — automatically building, testing and shipping code on every change.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=CI/CD"
+  },
+  "339": {
+    "term": "MVP",
+    "category": "tech",
+    "extended": "Minimum Viable Product — the smallest version of a product that delivers value and can be tested with real users.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=MVP"
+  },
+  "340": {
+    "term": "ORM",
+    "category": "tech",
+    "extended": "Object-Relational Mapping — a library that lets you work with a database using objects instead of raw SQL.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=ORM"
+  },
+  "341": {
+    "term": "CRUD",
+    "category": "tech",
+    "extended": "Create, Read, Update, Delete — the four basic operations on stored data.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=CRUD"
+  },
+  "342": {
+    "term": "REST",
+    "category": "tech",
+    "extended": "REST is a software architectural style that was created to describe the design and guide the development of the architecture for the World Wide Web. REST defines a set of constraints for how the architecture of a distributed, Internet-scale hypermedia system, such as the Web, should behave. The REST architectural style emphasizes uniform interfaces, independent deployment of components, the scalability of interactions between them, and creating a layered architecture to promote caching to reduce user-perceived latency, enforce security, and encapsulate legacy systems.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/REST"
+  },
+  "343": {
+    "term": "gRPC",
+    "category": "tech",
+    "extended": "gRPC is a cross-platform high-performance remote procedure call (RPC) framework. gRPC was initially created by Google, but is open source and is used in many organizations. Use cases range from microservices to the \"last mile\" of computing. gRPC uses HTTP/2 for transport, Protocol Buffers as the interface description language, and provides features such as authentication, bidirectional streaming and flow control, blocking or nonblocking bindings, and cancellation and timeouts. It generates cross-platform client and server bindings for many languages. The most common usage scenarios include connecting services in a microservices style architecture, or connecting mobile device clients to backend services.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/GRPC"
+  },
+  "344": {
+    "term": "GraphQL",
+    "category": "tech",
+    "extended": "GraphQL is a data query and manipulation language that allows specifying what data is to be retrieved or modified. A GraphQL server can process a client query using data from separate sources and present the results in a unified graph. The language is not tied to any specific database or storage engine. There are several open-source runtime engines for GraphQL.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/GraphQL"
+  },
+  "345": {
+    "term": "JSON",
+    "category": "tech",
+    "extended": "JSON is an open standard file format and data interchange format that uses human-readable text to store and transmit data objects consisting of name–value pairs and arrays. It is a commonly used data format with diverse uses in electronic data interchange, including that of web applications with servers.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/JSON"
+  },
+  "346": {
+    "term": "YAML",
+    "category": "tech",
+    "extended": "YAML is a human-readable data serialization language. It is commonly used for configuration files and in applications where data is being stored or transmitted. YAML targets many of the same communications applications as Extensible Markup Language (XML) but has a minimal syntax that intentionally differs from Standard Generalized Markup Language (SGML). It uses Python-style indentation to indicate nesting and does not require quotes around most string values.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/YAML"
+  },
+  "347": {
+    "term": "SQL",
+    "category": "tech",
+    "extended": "Structured Query Language (SQL) is a domain-specific language used to manage data, especially in a relational database management system (RDBMS). It is particularly useful in handling structured data, i.e., data incorporating relations among entities and variables.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/SQL"
+  },
+  "348": {
+    "term": "NoSQL",
+    "category": "tech",
+    "extended": "A family of databases (document, key-value, graph) that don't use the traditional relational table model.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=NoSQL"
+  },
+  "349": {
+    "term": "ACID",
+    "category": "tech",
+    "extended": "Atomicity, Consistency, Isolation, Durability — guarantees that keep database transactions reliable.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=ACID"
+  },
+  "350": {
+    "term": "DNS",
+    "category": "tech",
+    "extended": "Domain Name System — the internet's phone book, translating names like example.com into IP addresses.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=DNS"
+  },
+  "351": {
+    "term": "TTL",
+    "category": "tech",
+    "extended": "Time To Live — how long a piece of data (a cache entry, DNS record, packet) stays valid before it expires.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=TTL"
+  },
+  "352": {
+    "term": "TLS",
+    "category": "tech",
+    "extended": "A TLS termination proxy is a proxy server that acts as an intermediary point between client and server applications. It is used to terminate and/or establish TLS tunnels by decrypting and/or encrypting communications. This differs from TLS pass-through proxies, which forward encrypted (D)TLS traffic between clients and servers without terminating the tunnel.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/TLS_termination_proxy"
+  },
+  "353": {
+    "term": "VPN",
+    "category": "tech",
+    "extended": "A virtual private network (VPN) is an overlay network that uses network virtualization to extend a private network across a public network, such as the Internet, via the use of encryption and tunneling protocols. In a VPN, a tunneling protocol is used to transfer network messages from one network host to another.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Virtual_private_network"
+  },
+  "354": {
+    "term": "CDN",
+    "category": "tech",
+    "extended": "A content delivery network (CDN) or content distribution network is a geographically distributed network of proxy servers and corresponding data centers. CDNs provide high availability and performance (\"speed\") through geographical distribution relative to end users, and arose in the late 1990s to alleviate the performance bottlenecks of the Internet as it was becoming a critical medium. Since then, CDNs have grown to serve a large portion of Internet content, including text, graphics and scripts, downloadable objects, applications, live streaming media, on-demand streaming media, and social media services.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Content_delivery_network"
+  },
+  "355": {
+    "term": "SLA",
+    "category": "tech",
+    "extended": "A service-level agreement (SLA) is an agreement, typically a binding contract, between a service provider and a customer that define particular aspects of the service – such as quality of service, availability, responsibilities – as terms of contract. SLAs are commonly used in the technology industry, and often contain specific service-level objectives for defined service level indicators, such as mean time between failures, mean time to repair, mean time to recovery, network throughput, jitter, uptime, first-call resolution, and turnaround time.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Service-level_agreement"
+  },
+  "356": {
+    "term": "SLO",
+    "category": "tech",
+    "extended": "A service-level objective (SLO) is a target value or range of values for a service level that is measured by an SLI. An SLO is a key element of a service-level agreement (SLA) between a service provider and a customer. SLOs are agreed upon as a means of measuring the performance of the service provider and are outlined as a way of avoiding disputes between the two parties based on misunderstanding.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Service-level_objective"
+  },
+  "357": {
+    "term": "SLI",
+    "category": "tech",
+    "extended": "In information technology, a service level indicator (SLI) is a measure of the service level provided by a service provider to a customer. SLIs form the basis of service level objectives (SLOs), which in turn form the basis of service level agreements (SLAs); an SLI can also be called an SLA metric.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Service_level_indicator"
+  },
+  "358": {
+    "term": "JWT",
+    "category": "tech",
+    "extended": "JSON Web Token \nis a proposed Internet standard for creating data with optional signature and/or optional encryption whose payload holds JSON that asserts some number of claims. The tokens are signed either using a private secret or a public/private key.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/JSON_Web_Token"
+  },
+  "359": {
+    "term": "OAuth",
+    "category": "tech",
+    "extended": "OAuth is an open standard for access delegation, commonly used as a way for internet users to grant websites or applications access to their information on other websites but without giving them the passwords. This mechanism is used by companies such as Amazon, Google, Meta Platforms, Microsoft, and Twitter to permit users to share information about their accounts with third-party applications or websites.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/OAuth"
+  },
+  "360": {
+    "term": "SSO",
+    "category": "tech",
+    "extended": "Single Sign-On — logging in once to gain access to many separate applications.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=SSO"
+  },
+  "361": {
+    "term": "RBAC",
+    "category": "tech",
+    "extended": "Role-Based Access Control — granting permissions based on a user's role rather than per-person.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=RBAC"
+  },
+  "362": {
+    "term": "CORS",
+    "category": "tech",
+    "extended": "Cross-Origin Resource Sharing — browser rules controlling which sites may call a given API.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=CORS"
+  },
+  "363": {
+    "term": "XSS",
+    "category": "tech",
+    "extended": "Cross-Site Scripting — a vulnerability where attackers inject malicious scripts into a web page.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=XSS"
+  },
+  "364": {
+    "term": "CSRF",
+    "category": "tech",
+    "extended": "Cross-site request forgery, also known as one-click attack or session riding and abbreviated as CSRF or XSRF, is a type of malicious exploit of a website or web application where unauthorized commands are submitted from a user that the web application trusts. There are many ways in which a malicious website can transmit such commands; specially-crafted image tags, hidden forms, and JavaScript fetch or XMLHttpRequests, for example, can all work without the user's interaction or even knowledge. Unlike cross-site scripting (XSS), which exploits the trust a user has for a particular site, CSRF exploits the trust that a site has in a user's browser.\nIn a CSRF attack, an innocent end user is tricked by an attacker into submitting a web request that they did not intend. This may cause actions to be performed on the website that can include inadvertent client or server data leakage, change of session state, or manipulation of an end user's account.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Cross-site_request_forgery"
+  },
+  "365": {
+    "term": "2FA",
+    "category": "tech",
+    "extended": "Multi-factor authentication (MFA), also known as two-factor authentication (2FA), is an electronic authentication method in which a user is granted access to a website or application only after successfully presenting two or more distinct types of evidence to an authentication mechanism. MFA protects personal data—which may include personal identification or financial assets—from being accessed by an unauthorized third party that may have been able to discover, for example, a single password.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Multi-factor_authentication"
+  },
+  "366": {
+    "term": "LLM",
+    "category": "tech",
+    "extended": "A large language model (LLM) is a neural network trained on a vast amount of text for natural language processing tasks, especially language generation. LLMs can typically generate, summarize, translate, and analyze text in many contexts, and are a foundational technology behind modern chatbots. Biased or inaccurate training data can make an LLM's output less reliable.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Large_language_model"
+  },
+  "367": {
+    "term": "ML",
+    "category": "tech",
+    "extended": "Machine learning (ML) is a field of study in artificial intelligence concerned with the development and study of statistical algorithms that can learn from data and generalize to unseen data, and thus perform tasks without being explicitly programmed. Advances in the field of deep learning have allowed neural networks, a class of statistical algorithms, to surpass many previous machine learning approaches in performance.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Machine_learning"
+  },
+  "368": {
+    "term": "GPU",
+    "category": "tech",
+    "extended": "A graphics processing unit (GPU) is a specialized electronic circuit designed for digital image processing and to accelerate computer graphics, being present either as a component on a discrete graphics card or embedded on motherboards, mobile phones, personal computers, workstations, and game consoles. GPUs are also increasingly being used for artificial intelligence (AI) processing due to linear algebra acceleration, which is also used extensively in graphics processing.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Graphics_processing_unit"
+  },
+  "369": {
+    "term": "IDE",
+    "category": "tech",
+    "extended": "An integrated development environment (IDE) is software that provides a relatively comprehensive set of features for software development. An IDE is intended to enhance productivity by providing development features with a consistent user experience as opposed to using separate tools, such as vi, GDB, GCC, and make.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Integrated_development_environment"
+  },
+  "370": {
+    "term": "GC",
+    "category": "tech",
+    "extended": "Garbage Collection — automatic reclaiming of memory that a program no longer uses.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=GC"
+  },
+  "371": {
+    "term": "OOM",
+    "category": "tech",
+    "extended": "Out Of Memory — the condition where a process is killed for exhausting available RAM.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=OOM"
+  },
+  "372": {
+    "term": "K8s",
+    "category": "tech",
+    "extended": "Kubernetes — a system for automating deployment, scaling and management of containers.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=K8s"
+  },
+  "373": {
+    "term": "IaC",
+    "category": "tech",
+    "extended": "Infrastructure as Code — defining servers and networks in version-controlled config files.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=IaC"
+  },
+  "374": {
+    "term": "SRE",
+    "category": "tech",
+    "extended": "Site reliability engineering (SRE) is a discipline in the field of software engineering and IT infrastructure support that monitors and improves the availability and performance of deployed software systems and large software services. There is typically a focus on automation and an infrastructure as code methodology. SRE uses elements of software engineering, IT infrastructure, web development, and operations to assist with reliability. It is similar to DevOps as they both aim to improve the reliability and availability of deployed software systems.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Site_reliability_engineering"
+  },
+  "375": {
+    "term": "DevOps",
+    "category": "tech",
+    "extended": "DevOps is the integration and automation of software development and information technology operations. DevOps encompasses the tasks necessary for software development and can lead to both shortening development time and improving the development life cycle. According to American software architect Neal Ford, DevOps, particularly through continuous delivery, employs the \"bring the pain forward\" principle by tackling challenging tasks early, fostering automation, and enabling swift issue detection. Software programmers and architects should use fitness functions to keep their software in check.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/DevOps"
+  },
+  "376": {
+    "term": "PR",
+    "category": "tech",
+    "extended": "In software development, distributed version control is a form of version control in which the complete codebase, including its full history, is mirrored on every developer's computer. Compared to centralized version control, this enables automatic management branching and merging, speeds up most operations, improves the ability to work offline, and does not rely on a single location for backups. Git, the world's most popular version control system, is a distributed version control system.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Distributed_version_control"
+  },
+  "377": {
+    "term": "WIP",
+    "category": "tech",
+    "extended": "Work in process or work-in-process, WIP, work in progress, goods in process, or in-process inventory refers to a company's partially finished goods waiting for completion and eventual sale, or the value of these items. The term is used in supply chain management, and WIP is a key input for calculating inventory on a company's balance sheet. In lean thinking, inappropriate processing or excessive processing of goods or work in process, \"doing more than is necessary\", is seen as one of the seven wastes which do not add value to a product.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Work_in_process"
+  },
+  "378": {
+    "term": "LGTM",
+    "category": "tech",
+    "extended": "Looks Good To Me — reviewer shorthand approving a change.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=LGTM"
+  },
+  "379": {
+    "term": "YAGNI",
+    "category": "tech",
+    "extended": "You Aren't Gonna Need It — advice not to build features before they're actually required.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=YAGNI"
+  },
+  "380": {
+    "term": "DRY",
+    "category": "tech",
+    "extended": "Drywall is a panel made of calcium sulfate dihydrate (gypsum), with or without additives, typically extruded between thick sheets of facer and backer paper, used in the construction of interior walls and ceilings. The plaster is mixed with fiber ; plasticizer, foaming agent; and additives that can reduce mildew, flammability, and water absorption.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Drywall"
+  },
+  "381": {
+    "term": "KISS",
+    "category": "tech",
+    "extended": "Keep It Simple, Stupid — a reminder to prefer the simplest design that works.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=KISS"
+  },
+  "382": {
+    "term": "SOLID",
+    "category": "tech",
+    "extended": "Five object-oriented design principles (Single-responsibility, Open-closed, Liskov, Interface-segregation, Dependency-inversion) for maintainable code.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=SOLID"
+  },
+  "383": {
+    "term": "regex",
+    "category": "tech",
+    "extended": "A regular expression, sometimes referred to as a rational expression, is a sequence of characters that specifies a match pattern in text. Usually such patterns are used by string-searching algorithms for \"find\" or \"find and replace\" operations on strings, or for input validation. Regular expression techniques are developed in theoretical computer science and formal language theory.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Regular_expression"
+  },
+  "384": {
+    "term": "idempotent",
+    "category": "tech",
+    "extended": "In ring theory, a branch of mathematics, an idempotent element or simply idempotent of a ring is an element a such that a2 = a. That is, the element is idempotent under the ring's multiplication. Inductively then, one can also conclude that a = a2 = a3 = a4 = ... = an for any positive integer n. For example, an idempotent element of a matrix ring is precisely an idempotent matrix.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Idempotent_(ring_theory)"
+  },
+  "385": {
+    "term": "race condition",
+    "category": "tech",
+    "extended": "A bug where the outcome depends on the unpredictable timing of concurrent operations.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=race%20condition"
+  },
+  "386": {
+    "term": "deadlock",
+    "category": "tech",
+    "extended": "A standstill where two tasks each wait forever for a resource the other holds.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=deadlock"
+  },
+  "387": {
+    "term": "technical debt",
+    "category": "tech",
+    "extended": "Technical debt is a qualitative description of the cost to maintain a system that is attributable to choosing an expedient solution for its development. While an expedited solution can accelerate development in the short term, the resulting low quality may increase future costs if left unresolved. The term is often used in the context of information technology and especially software development.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Technical_debt"
+  },
+  "388": {
+    "term": "feature flag",
+    "category": "tech",
+    "extended": "A feature toggle in software development provides an alternative to maintaining multiple feature branches in source code. A condition within the code enables or disables a feature during runtime. In agile settings the toggle is used in production, to switch on the feature on demand, for some or all the users. Thus, feature toggles do make it easier to release often. Advanced roll out strategies such as canary roll out and A/B testing are easier to handle.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Feature_toggle"
+  },
+  "389": {
+    "term": "canary deploy",
+    "category": "tech",
+    "extended": "Releasing a change to a small subset of users first to catch problems before a full rollout.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=canary%20deploy"
+  },
+  "390": {
+    "term": "blue-green",
+    "category": "tech",
+    "extended": "A deploy strategy running two identical environments and switching traffic between them.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=blue-green"
+  },
+  "391": {
+    "term": "rollback",
+    "category": "tech",
+    "extended": "Reverting a system to a previous known-good version after a bad deploy.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=rollback"
+  },
+  "392": {
+    "term": "hotfix",
+    "category": "tech",
+    "extended": "A hotfix is a software update that is released outside the normal update cycle or intended to be applied to a live system, often to fix a bug.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Hotfix"
+  },
+  "393": {
+    "term": "monorepo",
+    "category": "tech",
+    "extended": "In version-control systems, a monorepo or monorepository is a software-development strategy in which the code for a number of projects is stored in the same repository. This practice dates back to at least the early 2000s, when it was commonly called a shared codebase. Google, Meta, Microsoft, Uber, Airbnb, and Twitter all employ very large monorepos with varying strategies to scale build systems and version control software with a large volume of code and daily changes.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Monorepo"
+  },
+  "394": {
+    "term": "monolith",
+    "category": "tech",
+    "extended": "A monolith is a geological feature consisting of a single massive stone or rock, such as some mountains. Erosion usually exposes the geological formations, which are often made of very hard and solid igneous or metamorphic rock. Some monoliths are volcanic plugs, solidified lava filling the vent of an extinct volcano.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Monolith"
+  },
+  "395": {
+    "term": "microservices",
+    "category": "tech",
+    "extended": "An architecture that splits an app into small, independently deployable services.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=microservices"
+  },
+  "396": {
+    "term": "webhook",
+    "category": "tech",
+    "extended": "In web development, a webhook is a method of augmenting or altering the behavior of a web page or web application with custom callbacks. These callbacks may be maintained, modified, and managed by third-party users who need not be affiliated with the originating website or application. In 2007, Jeff Lindsay coined the term webhook from the computer programming term hook.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Webhook"
+  },
+  "397": {
+    "term": "rate limit",
+    "category": "tech",
+    "extended": "In computer networks, rate limiting is used to control the rate of requests sent or received by a network interface controller. It can be used to prevent DoS attacks and limit web scraping.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Rate_limiting"
+  },
+  "398": {
+    "term": "eventual consistency",
+    "category": "tech",
+    "extended": "Eventual consistency is a consistency model used in distributed computing to achieve high availability. An eventually consistent system ensures that if no new updates are made to a given data item, eventually all read accesses to that item will return the last updated value. Eventual consistency, also called optimistic replication, is widely deployed in distributed systems and has origins in early mobile computing projects. A system that has achieved eventual consistency is said to have converged, or achieved replica convergence. Eventual consistency is a weak guarantee – most stronger models, like linearizability, are trivially eventually consistent.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Eventual_consistency"
+  },
+  "399": {
+    "term": "bikeshedding",
+    "category": "tech",
+    "extended": "Wasting time arguing over trivial details while ignoring the important decisions.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=bikeshedding"
+  },
+  "400": {
+    "term": "yak shaving",
+    "category": "tech",
+    "extended": "Doing a long chain of seemingly unrelated tasks before you can do the thing you set out to do.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=yak%20shaving"
+  },
+  "401": {
+    "term": "rubber ducking",
+    "category": "tech",
+    "extended": "Debugging by explaining your code line-by-line to an inanimate object (or anyone) until the bug reveals itself.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=rubber%20ducking"
+  },
+  "402": {
+    "term": "big O",
+    "category": "tech",
+    "extended": "Big-O notation — a way to describe how an algorithm's cost grows as input size grows.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=big%20O"
+  },
+  "403": {
+    "term": "memoization",
+    "category": "tech",
+    "extended": "Caching the result of an expensive function call so repeat calls return instantly.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=memoization"
+  },
+  "404": {
+    "term": "backpressure",
+    "category": "tech",
+    "extended": "A mechanism that slows producers when consumers can't keep up, preventing overload.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=backpressure"
+  },
+  "405": {
+    "term": "TDD",
+    "category": "tech",
+    "extended": "Test-driven development (TDD) is a way of writing code that involves writing an automated unit-level test case that fails, then writing just enough code to make the test pass, then refactoring both the test code and the production code, then repeating with another new test case.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Test-driven_development"
+  },
+  "406": {
+    "term": "BDD",
+    "category": "tech",
+    "extended": "Behavior-driven development (BDD) is an agile software development method centered around collaboration between business and IT professionals that have a stake in finding a solution for a complex problem. The core objective is to achieve a shared understanding of the problem.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Behavior-driven_development"
+  },
+  "407": {
+    "term": "agile",
+    "category": "tech",
+    "extended": "Agile software development is an umbrella term for approaches to developing software that reflect the values and principles agreed upon by The Agile Alliance, a group of 17 software practitioners, in 2001. As documented in their Manifesto for Agile Software Development, the practitioners value:Individuals and interactions over processes and tools\nWorking software over comprehensive documentation\nCustomer collaboration over contract negotiation\nResponding to change over following a plan",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Agile_software_development"
+  },
+  "408": {
+    "term": "scrum",
+    "category": "tech",
+    "extended": "Scrum is an agile team collaboration framework commonly used in software development and other industries.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Scrum_(project_management)"
+  },
+  "409": {
+    "term": "sprint",
+    "category": "tech",
+    "extended": "A short, fixed time-box (often two weeks) in which a team commits to and completes a set of work.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=sprint"
+  },
+  "410": {
+    "term": "standup",
+    "category": "tech",
+    "extended": "A brief daily team sync where each person shares progress, plans and blockers.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=standup"
+  },
+  "411": {
+    "term": "retro",
+    "category": "tech",
+    "extended": "Retrospective — a meeting to reflect on how the last sprint went and what to improve.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=retro"
+  },
+  "412": {
+    "term": "kanban",
+    "category": "tech",
+    "extended": "A workflow method that visualizes tasks on a board and limits work in progress.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=kanban"
+  },
+  "413": {
+    "term": "backlog",
+    "category": "tech",
+    "extended": "The prioritized list of features and work a team has yet to pick up.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=backlog"
+  },
+  "414": {
+    "term": "story points",
+    "category": "tech",
+    "extended": "Agile software development is an umbrella term for approaches to developing software that reflect the values and principles agreed upon by The Agile Alliance, a group of 17 software practitioners, in 2001. As documented in their Manifesto for Agile Software Development, the practitioners value:Individuals and interactions over processes and tools\nWorking software over comprehensive documentation\nCustomer collaboration over contract negotiation\nResponding to change over following a plan",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Agile_software_development"
+  },
+  "415": {
+    "term": "refactor",
+    "category": "tech",
+    "extended": "Restructuring existing code to improve it without changing its external behavior.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=refactor"
+  },
+  "416": {
+    "term": "code smell",
+    "category": "tech",
+    "extended": "In computer programming, a code smell is any characteristic of source code that hints at a deeper problem. Determining what a code smell is and is not is subjective, and varies by language, developer, and development methodology.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Code_smell"
+  },
+  "417": {
+    "term": "design pattern",
+    "category": "tech",
+    "extended": "A software design pattern describes a reusable solution to a commonly needed behavior in software. A design pattern is not a rigid structure to be copied directly into source code. Rather, it is a description of and a template for solving a particular type of problem that can be used in many different contexts, including different programming languages and computing platforms. Design patterns can be viewed as formalized best practices that the programmer may use to solve common problems when designing software.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Software_design_pattern"
+  },
+  "418": {
+    "term": "singleton",
+    "category": "tech",
+    "extended": "John Daniel Singleton was an American director, screenwriter, and producer. He made his feature film debut writing and directing Boyz n the Hood (1991), for which he was nominated for the Academy Award for Best Director, becoming, at age 24, the first African American and youngest nominee in the category.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/John_Singleton"
+  },
+  "419": {
+    "term": "dependency injection",
+    "category": "tech",
+    "extended": "In software engineering, dependency injection is a programming technique in which an object or function receives other objects or functions that it requires, as opposed to creating them internally. Dependency injection aims to separate the concerns of constructing objects and using them, leading to loosely coupled programs. The pattern ensures that an object or function that wants to use a given service should not have to know how to construct those services. Instead, the receiving \"client\" is provided with its dependencies by external code, which it is not aware of. Dependency injection makes implicit dependencies explicit and helps solve the following problems:How can a class be independent from the creation of the objects it depends on?\nHow can an application and the objects it uses support different configurations?",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Dependency_injection"
+  },
+  "420": {
+    "term": "polymorphism",
+    "category": "tech",
+    "extended": "Letting a single interface work with many different underlying types.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=polymorphism"
+  },
+  "421": {
+    "term": "encapsulation",
+    "category": "tech",
+    "extended": "Bundling data with the methods that operate on it and hiding internal state.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=encapsulation"
+  },
+  "422": {
+    "term": "abstraction",
+    "category": "tech",
+    "extended": "In software, an abstraction provides access while hiding details that otherwise might make access more challenging. It focuses attention on details of greater importance. Examples include the abstract data type which separates use from the representation of data and functions that form a call tree that is more general at the base and more specific towards the leaves.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Abstraction_(computer_science)"
+  },
+  "423": {
+    "term": "recursion",
+    "category": "tech",
+    "extended": "Recursion occurs when the definition of a concept or process depends on a simpler or previous version of itself. Recursion is used in a variety of disciplines ranging from linguistics to logic. The most common application of recursion is in mathematics and computer science, where a function being defined is applied within its own definition. While this apparently defines an infinite number of instances, it is often done in such a way that no infinite loop or infinite chain of references can occur.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Recursion"
+  },
+  "424": {
+    "term": "time complexity",
+    "category": "tech",
+    "extended": "How an algorithm's running time grows as the input size grows.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=time%20complexity"
+  },
+  "425": {
+    "term": "space complexity",
+    "category": "tech",
+    "extended": "How an algorithm's memory use grows as the input size grows.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=space%20complexity"
+  },
+  "426": {
+    "term": "hash map",
+    "category": "tech",
+    "extended": "A data structure mapping keys to values for near-constant-time lookup.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=hash%20map"
+  },
+  "427": {
+    "term": "binary search",
+    "category": "tech",
+    "extended": "An O(log n) algorithm that finds an item by repeatedly halving a sorted range.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=binary%20search"
+  },
+  "428": {
+    "term": "linked list",
+    "category": "tech",
+    "extended": "A linear data structure of nodes where each node points to the next.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=linked%20list"
+  },
+  "429": {
+    "term": "dynamic programming",
+    "category": "tech",
+    "extended": "Dynamic programming (DP) is both a mathematical optimization method and an algorithmic paradigm. The method was developed by Richard Bellman in the 1950s and has found applications in numerous fields, such as aerospace engineering and economics.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Dynamic_programming"
+  },
+  "430": {
+    "term": "LIFO",
+    "category": "tech",
+    "extended": "In computer science, a stack is an abstract data type that serves as a collection of elements with two main operations:Push, which adds an element to the collection, and\nPop, which removes the most recently added element.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Stack_(abstract_data_type)"
+  },
+  "431": {
+    "term": "FIFO",
+    "category": "tech",
+    "extended": "First In, First Out — the ordering a queue uses: the oldest item comes out first.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=FIFO"
+  },
+  "432": {
+    "term": "concurrency",
+    "category": "tech",
+    "extended": "Structuring a program so multiple tasks make progress in overlapping time periods.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=concurrency"
+  },
+  "433": {
+    "term": "parallelism",
+    "category": "tech",
+    "extended": "Actually executing multiple computations at the same instant across multiple cores.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=parallelism"
+  },
+  "434": {
+    "term": "mutex",
+    "category": "tech",
+    "extended": "Mutual-Exclusion lock — ensures only one thread enters a critical section at a time.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=mutex"
+  },
+  "435": {
+    "term": "semaphore",
+    "category": "tech",
+    "extended": "A counter that limits how many threads may access a resource at once.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=semaphore"
+  },
+  "436": {
+    "term": "async",
+    "category": "tech",
+    "extended": "Asynchronous — work that runs without blocking the caller, delivering its result later.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=async"
+  },
+  "437": {
+    "term": "callback",
+    "category": "tech",
+    "extended": "In computer programming, a callback is a programming pattern in which a function reference is passed from one context (consumer) to another (provider) such that the provider can call the function. If the function accesses state or functionality of the consumer, then the call is back to the consumer – backwards compared to the normal flow of control in which a consumer calls a provider.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Callback_(computer_programming)"
+  },
+  "438": {
+    "term": "closure",
+    "category": "tech",
+    "extended": "In programming languages, a closure, also lexical closure or function closure, is a technique for implementing lexically scoped name binding in a language with first-class functions. Operationally, a closure is a record storing a function together with an environment. The environment is a mapping associating each free variable of the function with the value or reference to which the name was bound when the closure was created. Unlike a plain function, a closure allows the function to access those captured variables through the closure's copies of their values or references, even when the function is invoked outside their scope.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Closure_(computer_programming)"
+  },
+  "439": {
+    "term": "immutable",
+    "category": "tech",
+    "extended": "In object-oriented (OO) and functional programming, an immutable object is an object whose state cannot be modified after it is created. This is in contrast to a mutable object, which can be modified after it is created. In some cases, an object is considered immutable even if some internally used attributes change, but the object's state appears unchanging from an external point of view. For example, an object that uses memoization to cache the results of expensive computations could still be considered an immutable object.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Immutable_object"
+  },
+  "440": {
+    "term": "pure function",
+    "category": "tech",
+    "extended": "A function whose output depends only on its inputs and which causes no side effects.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=pure%20function"
+  },
+  "441": {
+    "term": "side effect",
+    "category": "tech",
+    "extended": "Any change a function makes beyond its return value, such as I/O or mutating state.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=side%20effect"
+  },
+  "442": {
+    "term": "load balancer",
+    "category": "tech",
+    "extended": "A component that spreads incoming traffic across multiple servers.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=load%20balancer"
+  },
+  "443": {
+    "term": "sharding",
+    "category": "tech",
+    "extended": "Splitting a database horizontally across machines so each holds only part of the data.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=sharding"
+  },
+  "444": {
+    "term": "replication",
+    "category": "tech",
+    "extended": "Keeping copies of data on multiple nodes for durability and read scaling.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=replication"
+  },
+  "445": {
+    "term": "CAP theorem",
+    "category": "tech",
+    "extended": "In a distributed store you can guarantee at most two of Consistency, Availability and Partition-tolerance.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=CAP%20theorem"
+  },
+  "446": {
+    "term": "latency",
+    "category": "tech",
+    "extended": "The time it takes for a single request to receive its response.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=latency"
+  },
+  "447": {
+    "term": "throughput",
+    "category": "tech",
+    "extended": "Network throughput refers to the rate of message delivery over a communication channel in a communication network, such as Ethernet or packet radio. The data that these messages contain may be delivered over physical or logical links, or through network nodes. Throughput is usually measured in bits per second, and sometimes in packets per second or data packets per time slot.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Network_throughput"
+  },
+  "448": {
+    "term": "horizontal scaling",
+    "category": "tech",
+    "extended": "Scalability is the property of a system to handle a growing amount of work. One definition for software systems specifies that this may be done by adding resources to the system.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Scalability"
+  },
+  "449": {
+    "term": "vertical scaling",
+    "category": "tech",
+    "extended": "Scalability is the property of a system to handle a growing amount of work. One definition for software systems specifies that this may be done by adding resources to the system.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Scalability"
+  },
+  "450": {
+    "term": "message queue",
+    "category": "tech",
+    "extended": "A buffer that lets services hand off work to each other asynchronously.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=message%20queue"
+  },
+  "451": {
+    "term": "pub/sub",
+    "category": "tech",
+    "extended": "Publish/Subscribe — a pattern where publishers broadcast events to many decoupled subscribers.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=pub/sub"
+  },
+  "452": {
+    "term": "circuit breaker",
+    "category": "tech",
+    "extended": "A safeguard that stops calling a failing dependency for a while so it can recover.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=circuit%20breaker"
+  },
+  "453": {
+    "term": "API gateway",
+    "category": "tech",
+    "extended": "A single entry point that routes, authenticates and rate-limits calls to backend services.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=API%20gateway"
+  },
+  "454": {
+    "term": "serverless",
+    "category": "tech",
+    "extended": "Serverless computing is \"a cloud service category where the customer can use different cloud capability types without the customer having to provision, deploy and manage either hardware or software resources, other than providing customer application code or providing customer data. Serverless computing represents a form of virtualized computing\", according to ISO/IEC 22123-2. Serverless computing is a broad ecosystem that includes the cloud provider, function as a service (FaaS), managed services, tools, frameworks, engineers, stakeholders, and other interconnected elements.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Serverless_computing"
+  },
+  "455": {
+    "term": "idempotency key",
+    "category": "tech",
+    "extended": "A client-supplied token that lets a server safely ignore duplicate requests.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=idempotency%20key"
+  },
+  "456": {
+    "term": "cache invalidation",
+    "category": "tech",
+    "extended": "The hard problem of detecting when cached data is stale and removing it.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=cache%20invalidation"
+  },
+  "457": {
+    "term": "containerization",
+    "category": "tech",
+    "extended": "In software engineering, containerization is operating-system-level virtualization or application-level virtualization over multiple resources so that software applications can run in isolated user spaces called containers in any cloud or non-cloud environment, regardless of type or vendor. The term \"container\" has different meanings in different contexts, and it is important to ensure that the intended definition aligns with the audience's understanding.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Containerization_(computing)"
+  },
+  "458": {
+    "term": "Docker",
+    "category": "tech",
+    "extended": "Michelle Suzanne Dockery is an English actress, best known for starring as Lady Mary Crawley in the ITV television period drama series Downton Abbey (2010–2015), for which she was nominated for a Golden Globe Award and three consecutive Primetime Emmy Awards for Outstanding Lead Actress in a Drama Series. She reprised her role in the films Downton Abbey (2019), Downton Abbey: A New Era (2022) and Downton Abbey: The Grand Finale (2025).",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Michelle_Dockery"
+  },
+  "459": {
+    "term": "observability",
+    "category": "tech",
+    "extended": "How well you can understand a system's internal state from its logs, metrics and traces.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=observability"
+  },
+  "460": {
+    "term": "p99",
+    "category": "tech",
+    "extended": "99th-percentile latency — the value 99% of requests come in under; a measure of tail performance.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=p99"
+  },
+  "461": {
+    "term": "thread",
+    "category": "tech",
+    "extended": "The smallest unit of execution the operating system schedules within a process.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=thread"
+  },
+  "462": {
+    "term": "merge conflict",
+    "category": "tech",
+    "extended": "When version control can't automatically reconcile competing edits to the same lines.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=merge%20conflict"
+  },
+  "463": {
+    "term": "flaky test",
+    "category": "tech",
+    "extended": "Flaky test is a software test that exhibits non-deterministic behavior, i.e., it may pass or fail inconsistently without any changes in the underlying code. This flakiness can arise from a number of causes, including concurrency issues, timing dependencies, reliance on external systems, or lack of sufficient isolation between tests. Flaky tests are problematic in continuous integration environments because they decrease trust in automated test suites and can hide real defects, leading to wasted debugging effort and decreased productivity.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Flaky_test"
+  },
+  "464": {
+    "term": "linter",
+    "category": "tech",
+    "extended": "Lint is a Unix utility that performs static program analysis on C language source code. The software gives its name to modern computing tools responsible for checking for coding style or formatting errors, known as a \"linters\" or \"linting tools\", even though the original Lint program performed static program analysis.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Lint_(software)"
+  },
+  "465": {
+    "term": "staging",
+    "category": "tech",
+    "extended": "A pre-production environment that mirrors production for final testing before release.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=staging"
+  },
+  "466": {
+    "term": "WebSocket",
+    "category": "tech",
+    "extended": "WebSocket is a computer communications protocol, providing a bidirectional communication channel over a single Transmission Control Protocol (TCP) connection. The protocol was standardized by the IETF as RFC 6455 in 2011. The current specification allowing web applications to use this protocol is known as WebSockets. It is a living standard maintained by the WHATWG and a successor to The WebSocket API from the W3C.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/WebSocket"
+  },
+  "467": {
+    "term": "throttling",
+    "category": "tech",
+    "extended": "In thermodynamics, the Joule–Thomson effect describes the temperature change of a real gas or liquid when it is expanding, typically caused by the pressure loss from flow through a valve or porous plug while keeping it insulated so that no heat is exchanged with the environment. This procedure is called a throttling process or Joule–Thomson process. The effect is purely due to deviation from ideality, as any ideal gas has no JT effect.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Joule%E2%80%93Thomson_effect"
+  },
+  "105": {
+    "term": "accounts payable",
+    "category": "business",
+    "extended": "Accounts payable (AP) is money owed by a business to its suppliers, shown as a liability on a company's balance sheet. It is distinct from notes payable liabilities, which are debts created by formal legal instrument documents. An accounts payable department's main responsibility is to process and review transactions between the company and its suppliers and to make sure that all outstanding invoices from their suppliers are approved, processed, and paid. The accounts payable process starts with collecting supply requirements from within the organization and seeking quotes from vendors for the items required. Once the deal is negotiated, purchase orders are prepared and sent. The goods delivered are inspected upon arrival and the invoice received is routed for approvals. Processing an invoice includes recording important data from the invoice and inputting it into the company's financial, or bookkeeping, system. After this is accomplished, the invoices must go through the company's respective business process in order to be paid.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Accounts_payable"
+  },
+  "106": {
+    "term": "accounts receivable",
+    "category": "business",
+    "extended": "Accounts receivable, abbreviated as AR or A/R, are legally enforceable claims for payment held by a business for goods supplied or services rendered that customers have ordered but not paid for. The accounts receivable process involves customer onboarding, invoicing, collections, deductions, exception management, and finally, cash posting after the payment is collected.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Accounts_receivable"
+  },
+  "107": {
+    "term": "acquisition",
+    "category": "business",
+    "extended": "Elon Musk initiated an acquisition of the American social media company Twitter, Inc. on April 14, 2022, and concluded it on October 27, 2022. Musk had begun buying shares of the company in January 2022, becoming its largest shareholder by April with a 9.1 percent ownership stake. Twitter invited Musk to join its board of directors, an offer he initially accepted before declining. On April 14, Musk made an unsolicited offer to purchase the company, to which Twitter's board responded with a \"poison pill\" strategy to resist a hostile takeover before unanimously accepting Musk's buyout offer of $44 billion on April 25. Musk stated that he planned to introduce new features to the platform, make its algorithms open-source, combat spambot accounts, and promote free speech, framing the acquisition as the cornerstone of X, an \"everything app\".",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Acquisition_of_Twitter_by_Elon_Musk"
+  },
+  "108": {
+    "term": "arbitrage",
+    "category": "business",
+    "extended": "Profiting from a price difference for the same asset across two markets.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=arbitrage"
+  },
+  "109": {
+    "term": "assets",
+    "category": "business",
+    "extended": "Things a business owns that have value or future benefit.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=assets"
+  },
+  "110": {
+    "term": "audit",
+    "category": "business",
+    "extended": "An audit is an \"independent examination of financial information of any entity, whether profit oriented or not, irrespective of its size or legal form when such an examination is conducted with a view to express an opinion thereon.\" Auditing also attempts to ensure that the books of accounts are properly maintained by such entities as required by law. Auditors consider the propositions before them, obtain evidence, document their findings, and evaluate the propositions in their auditing report.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Audit"
+  },
+  "111": {
+    "term": "balance sheet",
+    "category": "business",
+    "extended": "In financial accounting, a balance sheet is a summary of the financial balances of an individual or organization, whether it be a sole proprietorship, a business partnership, a corporation, a private limited company or other organization such as a government or not-for-profit entity. Assets, liabilities and ownership equity are listed as of a specific date, such as the end of its financial year. A balance sheet is often described as a \"snapshot of a company's financial condition\".",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Balance_sheet"
+  },
+  "112": {
+    "term": "benchmarking",
+    "category": "business",
+    "extended": "Benchmarking is the practice of comparing business processes and performance metrics to industry bests and best practices from other companies. Dimensions typically measured are quality, time and cost.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Benchmarking"
+  },
+  "113": {
+    "term": "blue chip",
+    "category": "business",
+    "extended": "A large, well-established and financially sound company.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=blue%20chip"
+  },
+  "114": {
+    "term": "bond",
+    "category": "business",
+    "extended": "A loan to a company or government that pays interest over a set term.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=bond"
+  },
+  "115": {
+    "term": "bootstrapping",
+    "category": "business",
+    "extended": "Building a startup with little outside money, relying on savings and revenue.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=bootstrapping"
+  },
+  "116": {
+    "term": "break-even point",
+    "category": "business",
+    "extended": "The point where revenues exactly cover costs — no profit, no loss.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=break-even%20point"
+  },
+  "117": {
+    "term": "bridging loan",
+    "category": "business",
+    "extended": "A short-term loan that covers a gap until longer-term funds arrive.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=bridging%20loan"
+  },
+  "118": {
+    "term": "business angel",
+    "category": "business",
+    "extended": "An individual who invests their own money in a startup for a stake.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=business%20angel"
+  },
+  "119": {
+    "term": "capital",
+    "category": "business",
+    "extended": "Money invested into a company or project by its owners.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=capital"
+  },
+  "120": {
+    "term": "cash flow",
+    "category": "business",
+    "extended": "Cash flow, in general, refers to payments made into or out of a business, project, or financial product. It can also refer more specifically to a real or virtual movement of money.Cash flow, in its narrow sense, is a payment (in a currency), especially from one central bank account to another. The term 'cash flow' is mostly used to describe payments that are expected to happen in the future, are thus uncertain, and therefore need to be forecast with cash flows.\nA cash flow (CF) is determined by its time t, nominal amount N, currency CCY, and account A; symbolically, CF = CF(t, N, CCY, A).",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Cash_flow"
+  },
+  "121": {
+    "term": "collateral",
+    "category": "business",
+    "extended": "A collateralized debt obligation (CDO) is a type of structured asset-backed security (ABS). Originally developed as instruments for the corporate debt markets, after 2002 CDOs became vehicles for refinancing mortgage-backed securities (MBS). Like other private label securities backed by assets, a CDO can be thought of as a promise to pay investors in a prescribed sequence, based on the cash flow the CDO collects from the pool of bonds or other assets it owns. Distinctively, CDO credit risk is typically assessed based on a probability of default (PD) derived from ratings on those bonds or assets.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Collateralized_debt_obligation"
+  },
+  "122": {
+    "term": "commodity",
+    "category": "business",
+    "extended": "In economics, a commodity is an economic good, usually a resource, that specifically has full or substantial fungibility: that is, the market treats instances of the good as equivalent or nearly so with no regard to who produced them.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Commodity"
+  },
+  "123": {
+    "term": "copyright",
+    "category": "business",
+    "extended": "The exclusive legal right to use and reproduce a created work.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=copyright"
+  },
+  "124": {
+    "term": "creditor",
+    "category": "business",
+    "extended": "A person or business you owe money to.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=creditor"
+  },
+  "125": {
+    "term": "debtor",
+    "category": "business",
+    "extended": "A person or business that owes money to you.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=debtor"
+  },
+  "126": {
+    "term": "depreciation",
+    "category": "business",
+    "extended": "The decline in an asset's value over time, usually from wear and tear.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=depreciation"
+  },
+  "127": {
+    "term": "diversification",
+    "category": "business",
+    "extended": "Spreading into new products, customers or markets to reduce risk.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=diversification"
+  },
+  "128": {
+    "term": "dividend",
+    "category": "business",
+    "extended": "A share of profits paid regularly by a company to its shareholders.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=dividend"
+  },
+  "129": {
+    "term": "economies of scale",
+    "category": "business",
+    "extended": "Cost savings gained as production or purchasing volume increases.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=economies%20of%20scale"
+  },
+  "130": {
+    "term": "enterprise value",
+    "category": "business",
+    "extended": "Enterprise value (EV), total enterprise value (TEV), or firm value (FV) is an economic measure reflecting the market value of a business. It is a sum of claims by all claimants: creditors and shareholders. Enterprise value is one of the fundamental metrics used in business valuation, financial analysis, accounting, portfolio analysis, and risk analysis.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Enterprise_value"
+  },
+  "131": {
+    "term": "equity",
+    "category": "business",
+    "extended": "In law, particularly in common law jurisdictions, equity is the body of law that historically developed in the English Court of Chancery, which created a set of equitable doctrines distinct from the rest of English common law.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Equity_(law)"
+  },
+  "132": {
+    "term": "exit strategy",
+    "category": "business",
+    "extended": "An exit strategy is a means of leaving one's current situation, either after a predetermined objective has been achieved, or as a strategy to mitigate failure. An organisation or individual without an exit strategy may be in a quagmire. At worst, an exit strategy will save face; at best, an exit strategy will deliver an objective worth more than the cost of continuing the execution of a previous plan considered \"deemed to fail\" by weight of the present situation.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Exit_strategy"
+  },
+  "133": {
+    "term": "fixed cost",
+    "category": "business",
+    "extended": "A cost that stays the same regardless of output, such as rent.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=fixed%20cost"
+  },
+  "134": {
+    "term": "futures",
+    "category": "business",
+    "extended": "Contracts to buy or sell an asset at a set price on a future date.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=futures"
+  },
+  "135": {
+    "term": "GDP",
+    "category": "business",
+    "extended": "Gross Domestic Product — the total value of goods and services an economy produces.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=GDP"
+  },
+  "136": {
+    "term": "gross profit",
+    "category": "business",
+    "extended": "Sales minus the direct cost of goods, before overheads and tax.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=gross%20profit"
+  },
+  "137": {
+    "term": "hedge fund",
+    "category": "business",
+    "extended": "An actively managed fund using varied, often risky strategies for high returns.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=hedge%20fund"
+  },
+  "138": {
+    "term": "hostile takeover",
+    "category": "business",
+    "extended": "Acquiring a company against the wishes of its board.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=hostile%20takeover"
+  },
+  "139": {
+    "term": "inflation",
+    "category": "business",
+    "extended": "A general rise in prices over time that reduces purchasing power.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=inflation"
+  },
+  "140": {
+    "term": "insider trading",
+    "category": "business",
+    "extended": "Insider trading is the trading of a public company's stock or other securities based on material, nonpublic information about the company. In many countries, some kinds of trading based on insider information are illegal. The rationale for this prohibition of insider trading differs between countries and regions. Some view it as unfair to other investors in the market who do not have access to the information, as the investor with inside information can potentially make larger profits than an investor without such information. However, insider trading is also prohibited to prevent the directors of a company from abusing a company's confidential information for the directors' personal gain.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Insider_trading"
+  },
+  "141": {
+    "term": "insolvency",
+    "category": "business",
+    "extended": "In accounting, insolvency is the state of being unable to pay the debts, by a person or company (debtor), at maturity; those in a state of insolvency are said to be insolvent. There are two forms: cash-flow insolvency and balance-sheet insolvency.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Insolvency"
+  },
+  "142": {
+    "term": "intellectual property",
+    "category": "business",
+    "extended": "Intellectual property organizations are organizations that are focused on copyrights, trademarks, patents, or other intellectual property law concepts. This includes international intergovernmental organizations that foster governmental cooperation in the area of copyrights, trademarks and patents, as well as non-governmental, non-profit organizations, lobbying organizations, think tanks, notable committees, and professional associations.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Intellectual_property_organization"
+  },
+  "143": {
+    "term": "leveraged buyout",
+    "category": "business",
+    "extended": "Acquiring a company largely with borrowed money.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=leveraged%20buyout"
+  },
+  "144": {
+    "term": "liabilities",
+    "category": "business",
+    "extended": "What a business owes — its debts and obligations.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=liabilities"
+  },
+  "145": {
+    "term": "liquidity",
+    "category": "business",
+    "extended": "How easily an asset can be converted into cash.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=liquidity"
+  },
+  "146": {
+    "term": "macroeconomics",
+    "category": "business",
+    "extended": "The study of the economy as a whole.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=macroeconomics"
+  },
+  "147": {
+    "term": "margin",
+    "category": "business",
+    "extended": "Profit expressed as a percentage of revenue.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=margin"
+  },
+  "148": {
+    "term": "market segmentation",
+    "category": "business",
+    "extended": "Dividing a market into groups of customers with similar needs.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=market%20segmentation"
+  },
+  "149": {
+    "term": "market share",
+    "category": "business",
+    "extended": "Market share is the percentage of the total revenue or sales in a market that a company's business makes up. For example, if there are 50,000 units sold per year in a given industry, a company whose sales were 5,000 of those units would have a 10 percent share in that market.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Market_share"
+  },
+  "150": {
+    "term": "merger",
+    "category": "business",
+    "extended": "In business, mergers and acquisitions (M&A) are transactions where the ownership of a company, business organization, or one of their operating units is transferred to or consolidated with another entity. They may happen through direct absorption, a merger, a tender offer or a hostile takeover. As a central aspect of corporate strategy and strategic management, M&A activity enables companies to expand, diversify, restructure, or realign their competitive position.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Mergers_and_acquisitions"
+  },
+  "151": {
+    "term": "microeconomics",
+    "category": "business",
+    "extended": "Microeconomics is a branch of economics that studies the behavior of individuals and firms in making decisions regarding the allocation of scarce resources and the interactions among these individuals and firms. Microeconomics focuses on the study of individual markets, sectors, or industries as opposed to the economy as a whole, which is studied in macroeconomics.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Microeconomics"
+  },
+  "152": {
+    "term": "oligopoly",
+    "category": "business",
+    "extended": "A market dominated by just a few firms.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=oligopoly"
+  },
+  "153": {
+    "term": "overheads",
+    "category": "business",
+    "extended": "Ongoing costs not tied directly to production, such as rent and admin.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=overheads"
+  },
+  "154": {
+    "term": "patent",
+    "category": "business",
+    "extended": "A legal right granting sole use of an invention for a set period.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=patent"
+  },
+  "155": {
+    "term": "quantitative easing",
+    "category": "business",
+    "extended": "A central bank creating money to buy assets and stimulate the economy.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=quantitative%20easing"
+  },
+  "156": {
+    "term": "recession",
+    "category": "business",
+    "extended": "A sustained decline in economic activity, often two quarters of falling GDP.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=recession"
+  },
+  "157": {
+    "term": "revenue",
+    "category": "business",
+    "extended": "The total income a business earns from sales over a period.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=revenue"
+  },
+  "158": {
+    "term": "shareholder",
+    "category": "business",
+    "extended": "An owner of shares in a company.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=shareholder"
+  },
+  "159": {
+    "term": "SME",
+    "category": "business",
+    "extended": "Small and medium enterprises (SMEs) or small and medium businesses (SMBs) are businesses whose personnel and revenue numbers fall below certain limits. The abbreviation \"SME\" is used by many national agencies and international organizations, such as the World Bank, the OECD, the European Union, the United Nations, and the World Trade Organization (WTO).",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Small_and_medium_enterprises"
+  },
+  "160": {
+    "term": "supply chain",
+    "category": "business",
+    "extended": "A supply chain is a complex logistics system that consists of facilities that convert raw materials into finished products and distribute them to end consumers or end customers, while supply chain management focuses on the optimization of the flow of goods within the supply chain's distribution channels to ensure efficiency.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Supply_chain"
+  },
+  "161": {
+    "term": "sustainability",
+    "category": "business",
+    "extended": "Sustainability or being sustainable is the ability to continue over a long period of time. In modern usage it generally refers to a state in which the environment, economy, and society will continue to exist over a long period of time. Many definitions emphasize the environmental dimension. This can include addressing key environmental problems, such as climate change and biodiversity loss. The idea of sustainability can guide decisions at the global, national, organizational, and individual levels. A related concept is that of sustainable development, and the terms are often used to mean the same thing. \"Sustainability is often thought of as a long-term goal, while sustainable development refers to the many processes and pathways to achieve it.\"",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Sustainability"
+  },
+  "162": {
+    "term": "takeover",
+    "category": "business",
+    "extended": "One company buying control of another.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=takeover"
+  },
+  "163": {
+    "term": "trademark",
+    "category": "business",
+    "extended": "A legally registered brand name, logo or phrase.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=trademark"
+  },
+  "164": {
+    "term": "turnover",
+    "category": "business",
+    "extended": "A company's total sales over a period (also the rate at which staff leave).",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=turnover"
+  },
+  "165": {
+    "term": "venture capital",
+    "category": "business",
+    "extended": "Money invested in high-risk, high-growth startups in return for equity.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=venture%20capital"
+  },
+  "166": {
+    "term": "working capital",
+    "category": "business",
+    "extended": "Cash available for day-to-day operations — current assets minus current liabilities.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=working%20capital"
+  },
+  "167": {
+    "term": "yield",
+    "category": "business",
+    "extended": "The income from an investment as a percentage of its price.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=yield"
+  },
+  "168": {
+    "term": "APR",
+    "category": "business",
+    "extended": "April Fools' Day or April Fool's Day is an annual custom in many Western countries on the 1st of April consisting of practical jokes, hoaxes, and pranks. Jokesters often expose their actions by shouting \"April Fool[s]!\" at the recipient. Mass media can be involved with these pranks, which may be revealed as such the following day. The custom of setting aside a day for playing harmless pranks upon one's neighbor has been relatively common in the world historically.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/April_Fools'_Day"
+  },
+  "169": {
+    "term": "private limited company",
+    "category": "business",
+    "extended": "A private limited company is any type of business entity in \"private\" ownership used in many jurisdictions, in contrast to a publicly listed company, with some differences from country to country. Examples include: the LLC in the United States, private company limited by shares in the United Kingdom, GmbH in Germany and Austria, Besloten vennootschap (BV) in The Netherlands and Belgium, société à responsabilité limitée (SARL) in France, società a responsabilità limitata (S.r.l.) in Italy, and sociedad de responsabilidad limitada (SRL) in the Spanish-speaking world. The benefit of having a private limited company is that there is limited liability.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Private_limited_company"
+  },
+  "468": {
+    "term": "HTML",
+    "category": "tech",
+    "extended": "Hypertext Markup Language (HTML) is the standard markup language for documents designed to be displayed in a web browser. It defines the content and structure of web content. It is often assisted by technologies such as Cascading Style Sheets (CSS) and scripting languages such as JavaScript.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/HTML"
+  },
+  "469": {
+    "term": "CSS",
+    "category": "tech",
+    "extended": "Cascading Style Sheets (CSS) is a style sheet language used for specifying the presentation and styling of a document written in a markup language, such as HTML or XML. CSS is a cornerstone technology of the World Wide Web, alongside HTML and JavaScript.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/CSS"
+  },
+  "470": {
+    "term": "HTTP",
+    "category": "tech",
+    "extended": "HyperText Transfer Protocol — how browsers request web pages from servers.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=HTTP"
+  },
+  "471": {
+    "term": "HTTPS",
+    "category": "tech",
+    "extended": "HTTP Secure — HTTP encrypted with TLS so the connection stays private.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=HTTPS"
+  },
+  "472": {
+    "term": "FTP",
+    "category": "tech",
+    "extended": "File Transfer Protocol — a standard way to upload and download files between computers.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=FTP"
+  },
+  "473": {
+    "term": "SSH",
+    "category": "tech",
+    "extended": "Secure Shell — an encrypted protocol for logging into and running commands on remote machines.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=SSH"
+  },
+  "474": {
+    "term": "SSL",
+    "category": "tech",
+    "extended": "Secure Sockets Layer — the older encryption for web traffic, now succeeded by TLS.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=SSL"
+  },
+  "475": {
+    "term": "TCP",
+    "category": "tech",
+    "extended": "The Transmission Control Protocol (TCP) is one of the main protocols of the Internet protocol suite, providing reliable, ordered, and error-checked delivery of a stream of octets (bytes) between applications running on hosts communicating via an IP network. It originated in the initial network implementation in which it complemented the Internet Protocol (IP). Therefore, the entire suite is commonly referred to as TCP/IP.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Transmission_Control_Protocol"
+  },
+  "476": {
+    "term": "TCP/IP",
+    "category": "tech",
+    "extended": "The Internet protocol suite, commonly known as TCP/IP, is a framework for organizing the communication protocols used in the Internet and similar computer networks according to functional criteria. The foundational protocols in the suite are the Transmission Control Protocol (TCP), the User Datagram Protocol (UDP), and the Internet Protocol (IP). Early versions of this networking model were known as the Department of Defense (DoD) Internet Architecture Model because the research and development were funded by the Defense Advanced Research Projects Agency (DARPA) of the United States Department of Defense.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Internet_protocol_suite"
+  },
+  "477": {
+    "term": "IP address",
+    "category": "tech",
+    "extended": "An Internet Protocol address is a numerical label, such as 192.168.1.1 or 2001:0db8:0000:0000:0000:8a2e:0370:7334, that is assigned to a device connected to a computer network that uses the Internet Protocol for communication. IP addresses serve two main functions: network interface identification, and location addressing.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/IP_address"
+  },
+  "478": {
+    "term": "DHCP",
+    "category": "tech",
+    "extended": "The Dynamic Host Configuration Protocol (DHCP) is a network management protocol used on Internet Protocol (IP) networks for automatically assigning IP addresses and other communication parameters to devices connected to the network using a client–server architecture.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Dynamic_Host_Configuration_Protocol"
+  },
+  "479": {
+    "term": "NAT",
+    "category": "tech",
+    "extended": "Network Address Translation — lets many devices share one public IP address.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=NAT"
+  },
+  "480": {
+    "term": "LDAP",
+    "category": "tech",
+    "extended": "Lightweight Directory Access Protocol — a standard for querying directories like user accounts.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=LDAP"
+  },
+  "481": {
+    "term": "SMTP",
+    "category": "tech",
+    "extended": "Simple Mail Transfer Protocol — the standard protocol for sending email.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=SMTP"
+  },
+  "482": {
+    "term": "IMAP",
+    "category": "tech",
+    "extended": "Internet Message Access Protocol — for reading email kept on a server.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=IMAP"
+  },
+  "483": {
+    "term": "ISP",
+    "category": "tech",
+    "extended": "An Internet service provider (ISP) is an organization that provides a myriad of services related to accessing, using, managing, or participating in the Internet. ISPs can be organized in various forms, such as commercial, community-owned, non-profit, or otherwise privately owned.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Internet_service_provider"
+  },
+  "484": {
+    "term": "URL",
+    "category": "tech",
+    "extended": "A uniform resource locator (URL), colloquially known as a web address, is a reference to a resource on the World Wide Web. A URL specifies the location of a resource on a computer network and a mechanism for retrieving it. A URL is a specific type of Uniform Resource Identifier (URI), although many people use the two terms interchangeably. A URL is most commonly used to reference a web page (HTTP/HTTPS) but is also used for file transfer (FTP), email (mailto), database access (JDBC), and many other applications.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/URL"
+  },
+  "485": {
+    "term": "VoIP",
+    "category": "tech",
+    "extended": "Voice over Internet Protocol (VoIP), also known as IP telephony, is a set of technologies used primarily for voice communication sessions over Internet Protocol (IP) networks, such as the Internet. VoIP enables voice calls to be transmitted as data packets, facilitating various methods of voice communication, including traditional applications like Skype, Microsoft Teams, Google Voice, and VoIP phones. Regular telephones can also be used for VoIP by connecting them to the Internet via analog telephone adapters (ATAs), which convert traditional telephone signals into digital data packets that can be transmitted over IP networks.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Voice_over_IP"
+  },
+  "486": {
+    "term": "WAN",
+    "category": "tech",
+    "extended": "A wide area network (WAN) is a telecommunications network that extends over a large geographic area. Wide area networks are often established with leased telecommunication circuits.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Wide_area_network"
+  },
+  "487": {
+    "term": "LAN",
+    "category": "tech",
+    "extended": "A local area network (LAN) is a computer network that interconnects computers within a limited area such as a residence, campus, or building, and has its network equipment and interconnects locally managed. LANs facilitate the distribution of data and the sharing of network devices, such as printers.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Local_area_network"
+  },
+  "488": {
+    "term": "proxy server",
+    "category": "tech",
+    "extended": "A server that sits between clients and the internet, forwarding and filtering requests.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=proxy%20server"
+  },
+  "489": {
+    "term": "firewall",
+    "category": "tech",
+    "extended": "A security system that monitors and controls network traffic by rules.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=firewall"
+  },
+  "490": {
+    "term": "packet",
+    "category": "tech",
+    "extended": "A small unit of data sent across a network.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=packet"
+  },
+  "491": {
+    "term": "protocol",
+    "category": "tech",
+    "extended": "An agreed set of rules for how computers exchange data.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=protocol"
+  },
+  "492": {
+    "term": "broadband",
+    "category": "tech",
+    "extended": "High-speed, always-on internet access.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=broadband"
+  },
+  "493": {
+    "term": "cloud computing",
+    "category": "tech",
+    "extended": "Delivering computing resources on demand over the internet.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=cloud%20computing"
+  },
+  "494": {
+    "term": "XML",
+    "category": "tech",
+    "extended": "eXtensible Markup Language — a flexible text format for structured data.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=XML"
+  },
+  "495": {
+    "term": "AJAX",
+    "category": "tech",
+    "extended": "The Asynchronous JavaScript and XML, usually referred to as Ajax is a set of web development techniques that uses various web technologies on the client-side to create asynchronous web applications. With Ajax, web applications can send and retrieve data from a server asynchronously without interfering with the display and behaviour of the existing page. By decoupling the data interchange layer from the presentation layer, Ajax allows web pages and, by extension, web applications, to change content dynamically without the need to reload the entire page. In practice, modern implementations commonly utilize JSON instead of XML.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Ajax_(programming)"
+  },
+  "496": {
+    "term": "JavaScript",
+    "category": "tech",
+    "extended": "JavaScript (JS) is a programming language and core technology of the Web, alongside HTML and CSS. Created by Brendan Eich in 1995, it is maintained by Ecma International's TC39 technical committee, with related Web APIs maintained by W3C and WHATWG. As of 2025, JavaScript is the most widely used programming language on GitHub.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/JavaScript"
+  },
+  "497": {
+    "term": "PHP",
+    "category": "tech",
+    "extended": "PHP is a general-purpose scripting language geared towards web development. It was created by Danish-Canadian programmer Rasmus Lerdorf in 1993 and released in 1995. The PHP reference implementation is now produced by the PHP Group. PHP was originally an abbreviation of Personal Home Page, but it now stands for the recursive backronym PHP: Hypertext Preprocessor.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/PHP"
+  },
+  "498": {
+    "term": "Node.js",
+    "category": "tech",
+    "extended": "A runtime that lets JavaScript run on servers, outside the browser.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=Node.js"
+  },
+  "499": {
+    "term": "Apache",
+    "category": "tech",
+    "extended": "A widely used open-source web server.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=Apache"
+  },
+  "500": {
+    "term": "web server",
+    "category": "tech",
+    "extended": "Software or a machine that serves web pages to browsers over HTTP.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=web%20server"
+  },
+  "501": {
+    "term": "web service",
+    "category": "tech",
+    "extended": "A function exposed over a network so other software can call it.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=web%20service"
+  },
+  "502": {
+    "term": "BGP",
+    "category": "tech",
+    "extended": "Border Gateway Protocol — routes traffic between the large networks of the internet.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=BGP"
+  },
+  "503": {
+    "term": "P2P",
+    "category": "tech",
+    "extended": "Peer-to-Peer — a network where computers share directly with no central server.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=P2P"
+  },
+  "504": {
+    "term": "RSS",
+    "category": "tech",
+    "extended": "RSS is a web feed that allows users and applications to access updates to websites in a standardized, computer-readable format. Subscribing to RSS feeds can allow a user to keep track of many different websites in a single news aggregator, which constantly monitors sites for new content, removing the need for the user to manually check them. News aggregators can be built into a browser, installed on a desktop computer, or installed on a mobile device.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/RSS"
+  },
+  "505": {
+    "term": "open source",
+    "category": "tech",
+    "extended": "Open source typically refers to software whose source code is made available, enabling use, modification, and redistribution. It is primarily associated with software distributed under licenses that meet the criteria of the Open Source Definition maintained by the Open Source Initiative, which permit anyone to use it for any purpose, although the term is sometimes used more broadly for software distributed with source code under different conditions reflecting divergence over the usage of the term and its precise definition. The concept has also been applied beyond software to other digital resources made available alongside their source files or design documents, such as open-source educational resources, open-source hardware or open-source film.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Open_source"
+  },
+  "506": {
+    "term": "CVE",
+    "category": "tech",
+    "extended": "The Common Vulnerabilities and Exposures (CVE) system, originally Common Vulnerability Enumeration, provides a reference method for publicly known information-security vulnerabilities and exposures. The United States' Homeland Security Systems Engineering and Development Institute FFRDC, operated by The MITRE Corporation, maintains the system, with funding from the US National Cyber Security Division of the US Department of Homeland Security. The system was officially launched for the public in September 1999.",
+    "source": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Common_Vulnerabilities_and_Exposures"
+  },
+  "507": {
+    "term": "MSP",
+    "category": "tech",
+    "extended": "Managed Service Provider — a company that remotely manages a client's IT.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=MSP"
+  },
+  "508": {
+    "term": "VLAN",
+    "category": "tech",
+    "extended": "Virtual LAN — a logically separated network running over shared physical hardware.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=VLAN"
+  },
+  "509": {
+    "term": "WebP",
+    "category": "tech",
+    "extended": "A modern image format with smaller file sizes than JPEG or PNG.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=WebP"
+  },
+  "510": {
+    "term": "refresh rate",
+    "category": "tech",
+    "extended": "How many times per second a display updates its image, in hertz.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=refresh%20rate"
+  },
+  "511": {
+    "term": "Telnet",
+    "category": "tech",
+    "extended": "An old, unencrypted protocol for remote command-line access, superseded by SSH.",
+    "source": "TermScope dictionary",
+    "url": "https://en.wiktionary.org/wiki/Special:Search?search=Telnet"
+  }
+}

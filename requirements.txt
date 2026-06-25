@@ -1,0 +1,23 @@
+# TermScope runtime dependencies (Windows 11, Python 3.10+).
+# The core (dictionary, matcher, knowledge, demo) needs none of these.
+# Install for the full tray app with audio + global hotkeys:
+#   python -m pip install -r requirements.txt
+
+# --- Modern desktop UI ---------------------------------------------------
+customtkinter>=5.2       # the hub window, settings and floating notification cards
+
+# --- Notifications -------------------------------------------------------
+win11toast>=0.35        # native Windows toast notifications (alternative to the card)
+
+# --- System tray ---------------------------------------------------------
+pystray>=0.19           # tray icon + menu
+Pillow>=10.0            # icon rendering (pystray dependency we use directly)
+
+# --- Global hotkeys + selection capture ----------------------------------
+keyboard>=0.13.5        # global hotkeys + synthesizing Ctrl+C
+pyperclip>=1.8          # reading the clipboard (highlighted text)
+
+# --- Audio capture + offline speech-to-text ------------------------------
+PyAudioWPatch>=0.2.12   # WASAPI loopback (system audio) + microphone capture
+vosk>=0.3.45            # offline streaming speech recognition
+numpy>=1.24             # stereo->mono downmix of captured audio

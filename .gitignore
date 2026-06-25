@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Personal / progress / state — NEVER upload.
+# (These normally live in %APPDATA%\TermScope\, outside the repo; listed here so
+#  they're still excluded if a copy ever lands in the project folder.)
+knowledge.json
+config.json
+termscope.log
+*.log
+*.lock
+models/
+
+# Local artifacts produced by running tests/manual or diagnostics
+*.wav
+stress_test_log.jsonl
+desktop_probe.png
+notif_*_capture.png
+_import_terms.json
