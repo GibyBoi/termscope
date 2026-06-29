@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "TermScope",
+  "version": "2.0.0",
+  "identifier": "com.0xygenbreather.termscope",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "TermScope",
+        "width": 960,
+        "height": 620,
+        "minWidth": 860,
+        "minHeight": 560,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": {
+      "../data/terms_tech.json": "data/terms_tech.json",
+      "../data/terms_business.json": "data/terms_business.json",
+      "../data/terms_companies.json": "data/terms_companies.json",
+      "../data/library.json": "data/library.json",
+      "../sidecar/listen.py": "sidecar/listen.py"
+    }
+  }
+}

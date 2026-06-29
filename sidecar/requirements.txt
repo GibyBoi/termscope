@@ -1,0 +1,9 @@
+# TermScope audio sidecar — offline speech-to-text dependencies.
+# Install for the Python that the app spawns (`python` on PATH):
+#   python -m pip install --user -r sidecar/requirements.txt
+#
+# The first run downloads the Whisper model (base.en, ~140 MB) into
+# %APPDATA%\TermScope\models; after that it is fully offline.
+faster-whisper>=1.2
+pyaudiowpatch>=0.2.12
+numpy>=1.24

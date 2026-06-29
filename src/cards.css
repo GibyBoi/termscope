@@ -1,0 +1,15 @@
+/* The cards window is transparent; only the cards themselves paint. */
+@import "./app.css";
+
+html,
+body.cards-body {
+  background: transparent !important;
+  overflow: hidden;
+}
+
+#cards {
+  position: fixed;
+  inset: 0;
+  /* Empty regions let clicks fall through visually; the window auto-resizes to
+     the card stack so it rarely covers anything but the cards. */
+}

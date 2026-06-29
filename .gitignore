@@ -1,4 +1,13 @@
-# Python
+# --- Node / Vite (frontend) ---
+node_modules/
+dist/
+.vite/
+
+# --- Rust / Tauri (backend) ---
+src-tauri/target/
+src-tauri/gen/schemas/
+
+# --- Python (legacy app under legacy/) ---
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -13,7 +22,6 @@ knowledge.json
 config.json
 termscope.log
 *.log
-*.lock
 models/
 
 # Local artifacts produced by running tests/manual or diagnostics

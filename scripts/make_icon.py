@@ -1,39 +1,60 @@
 #!/usr/bin/env python
-"""Generate the TermScope app icon (assets/termscope.ico) — a blue diamond glyph
-with a green 'listening' dot on a rounded dark tile."""
+"""Generate the TermScope app logo/icon (redrawn from the v2 reference art).
+
+Concept: a blue "scope" lens (ring) with a green pupil; three blue signal waves
+sweeping out to the upper-right; and a green "C" arc wrapping the left side.
+Evokes a scope actively listening and picking up terms. Rendered supersampled for
+crisp edges on a transparent background; saved as a 1024px PNG (source for
+`tauri icon`) plus a multi-size .ico.
+"""
 from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-OUT = Path(__file__).resolve().parents[1] / "assets" / "termscope.ico"
+ROOT = Path(__file__).resolve().parents[1]
+PNG_OUT = ROOT / "assets" / "termscope.png"
+ICO_OUT = ROOT / "assets" / "termscope.ico"
+
+BLUE = (43, 163, 227, 255)    # azure ~ #2BA3E3 (lens + signal waves)
+GREEN = (54, 169, 76, 255)    # ~ #36A94C (pupil + left arc)
 
 
-def render(size: int = 256) -> Image.Image:
-    s = size
+def render(size: int) -> Image.Image:
+    SS = 4  # supersample for smooth arcs
+    s = size * SS
     img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    pad = int(s * 0.03)
-    d.rounded_rectangle([pad, pad, s - pad, s - pad], radius=int(s * 0.21),
-                        fill=(26, 27, 38, 255))
-    cx, cy = s // 2, int(s * 0.47)
-    r = int(s * 0.23)
-    d.polygon([(cx, cy - r), (cx + r, cy), (cx, cy + r), (cx - r, cy)],
-              fill=(122, 162, 247, 255))
-    r2 = int(s * 0.11)
-    d.polygon([(cx, cy - r2), (cx + r2, cy), (cx, cy + r2), (cx - r2, cy)],
-              fill=(26, 27, 38, 255))
-    dot = int(s * 0.075)
-    dx, dy = int(s * 0.66), int(s * 0.66)
-    d.ellipse([dx - dot, dy - dot, dx + dot, dy + dot], fill=(158, 206, 106, 255))
-    return img
+
+    cx, cy = s * 0.46, s * 0.52  # lens centre (slightly left, vertically centred)
+
+    def arc(radius, start, end, color, width):
+        bb = [cx - radius, cy - radius, cx + radius, cy + radius]
+        d.arc(bb, start=start, end=end, fill=color, width=int(width))
+
+    # Three blue signal waves sweeping the upper-right (outer-most first looks fine).
+    wave_w = s * 0.044
+    for r in (0.225, 0.30, 0.375):
+        arc(s * r, -110, 62, BLUE, wave_w)
+
+    # Green "C" wrapping the left side, opening toward the lens.
+    arc(s * 0.255, 118, 236, GREEN, s * 0.058)
+
+    # Blue lens ring + green pupil.
+    r = s * 0.155
+    d.ellipse([cx - r, cy - r, cx + r, cy + r], outline=BLUE, width=int(s * 0.052))
+    rp = s * 0.055
+    d.ellipse([cx - rp, cy - rp, cx + rp, cy + rp], fill=GREEN)
+
+    return img.resize((size, size), Image.LANCZOS)
 
 
 def main() -> int:
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    base = render(256)
-    base.save(OUT, sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64),
-                          (128, 128), (256, 256)])
-    print(f"wrote {OUT}")
+    PNG_OUT.parent.mkdir(parents=True, exist_ok=True)
+    base = render(1024)
+    base.save(PNG_OUT)
+    base.save(ICO_OUT, sizes=[(16, 16), (24, 24), (32, 32), (48, 48),
+                              (64, 64), (128, 128), (256, 256)])
+    print(f"wrote {PNG_OUT} and {ICO_OUT}")
     return 0
 
 
