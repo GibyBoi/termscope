@@ -217,12 +217,14 @@ fn handle_heard_text(app: &AppHandle, text: &str, _source: &str) {
     // Find ALL jargon in the utterance (ignore learned/cooldown) — history records
     // what was actually said, not just what we decide to pop a card for.
     let matches = state.matcher.find(text, &std::collections::HashSet::new());
-    let jargon_ids: Vec<String> = matches
-        .iter()
-        .map(|m| state.entries[m.entry_index].id.clone())
-        .collect();
-    state.history.record_audio(text, &jargon_ids);
-    let _ = app.emit_to("main", "ts://history", json!({}));
+    if state.config.lock().unwrap().track_history {
+        let jargon_ids: Vec<String> = matches
+            .iter()
+            .map(|m| state.entries[m.entry_index].id.clone())
+            .collect();
+        state.history.record_audio(text, &jargon_ids);
+        let _ = app.emit_to("main", "ts://history", json!({}));
+    }
 
     if matches.is_empty() {
         return;

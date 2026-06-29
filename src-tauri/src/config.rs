@@ -41,6 +41,11 @@ pub struct Config {
     pub close_to_tray: bool,
     pub appearance: String,
     pub minimize_hint_shown: bool,
+
+    /// Record spoken-word and jargon history for the History tab. When off, no
+    /// words or jargon occurrences are tallied or logged (existing history is
+    /// kept until the user clears it).
+    pub track_history: bool,
 }
 
 impl Default for Config {
@@ -67,6 +72,7 @@ impl Default for Config {
             close_to_tray: false,
             appearance: "dark".into(),
             minimize_hint_shown: false,
+            track_history: true,
         }
     }
 }

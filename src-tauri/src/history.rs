@@ -135,3 +135,82 @@ fn now_secs() -> f64 {
         .map(|d| d.as_secs_f64())
         .unwrap_or(0.0)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// A History backed by a unique, freshly-removed temp file.
+    fn fresh(name: &str) -> (History, PathBuf) {
+        let path = std::env::temp_dir().join(format!("termscope_test_history_{name}.json"));
+        let _ = std::fs::remove_file(&path);
+        (History::new(path.clone()), path)
+    }
+
+    #[test]
+    fn tallies_spoken_words_and_jargon() {
+        let (h, path) = fresh("words");
+        h.record_audio("the API talks to the API", &["334".into()]);
+        let s = h.snapshot();
+        assert_eq!(s.word_counts.get("the"), Some(&2)); // every spoken word counted
+        assert_eq!(s.word_counts.get("api"), Some(&2));
+        assert_eq!(s.word_counts.get("talks"), Some(&1));
+        assert_eq!(s.term_counts.get("334"), Some(&1)); // jargon tallied once
+        assert_eq!(s.log.len(), 1);
+        assert_eq!(s.log[0].id, "334");
+        assert_eq!(s.log[0].source, "audio");
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn selection_logs_jargon_without_word_tally() {
+        let (h, path) = fresh("selection");
+        h.record_selection(&["1".into(), "2".into()]);
+        let s = h.snapshot();
+        assert!(s.word_counts.is_empty()); // selected text isn't "spoken"
+        assert_eq!(s.term_counts.get("1"), Some(&1));
+        assert_eq!(s.log.len(), 2);
+        assert_eq!(s.log[0].source, "selection");
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn log_is_capped_newest_first_but_counts_are_complete() {
+        let (h, path) = fresh("cap");
+        for i in 0..150 {
+            h.record_selection(&[i.to_string()]);
+        }
+        let s = h.snapshot();
+        assert_eq!(s.log.len(), LOG_CAP); // never retains more than the slider can show
+        assert_eq!(s.log[0].id, "149"); // newest first
+        assert_eq!(s.log[LOG_CAP - 1].id, "50"); // 0..49 were trimmed
+        assert_eq!(s.term_counts.len(), 150); // cumulative counts keep everything
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn clear_wipes_everything() {
+        let (h, path) = fresh("clear");
+        h.record_audio("API and SDK", &["334".into(), "335".into()]);
+        h.clear();
+        let s = h.snapshot();
+        assert!(s.word_counts.is_empty());
+        assert!(s.term_counts.is_empty());
+        assert!(s.log.is_empty());
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn persists_across_reload() {
+        let path = std::env::temp_dir().join("termscope_test_history_reload.json");
+        let _ = std::fs::remove_file(&path);
+        {
+            let h = History::new(path.clone());
+            h.record_audio("vector database", &["999".into()]);
+        }
+        let s = History::new(path.clone()).snapshot(); // fresh instance, same file
+        assert_eq!(s.term_counts.get("999"), Some(&1));
+        assert_eq!(s.word_counts.get("vector"), Some(&1));
+        let _ = std::fs::remove_file(&path);
+    }
+}

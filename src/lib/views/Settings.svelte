@@ -181,6 +181,24 @@
   </section>
 
   <section class="group">
+    <h2>History</h2>
+    <div class="note">
+      When on, TermScope tallies every spoken word it hears and logs the jargon it
+      catches, for the History tab. All of it stays on this machine. Turn it off to
+      stop recording — clear the stored history any time from the History tab.
+    </div>
+    <label class="switch">
+      <input
+        type="checkbox"
+        checked={cfg.track_history}
+        onchange={(e) => save("track_history", e.currentTarget.checked)}
+      />
+      <span class="track"></span>
+      <span>Record spoken-word &amp; jargon history</span>
+    </label>
+  </section>
+
+  <section class="group">
     <h2>Progress data</h2>
     <div class="note">Your learned-terms history lives in %APPDATA%\TermScope.</div>
     <div class="actions">

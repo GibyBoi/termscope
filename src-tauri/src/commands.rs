@@ -238,12 +238,14 @@ pub fn run_explain_selection(app: AppHandle) {
         // History: log every jargon term in the selection (what the user looked up),
         // independent of whether it's learned, so the chronological log is complete.
         let all = state.matcher.find(&text, &std::collections::HashSet::new());
-        let ids: Vec<String> = all
-            .iter()
-            .map(|m| state.entries[m.entry_index].id.clone())
-            .collect();
-        state.history.record_selection(&ids);
-        let _ = app.emit_to("main", "ts://history", json!({}));
+        if state.config.lock().unwrap().track_history {
+            let ids: Vec<String> = all
+                .iter()
+                .map(|m| state.entries[m.entry_index].id.clone())
+                .collect();
+            state.history.record_selection(&ids);
+            let _ = app.emit_to("main", "ts://history", json!({}));
+        }
 
         let learned = state.knowledge.learned_ids();
         let matches = state.matcher.find(&text, &learned);

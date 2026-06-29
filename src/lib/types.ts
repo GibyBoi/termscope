@@ -69,6 +69,7 @@ export interface Config {
   close_to_tray: boolean;
   appearance: string;
   minimize_hint_shown: boolean;
+  track_history: boolean;
 }
 
 export interface AudioStatus {

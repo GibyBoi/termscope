@@ -7,6 +7,7 @@
 
   let data: History | null = $state(null);
   let loaded = $state(false);
+  let trackingOn = $state(true); // mirrors config.track_history, for the paused hint
 
   // "jargon" = how often each dictionary term was said; "words" = a tally of
   // every spoken word ever captured.
@@ -22,6 +23,9 @@
 
   async function load() {
     data = await api.getHistory();
+    try {
+      trackingOn = (await api.getConfig()).track_history;
+    } catch {}
     loaded = true;
   }
 
@@ -79,6 +83,22 @@
   });
   let shownLog = $derived(filteredLog.slice(0, logCount));
 
+  // Insert a day header whenever the calendar day changes (newest-first order).
+  type LogRow = { header: string } | { it: (typeof shownLog)[number] };
+  let shownLogRows = $derived.by<LogRow[]>(() => {
+    const out: LogRow[] = [];
+    let last = "";
+    for (const it of shownLog) {
+      const lbl = dayLabel(it.ts);
+      if (lbl !== last) {
+        out.push({ header: lbl });
+        last = lbl;
+      }
+      out.push({ it });
+    }
+    return out;
+  });
+
   const sourceMeta: Record<string, { label: string; icon: string }> = {
     audio: { label: "Heard", icon: "🔊" },
     selection: { label: "Selected", icon: "✎" },
@@ -94,6 +114,19 @@
   }
   function fmtClock(ts: number): string {
     return new Date(ts * 1000).toLocaleString();
+  }
+  function dayLabel(ts: number): string {
+    const d = new Date(ts * 1000);
+    const startOf = (x: Date) =>
+      new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+    const days = Math.round((startOf(new Date()) - startOf(d)) / 86_400_000);
+    if (days <= 0) return "Today";
+    if (days === 1) return "Yesterday";
+    return d.toLocaleDateString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+    });
   }
 </script>
 
@@ -111,6 +144,13 @@
       </button>
     {/if}
   </header>
+
+  {#if loaded && !trackingOn}
+    <div class="paused">
+      ⏸ Recording is paused. Existing history is shown below — turn
+      <strong>Record history</strong> back on in Settings to resume.
+    </div>
+  {/if}
 
   {#if !loaded}
     <p class="empty">Loading…</p>
@@ -262,27 +302,32 @@
         <p class="empty">No jargon logged yet for this filter.</p>
       {:else}
         <div class="list">
-          {#each shownLog as it}
-            {@const accent = categoryColor(it.category)}
-            <div class="row">
-              <div class="stripe" style="background: {accent}"></div>
-              <div class="body">
-                <div class="row-top">
-                  <span class="term" style="color: {accent}">{it.term}</span>
-                  <span class="chip" style="background: {accent}"
-                    >{it.category.toUpperCase()}</span
-                  >
-                  {#if it.learned}<span class="learned">✓ learned</span>{/if}
-                  <span class="spacer"></span>
-                  <span class="src">
-                    {sourceMeta[it.source].icon}
-                    {sourceMeta[it.source].label}
-                  </span>
-                  <span class="time" title={fmtClock(it.ts)}>{fmtTime(it.ts)}</span>
+          {#each shownLogRows as row}
+            {#if "header" in row}
+              <div class="day-sep">{row.header}</div>
+            {:else}
+              {@const it = row.it}
+              {@const accent = categoryColor(it.category)}
+              <div class="row">
+                <div class="stripe" style="background: {accent}"></div>
+                <div class="body">
+                  <div class="row-top">
+                    <span class="term" style="color: {accent}">{it.term}</span>
+                    <span class="chip" style="background: {accent}"
+                      >{it.category.toUpperCase()}</span
+                    >
+                    {#if it.learned}<span class="learned">✓ learned</span>{/if}
+                    <span class="spacer"></span>
+                    <span class="src">
+                      {sourceMeta[it.source].icon}
+                      {sourceMeta[it.source].label}
+                    </span>
+                    <span class="time" title={fmtClock(it.ts)}>{fmtTime(it.ts)}</span>
+                  </div>
+                  <div class="def">{it.definition}</div>
                 </div>
-                <div class="def">{it.definition}</div>
               </div>
-            </div>
+            {/if}
           {/each}
         </div>
         <p class="foot">
@@ -333,10 +378,27 @@
     color: var(--bg);
   }
 
+  .paused {
+    background: color-mix(in srgb, var(--gold) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+    color: var(--gold);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-size: 12px;
+    margin-bottom: 16px;
+  }
   .empty {
     color: var(--text-faint);
     font-size: 12px;
     padding: 6px 2px;
+  }
+  .day-sep {
+    color: var(--text-faint);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 10px 2px 2px;
   }
   .empty-state {
     text-align: center;
