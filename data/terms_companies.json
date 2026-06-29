@@ -162,6 +162,14 @@
     {"id": 329, "term": "Webflow", "definition": "A visual platform for designing and building responsive websites without code.", "aliases": ["web flow"]},
     {"id": 330, "term": "Retool", "definition": "A platform for quickly building internal business tools and dashboards."},
     {"id": 331, "term": "Supabase", "definition": "An open-source backend-as-a-service built on PostgreSQL, an alternative to Firebase."},
-    {"id": 332, "term": "Firebase", "definition": "Google's app-development platform offering databases, auth, hosting and analytics."}
+    {"id": 332, "term": "Firebase", "definition": "Google's app-development platform offering databases, auth, hosting and analytics."},
+    {"id": 584, "term": "Mixpanel", "definition": "A product-analytics platform for tracking how users interact with apps and websites."},
+    {"id": 585, "term": "Tableau", "definition": "A widely used business-intelligence tool for visualizing and exploring data."},
+    {"id": 586, "term": "Carta", "definition": "A platform for managing startup equity, cap tables, and investor records."},
+    {"id": 587, "term": "Pinecone", "definition": "A managed vector database used to power semantic search and AI retrieval."},
+    {"id": 588, "term": "LangChain", "definition": "A popular open-source framework for building applications on top of large language models."},
+    {"id": 589, "term": "Y Combinator", "definition": "An influential startup accelerator and early-stage investor that runs a competitive three-month program.", "aliases": ["YC"]},
+    {"id": 590, "term": "Mistral", "definition": "A European AI company known for its open-weight large language models.", "aliases": ["Mistral AI"]},
+    {"id": 591, "term": "Perplexity", "definition": "An AI-powered answer engine that responds to questions with cited, summarized sources.", "aliases": ["Perplexity AI"]}
   ]
 }
