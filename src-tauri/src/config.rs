@@ -23,9 +23,11 @@ pub struct Config {
     pub notification_timeout: u32,
     /// Card corner: bottom-right | bottom-left | top-right | top-left | custom.
     pub card_position: String,
-    /// Custom card location — logical screen coords of the card stack's top-left,
-    /// used only when `card_position == "custom"`. `-1` means unset, so custom
-    /// falls back to the bottom-right corner until the user drags a location.
+    /// Custom card location — PHYSICAL virtual-screen coords of the cards
+    /// window's top-left, used only when `card_position == "custom"`. Stored
+    /// physical (not logical) so save/restore is an exact round-trip on
+    /// fractionally-scaled displays. `-1` means unset, so custom falls back to
+    /// the bottom-right corner until the user drags a location.
     pub card_custom_x: i32,
     pub card_custom_y: i32,
     /// How many cards may stack on screen at once.

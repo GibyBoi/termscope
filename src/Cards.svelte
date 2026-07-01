@@ -7,6 +7,7 @@
     currentMonitor,
     getCurrentWindow,
     LogicalPosition,
+    PhysicalPosition,
     PhysicalSize,
   } from "@tauri-apps/api/window";
   import Card from "./lib/components/Card.svelte";
@@ -68,27 +69,36 @@
     }
     const { w, h } = await fitWindowTo(stackEl);
 
-    const mon = await currentMonitor();
-    const sf = mon?.scaleFactor ?? 1;
-    const sw = (mon?.size.width ?? 1920) / sf;
-    const sh = (mon?.size.height ?? 1080) / sf;
-    const margin = 10;
-    const taskbar = 48;
-
-    let x: number;
-    let y: number;
     if (position === "custom" && customX >= 0 && customY >= 0) {
-      // Anchor the stack's top-left at the saved custom spot, clamped on-screen.
-      x = Math.min(Math.max(customX, margin), Math.max(margin, sw - w - margin));
-      y = Math.min(Math.max(customY, margin), Math.max(margin, sh - h - margin));
+      // Custom coords are stored as raw PHYSICAL pixels (see savePlacement) and
+      // re-applied as physical — an exact round-trip with no scale-factor math
+      // that could drift on fractional display scaling. Clamp to the monitor so
+      // a grown card stack never hangs off-screen.
+      const dpr = window.devicePixelRatio || 1;
+      const pw = Math.ceil(w * dpr);
+      const ph = Math.ceil(h * dpr);
+      const mon = await currentMonitor();
+      const m = Math.round(10 * dpr);
+      const mx = mon?.position.x ?? 0;
+      const my = mon?.position.y ?? 0;
+      const mw = mon?.size.width ?? Math.round(1920 * dpr);
+      const mh = mon?.size.height ?? Math.round(1080 * dpr);
+      const x = Math.min(Math.max(customX, mx + m), Math.max(mx + m, mx + mw - pw - m));
+      const y = Math.min(Math.max(customY, my + m), Math.max(my + m, my + mh - ph - m));
+      await win.setPosition(new PhysicalPosition(Math.round(x), Math.round(y)));
     } else {
+      const mon = await currentMonitor();
+      const sf = mon?.scaleFactor ?? 1;
+      const sw = (mon?.size.width ?? 1920) / sf;
+      const sh = (mon?.size.height ?? 1080) / sf;
+      const margin = 10;
+      const taskbar = 48;
       const right = position.includes("right");
       const top = position.includes("top");
-      x = right ? sw - w - margin : margin;
-      y = top ? margin : sh - h - taskbar;
+      const x = right ? sw - w - margin : margin;
+      const y = top ? margin : sh - h - taskbar;
+      await win.setPosition(new LogicalPosition(Math.round(x), Math.round(y)));
     }
-
-    await win.setPosition(new LogicalPosition(Math.round(x), Math.round(y)));
     await win.setAlwaysOnTop(true);
     await win.show();
   }
@@ -102,18 +112,19 @@
     await win.setFocusable(true); // so the sample card can be dragged & clicked
     const { w, h } = await fitWindowTo(placeEl);
 
-    // Start from the existing custom spot, or centered on first use.
-    let x = customX;
-    let y = customY;
-    if (x < 0 || y < 0) {
+    // Start from the existing custom spot (physical px, exact round-trip with
+    // savePlacement), or centered on first use.
+    if (customX >= 0 && customY >= 0) {
+      await win.setPosition(new PhysicalPosition(customX, customY));
+    } else {
       const mon = await currentMonitor();
       const sf = mon?.scaleFactor ?? 1;
       const sw = (mon?.size.width ?? 1920) / sf;
       const sh = (mon?.size.height ?? 1080) / sf;
-      x = Math.round((sw - w) / 2);
-      y = Math.round((sh - h) / 2);
+      const x = Math.round((sw - w) / 2);
+      const y = Math.round((sh - h) / 2);
+      await win.setPosition(new LogicalPosition(x, y));
     }
-    await win.setPosition(new LogicalPosition(Math.round(x), Math.round(y)));
     await win.setAlwaysOnTop(true);
     await win.show();
     await win.setFocus();
@@ -121,10 +132,13 @@
 
   async function savePlacement() {
     const win = getCurrentWindow();
-    const pos = await win.outerPosition(); // physical, virtual-screen coords
-    const sf = await win.scaleFactor();
-    customX = Math.round(pos.x / sf);
-    customY = Math.round(pos.y / sf);
+    // Store the RAW physical position. Converting to logical on save and back
+    // on show uses two potentially different scale factors (the hidden window's
+    // monitor is ambiguous), which visibly drifted the box on scaled displays —
+    // physical in, physical out is exact.
+    const pos = await win.outerPosition();
+    customX = Math.round(pos.x);
+    customY = Math.round(pos.y);
     position = "custom";
     await setConfigKey("card_custom_x", customX);
     await setConfigKey("card_custom_y", customY);
