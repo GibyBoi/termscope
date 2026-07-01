@@ -26,6 +26,10 @@ struct Stored {
 
 pub struct History {
     path: PathBuf,
+    /// False when the on-disk file was unreadable and couldn't be backed up, so we
+    /// must not overwrite it (see `paths::load_json_store`). New history isn't
+    /// persisted in that state rather than destroying data we couldn't recover.
+    savable: bool,
     inner: Mutex<Stored>,
 }
 
@@ -37,17 +41,24 @@ pub struct Snapshot {
 
 impl History {
     pub fn new(path: PathBuf) -> Self {
-        // A pre-orderless `history.json` may still carry a legacy `log` array; serde
-        // ignores unknown fields, so old files load fine and the log is dropped on
-        // the next save (never re-serialized).
-        let inner = std::fs::read_to_string(&path)
-            .ok()
-            .and_then(|t| serde_json::from_str::<Stored>(&t).ok())
-            .unwrap_or_default();
-        Self { path, inner: Mutex::new(inner) }
+        // Loaded through the shared safe loader: a missing file is a fresh start, a
+        // parseable file loads as-is, and an UNREADABLE file (corruption or a future
+        // schema) is preserved as a backup rather than silently wiped. A pre-orderless
+        // `history.json` still carrying a legacy `log` array parses fine (serde ignores
+        // unknown fields) and drops the log on the next save. User data is never
+        // deleted on load — only the History-tab "Clear" removes it.
+        let loaded = crate::paths::load_json_store::<Stored>(&path);
+        Self { path, savable: loaded.savable, inner: Mutex::new(loaded.value) }
     }
 
     fn save(&self, stored: &Stored) {
+        if !self.savable {
+            eprintln!(
+                "[termscope] WARN: not persisting history — {} was unreadable and left untouched to avoid destroying unrecovered data",
+                self.path.display()
+            );
+            return;
+        }
         if let Ok(text) = serde_json::to_string(stored) {
             let tmp = self.path.with_extension("tmp");
             if std::fs::write(&tmp, text).is_ok() {
@@ -173,6 +184,46 @@ mod tests {
         assert_eq!(s.term_counts.get("999"), Some(&1));
         assert_eq!(s.word_counts.get("vector"), Some(&1));
         let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
+    fn unreadable_file_is_preserved_never_wiped() {
+        // A history.json this build can't parse (corruption, a partial write, or a
+        // file from a future schema) must NOT be silently reset and overwritten —
+        // the user's counts are their data and only they may delete them.
+        let path = std::env::temp_dir().join("termscope_test_history_corrupt.json");
+        let prefix = "termscope_test_history_corrupt.corrupt-";
+        let clear_backups = || {
+            for e in std::fs::read_dir(std::env::temp_dir()).unwrap().flatten() {
+                if e.file_name().to_string_lossy().starts_with(prefix) {
+                    let _ = std::fs::remove_file(e.path());
+                }
+            }
+        };
+        let _ = std::fs::remove_file(&path);
+        clear_backups();
+
+        std::fs::write(&path, "{ not valid json for Stored ]").unwrap();
+        let h = History::new(path.clone());
+        assert!(h.snapshot().word_counts.is_empty()); // couldn't parse → starts empty
+
+        // The original bytes were preserved as a sibling backup, not deleted.
+        let backups: Vec<_> = std::fs::read_dir(std::env::temp_dir())
+            .unwrap()
+            .flatten()
+            .filter(|e| e.file_name().to_string_lossy().starts_with(prefix))
+            .collect();
+        assert_eq!(backups.len(), 1, "corrupt history must be preserved as a backup");
+
+        // New activity now persists cleanly to the freed canonical path.
+        h.record_audio("api", &[]);
+        assert_eq!(
+            History::new(path.clone()).snapshot().word_counts.get("api"),
+            Some(&1)
+        );
+
+        let _ = std::fs::remove_file(&path);
+        clear_backups();
     }
 
     #[test]

@@ -27,19 +27,30 @@ struct Seen {
 
 pub struct Knowledge {
     path: PathBuf,
+    /// False when the on-disk file was unreadable and couldn't be backed up, so we
+    /// must not overwrite it (see `paths::load_json_store`) — the user's learned
+    /// terms stay on disk rather than being destroyed by a fresh write.
+    savable: bool,
     inner: Mutex<Stored>,
 }
 
 impl Knowledge {
     pub fn new(path: PathBuf) -> Self {
-        let inner = std::fs::read_to_string(&path)
-            .ok()
-            .and_then(|t| serde_json::from_str::<Stored>(&t).ok())
-            .unwrap_or_default();
-        Self { path, inner: Mutex::new(inner) }
+        // Loaded through the shared safe loader: an unreadable `knowledge.json`
+        // (corruption or a future schema) is preserved as a backup, never silently
+        // reset. Learned progress is only ever removed by the user's "Reset".
+        let loaded = crate::paths::load_json_store::<Stored>(&path);
+        Self { path, savable: loaded.savable, inner: Mutex::new(loaded.value) }
     }
 
     fn save(&self, stored: &Stored) {
+        if !self.savable {
+            eprintln!(
+                "[termscope] WARN: not persisting knowledge — {} was unreadable and left untouched to avoid destroying unrecovered learned terms",
+                self.path.display()
+            );
+            return;
+        }
         if let Ok(text) = serde_json::to_string_pretty(stored) {
             let tmp = self.path.with_extension("tmp");
             if std::fs::write(&tmp, text).is_ok() {

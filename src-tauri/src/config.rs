@@ -80,17 +80,18 @@ impl Default for Config {
 impl Config {
     /// Load from `config.json`, writing defaults on first run. Unknown keys are
     /// ignored and missing keys fall back to defaults (matches the Python loader).
+    /// Goes through the shared safe loader, so a corrupt config is preserved as a
+    /// backup rather than silently overwritten (see `paths::load_json_store`).
     pub fn load() -> Self {
         let path = paths::config_path();
-        if !path.exists() {
-            let cfg = Self::default();
-            cfg.save();
-            return cfg;
+        let loaded = paths::load_json_store::<Config>(&path);
+        // Write defaults only when there's no usable file yet — a genuine first run,
+        // or right after a corrupt config was quarantined aside. Never over a file we
+        // couldn't read or preserve (`savable == false`).
+        if loaded.savable && !path.exists() {
+            loaded.value.save_to(&path);
         }
-        match std::fs::read_to_string(&path) {
-            Ok(text) => serde_json::from_str(&text).unwrap_or_default(),
-            Err(_) => Self::default(),
-        }
+        loaded.value
     }
 
     pub fn save(&self) {

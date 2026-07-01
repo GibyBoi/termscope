@@ -66,6 +66,29 @@ Listening UI is present but inert.
 - Bundled data is wired via `tauri.conf.json` `bundle.resources`; `state.rs::resolve_data_dir`
   finds it in both packaged (resource dir) and dev (`../data`) builds.
 
+## Storage safety — user data is never deleted except by the user (do not break)
+Per-user data (`history.json` = spoken words + jargon tallies, `knowledge.json` = learned
+terms, `config.json`) must survive every app update. The rules a future version MUST keep:
+- **Load through `paths::load_json_store`** — the single safe loader. A missing file is a
+  fresh start; a parseable file loads as-is; an **unreadable** file (corruption, a partial
+  write, or a schema this build can't parse) is *quarantined* — renamed to
+  `<name>.corrupt-<unix>.json` — and the store starts empty, `savable`. If it can't even be
+  backed up, the store is **not** `savable` and refuses to write, so the original is left
+  untouched. Never load with `serde_json::from_str(...).ok().unwrap_or_default()`: on a parse
+  failure that silently returns empty and the next `save()` *overwrites the user's real data*.
+  Regression test: `history::tests::unreadable_file_is_preserved_never_wiped`.
+- **Keep persisted structs additively compatible**: every field `#[serde(default)]`, add
+  fields (don't rename/retype existing ones), so old files keep parsing and no field is
+  silently dropped. Renaming a field IS data loss — migrate it in the loader instead.
+- **Deletion is user-only**: the sole code paths that remove user data are `History::clear`
+  (History-tab "Clear") and `Knowledge::reset` (Reset learned). No load, migration, or update
+  path may delete or blank a file.
+- **The installer must not touch `%APPDATA%\TermScope`.** Data lives in Roaming `%APPDATA%`;
+  the app installs to `%LOCALAPPDATA%`. The default NSIS bundle (no custom `bundle.windows.nsis`
+  config) doesn't remove `%APPDATA%` on uninstall — and an *update* runs the old uninstaller
+  first, so any future `deleteAppDataOnUninstall`-style behavior would wipe data on update.
+  Never add it.
+
 ## Events (Rust → JS)
 - `ts://card` (to `cards`): `{ entry, timeout, maxCards, position }` — show a card.
 - `ts://card-remove` (to `cards`): `{ id }`. `ts://config` (to `cards`): live card options.
