@@ -9,10 +9,22 @@ you've learned. Everything runs offline.
 This is the **Tauri V2 rewrite** (Rust + Svelte 5). The original Python/customtkinter
 app lives under [`legacy/`](legacy/) for reference.
 
+> **Release: “WhisperOfHistory.”** The project is still called **TermScope** — this is
+> just the name of the current release, which is where TermScope started using the
+> **Whisper** offline voice-detection model to hear spoken jargon and added the
+> **History** tab. History is stored as **orderless frequency counts only** (how often
+> each word/term came up), never a timeline, so past conversations can't be
+> reconstructed from disk.
+
 ## Features
 
 - **Explain selection** — highlight text anywhere, press `Ctrl+Alt+E`, and unknown terms
   surface as floating cards (Learn more / ✓ Learned / Dismiss), stacked in a corner.
+- **Listening (Whisper STT)** — optionally transcribe system audio + mic offline with the
+  **Whisper** model to catch jargon as it's spoken and surface the same floating cards.
+- **History** — a tally of how often each spoken word and each detected jargon term has
+  come up. Stored as **orderless frequency counts only** (no order, timestamps, or log),
+  so the file can't be replayed as a conversation.
 - **Hub window** — Dashboard (progress, milestones, per-category bars), Library (search +
   filter ~500 terms with extended definitions), and Settings (all saved live).
 - **Learned tracker** — mark terms learned so they stop interrupting you; progress lives
@@ -23,10 +35,12 @@ app lives under [`legacy/`](legacy/) for reference.
 | --- | --- |
 | Explain highlighted selection | `Ctrl+Alt+E` |
 | Mark last shown term learned | `Ctrl+Alt+K` |
+| Toggle listening | `Ctrl+Alt+Space` |
 
-> **Audio is coming in v2.** The original app also transcribed system audio + mic with
-> offline Vosk to catch jargon as it's spoken. That pipeline is being re-implemented
-> natively in Rust; for now the Listening controls are visible but inert.
+As of the **WhisperOfHistory** release, the Listening controls are live: enable system
+audio and/or microphone in Settings and TermScope transcribes offline with **Whisper**,
+catching spoken jargon and feeding the History tallies. (The original app used Vosk; see
+[`legacy/`](legacy/).)
 
 ## Develop
 
@@ -60,7 +74,11 @@ termscope/
 ## Configuration & privacy
 
 Settings live in `%APPDATA%\TermScope\config.json`; learned terms + anti-spam state in
-`knowledge.json` — both shared with the legacy app's format. No network access at
-runtime; "Learn more" opens a source link in your browser only when you click it.
+`knowledge.json` — both shared with the legacy app's format. Listening history lives in
+`history.json` as **orderless frequency counts only** — just how many times each word and
+jargon term came up, with no order, timestamps, or per-utterance log, so it can never be
+read back as a conversation (and transcribed speech is never written to any log). No
+network access at runtime; "Learn more" opens a source link in your browser only when you
+click it.
 
 See [CLAUDE.md](CLAUDE.md) for architecture notes.
