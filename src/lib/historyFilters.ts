@@ -36,6 +36,10 @@ export interface FilterContext {
   data: History;
   /** Normalized filler-word tokens (from `get_filler_words`). */
   fillerWords: Set<string>;
+  /** All jargon categories available (from config `enabled_categories`), so the
+   * per-category filters are always offered — even before any such jargon has
+   * been detected. Categories seen in the data but not listed here are appended. */
+  categories: string[];
 }
 
 function termItem(t: TermStat): DisplayItem {
@@ -50,7 +54,7 @@ function termItem(t: TermStat): DisplayItem {
   };
 }
 
-function wordItem(w: WordStat, category: string): DisplayItem {
+function wordItem(w: WordStat, category?: string): DisplayItem {
   return { key: `word:${w.word}`, label: w.word, count: w.count, isTerm: false, category };
 }
 
@@ -73,7 +77,7 @@ function categoryLabel(cat: string): string {
  * surface here automatically without code changes.
  */
 export function buildFilters(ctx: FilterContext): FilterDef[] {
-  const { data, fillerWords } = ctx;
+  const { data, fillerWords, categories } = ctx;
 
   const filters: FilterDef[] = [
     {
@@ -93,12 +97,15 @@ export function buildFilters(ctx: FilterContext): FilterDef[] {
     },
   ];
 
-  // One filter per jargon category present, in a stable preferred order.
+  // One filter per jargon category, in a stable preferred order. Driven by the
+  // configured categories so Tech/Business/Company are always selectable, plus
+  // any extra category actually seen in the data.
   const present = new Set(data.terms.map((t) => t.category));
   const order = ["tech", "business", "companies"];
+  const all = new Set([...categories, ...present]);
   const cats = [
-    ...order.filter((c) => present.has(c)),
-    ...[...present].filter((c) => !order.includes(c)).sort(),
+    ...order.filter((c) => all.has(c)),
+    ...[...all].filter((c) => !order.includes(c)).sort(),
   ];
   for (const cat of cats) {
     filters.push({
@@ -108,6 +115,15 @@ export function buildFilters(ctx: FilterContext): FilterDef[] {
       build: () => data.terms.filter((t) => t.category === cat).map(termItem),
     });
   }
+
+  // Every spoken word captured, unfiltered — so any individual word's frequency
+  // is always searchable, not just jargon and filler.
+  filters.push({
+    key: "words",
+    label: "All words",
+    hint: "Every spoken word captured, by frequency.",
+    build: () => data.words.map((w) => wordItem(w)),
+  });
 
   return filters;
 }

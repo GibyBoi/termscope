@@ -48,9 +48,11 @@ Listening UI is present but inert.
   set of `DisplayItem` rows; the view unions the selected filters (de-duped by key),
   frequency-sorts them (asc/desc toggle) and search-narrows by label. Built-in
   filters: **Jargon** (all detected terms), **Filler words** (spoken words ∩ the
-  filler list), and one per jargon category present (**Tech / Business / Company**,
-  auto-derived from `data.terms` so new categories appear without code changes). Add
-  a filter type = add one `FilterDef`. Still pure frequency bars, no chronological view.
+  filler list), one per jargon category (**Tech / Business / Company**, driven by
+  config `enabled_categories` so they're always selectable — plus any extra category
+  seen in `data.terms`), and **All words** (every spoken word, so any word's frequency
+  stays searchable). Add a filter type = add one `FilterDef`. Still pure frequency
+  bars, no chronological view.
 - **Filler words** live in bundled `data/filler_words.json` (`{category, words:[…]}`),
   loaded by `dictionary::load_filler_words` into `AppState.filler_words` as normalized
   tokens and exposed via `get_filler_words`; membership is a client-side lookup against

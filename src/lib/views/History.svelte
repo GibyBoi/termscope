@@ -13,6 +13,7 @@
 
   let data: History | null = $state(null);
   let fillerWords = $state<Set<string>>(new Set());
+  let categories = $state<string[]>([]); // config.enabled_categories, for filters
   let loaded = $state(false);
   let trackingOn = $state(true); // mirrors config.track_history, for the paused hint
 
@@ -33,7 +34,9 @@
   async function load() {
     data = await api.getHistory();
     try {
-      trackingOn = (await api.getConfig()).track_history;
+      const cfg = await api.getConfig();
+      trackingOn = cfg.track_history;
+      categories = cfg.enabled_categories;
     } catch {}
     loaded = true;
   }
@@ -76,7 +79,7 @@
   // ---- derived views --------------------------------------------------------
 
   let filters = $derived<FilterDef[]>(
-    data ? buildFilters({ data, fillerWords }) : [],
+    data ? buildFilters({ data, fillerWords, categories }) : [],
   );
   let selectedLabels = $derived(
     filters.filter((f) => selected.has(f.key)).map((f) => f.label),
