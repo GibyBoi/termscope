@@ -4,20 +4,31 @@
   import * as api from "../api";
   import { categoryColor } from "../api";
   import type { History } from "../types";
+  import {
+    buildFilters,
+    collectItems,
+    type DisplayItem,
+    type FilterDef,
+  } from "../historyFilters";
 
   let data: History | null = $state(null);
+  let fillerWords = $state<Set<string>>(new Set());
   let loaded = $state(false);
   let trackingOn = $state(true); // mirrors config.track_history, for the paused hint
 
-  // "jargon" = how often each dictionary term was said; "words" = a tally of
-  // every spoken word ever captured. Both are pure frequency counts — TermScope
-  // never stores the order or timing of what was said, so nothing here can be
-  // read back as a conversation.
-  let countMode: "jargon" | "words" = $state("jargon");
-  let wordSearch = $state("");
+  // The Counts view is driven by a modular multi-select filter (see
+  // historyFilters.ts): each selected filter contributes a set of rows, unioned
+  // and shown by frequency. Everything shown is a pure count — TermScope never
+  // stores the order or timing of what was said, so nothing here can be read
+  // back as a conversation.
+  let selected = $state<Set<string>>(new Set(["jargon"]));
+  let sortDir: "desc" | "asc" = $state("desc");
+  let search = $state("");
+  let dropdownOpen = $state(false);
 
-  // The all-words tally can grow large; render a window of it (search narrows).
-  const WORD_RENDER_CAP = 400;
+  // The union (esp. all filler/spoken words) can grow large; render a window of
+  // it, which the search narrows.
+  const RENDER_CAP = 500;
 
   async function load() {
     data = await api.getHistory();
@@ -50,6 +61,9 @@
     const unlisteners: UnlistenFn[] = [];
     (async () => {
       await load();
+      try {
+        fillerWords = new Set(await api.getFillerWords());
+      } catch {}
       unlisteners.push(await listen("ts://history", scheduleRefetch));
       unlisteners.push(await listen("ts://refresh", scheduleRefetch));
     })();
@@ -61,15 +75,44 @@
 
   // ---- derived views --------------------------------------------------------
 
-  let termMax = $derived(data && data.terms.length ? data.terms[0].count : 1);
+  let filters = $derived<FilterDef[]>(
+    data ? buildFilters({ data, fillerWords }) : [],
+  );
+  let selectedLabels = $derived(
+    filters.filter((f) => selected.has(f.key)).map((f) => f.label),
+  );
+  let filterSummary = $derived(
+    selectedLabels.length === 0
+      ? "Select filters…"
+      : selectedLabels.join(", "),
+  );
 
-  let filteredWords = $derived.by(() => {
+  // Union of the selected filters, then search-narrowed and frequency-sorted.
+  let items = $derived.by<DisplayItem[]>(() => {
     if (!data) return [];
-    const q = wordSearch.trim().toLowerCase();
-    return q ? data.words.filter((w) => w.word.includes(q)) : data.words;
+    let out = collectItems(filters, selected);
+    const q = search.trim().toLowerCase();
+    if (q) out = out.filter((i) => i.label.toLowerCase().includes(q));
+    out.sort((a, b) =>
+      sortDir === "desc"
+        ? b.count - a.count || a.label.localeCompare(b.label)
+        : a.count - b.count || a.label.localeCompare(b.label),
+    );
+    return out;
   });
-  let shownWords = $derived(filteredWords.slice(0, WORD_RENDER_CAP));
-  let wordMax = $derived(shownWords.length ? shownWords[0].count : 1);
+  let shown = $derived(items.slice(0, RENDER_CAP));
+  // Bar scale is the largest count in the whole selection so bars stay
+  // comparable regardless of sort direction or the render window.
+  let countMax = $derived(
+    items.reduce((m, i) => (i.count > m ? i.count : m), 1),
+  );
+
+  function toggleFilter(key: string) {
+    const next = new Set(selected);
+    if (next.has(key)) next.delete(key);
+    else next.add(key);
+    selected = next;
+  }
 </script>
 
 <div class="scroll">
@@ -134,85 +177,108 @@
     <section class="block">
       <div class="block-head">
         <h2>Counts</h2>
-        <div class="segmented">
-          <button
-            class:active={countMode === "jargon"}
-            onclick={() => (countMode = "jargon")}>Jargon terms</button
-          >
-          <button
-            class:active={countMode === "words"}
-            onclick={() => (countMode = "words")}>All words</button
-          >
+        <div class="controls">
+          <!-- multi-select filter dropdown -->
+          <div class="dropdown">
+            <button
+              class="dd-btn"
+              class:open={dropdownOpen}
+              onclick={() => (dropdownOpen = !dropdownOpen)}
+              title="Choose which words to show"
+            >
+              <span class="dd-label">{filterSummary}</span>
+              <span class="dd-caret">▾</span>
+            </button>
+            {#if dropdownOpen}
+              <!-- click-away backdrop -->
+              <button
+                class="dd-backdrop"
+                aria-label="Close filter menu"
+                onclick={() => (dropdownOpen = false)}
+              ></button>
+              <div class="dd-menu">
+                {#each filters as f}
+                  <label class="dd-opt" title={f.hint}>
+                    <input
+                      type="checkbox"
+                      checked={selected.has(f.key)}
+                      onchange={() => toggleFilter(f.key)}
+                    />
+                    <span>{f.label}</span>
+                  </label>
+                {/each}
+              </div>
+            {/if}
+          </div>
+
+          <!-- sort direction -->
+          <div class="segmented">
+            <button
+              class:active={sortDir === "desc"}
+              onclick={() => (sortDir = "desc")}
+              title="Most frequent first">Most</button
+            >
+            <button
+              class:active={sortDir === "asc"}
+              onclick={() => (sortDir = "asc")}
+              title="Least frequent first">Least</button
+            >
+          </div>
         </div>
       </div>
 
-      {#if countMode === "jargon"}
-        <p class="hint">
-          How many times each dictionary term has been said, most frequent first.
+      <p class="hint">
+        Word usage by frequency for the selected filter{selectedLabels.length ===
+        1
+          ? ""
+          : "s"}, {sortDir === "desc" ? "most" : "least"} frequent first.
+      </p>
+
+      <input
+        class="search"
+        placeholder="Search for a word…"
+        bind:value={search}
+      />
+
+      {#if selected.size === 0}
+        <p class="empty">Pick at least one filter above.</p>
+      {:else if items.length === 0}
+        <p class="empty">
+          {search.trim()
+            ? `No matches for “${search}”.`
+            : "Nothing tallied for the selected filters yet."}
         </p>
-        {#if data.terms.length === 0}
-          <p class="empty">No jargon caught yet.</p>
-        {:else}
-          <div class="list">
-            {#each data.terms as t}
-              {@const accent = categoryColor(t.category)}
-              <div class="crow">
-                <div class="crow-main">
-                  <span class="term" style="color: {accent}">{t.term}</span>
-                  <span class="chip" style="background: {accent}"
-                    >{t.category.toUpperCase()}</span
-                  >
-                  {#if t.learned}<span class="learned">✓ learned</span>{/if}
-                  <span class="spacer"></span>
-                  <span class="count">{t.count}×</span>
-                </div>
-                <div class="cbar">
-                  <div
-                    class="cbar-fill"
-                    style="width: {(t.count / termMax) * 100}%; background: {accent}"
-                  ></div>
-                </div>
-                <div class="cdef">{t.definition}</div>
-              </div>
-            {/each}
-          </div>
-        {/if}
       {:else}
-        <p class="hint">
-          A complete tally of every spoken word captured by the microphone.
-        </p>
-        <input
-          class="search"
-          placeholder="Filter words…"
-          bind:value={wordSearch}
-        />
-        {#if filteredWords.length === 0}
-          <p class="empty">
-            {wordSearch.trim()
-              ? `No words match “${wordSearch}”.`
-              : "No spoken words captured yet."}
-          </p>
-        {:else}
-          <div class="wgrid">
-            {#each shownWords as w}
-              <div class="wrow">
-                <span class="wword" title={w.word}>{w.word}</span>
-                <div class="wbar">
-                  <div
-                    class="wbar-fill"
-                    style="width: {(w.count / wordMax) * 100}%"
-                  ></div>
-                </div>
-                <span class="wcount">{w.count}</span>
+        <div class="list">
+          {#each shown as i (i.key)}
+            {@const accent = categoryColor(i.category ?? "")}
+            <div class="crow">
+              <div class="crow-main">
+                <span class="term" style="color: {accent}">{i.label}</span>
+                {#if i.category}
+                  <span class="chip" style="background: {accent}"
+                    >{i.category.toUpperCase()}</span
+                  >
+                {/if}
+                {#if i.learned}<span class="learned">✓ learned</span>{/if}
+                <span class="spacer"></span>
+                <span class="count">{i.count}×</span>
               </div>
-            {/each}
-          </div>
-          {#if filteredWords.length > shownWords.length}
-            <p class="more">
-              +{(filteredWords.length - shownWords.length).toLocaleString()} more
-              — type above to narrow.
-            </p>
-          {/if}
+              <div class="cbar">
+                <div
+                  class="cbar-fill"
+                  style="width: {(i.count / countMax) * 100}%; background: {accent}"
+                ></div>
+              </div>
+              {#if i.definition}<div class="cdef">{i.definition}</div>{/if}
+            </div>
+          {/each}
+        </div>
+        {#if items.length > shown.length}
+          <p class="more">
+            +{(items.length - shown.length).toLocaleString()} more — search above
+            to narrow.
+          </p>
         {/if}
       {/if}
     </section>
@@ -342,6 +408,77 @@
     margin: 4px 0 12px;
   }
 
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* multi-select filter dropdown */
+  .dropdown {
+    position: relative;
+  }
+  .dd-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 260px;
+    height: 30px;
+    padding: 0 10px;
+    border-radius: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 12px;
+  }
+  .dd-btn.open,
+  .dd-btn:hover {
+    border-color: var(--accent);
+  }
+  .dd-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .dd-caret {
+    color: var(--text-muted);
+    font-size: 10px;
+  }
+  .dd-backdrop {
+    position: fixed;
+    inset: 0;
+    background: transparent;
+    border: none;
+    z-index: 10;
+  }
+  .dd-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 11;
+    min-width: 180px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+  .dd-opt {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .dd-opt:hover {
+    background: var(--surface3);
+  }
+  .dd-opt input {
+    accent-color: var(--accent);
+  }
+
   .segmented {
     display: inline-flex;
     background: var(--surface2);
@@ -432,44 +569,6 @@
     font-size: 13px;
   }
 
-  /* all-words grid */
-  .wgrid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px 18px;
-  }
-  .wrow {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .wword {
-    width: 120px;
-    flex-shrink: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: 12px;
-  }
-  .wbar {
-    flex: 1;
-    height: 6px;
-    border-radius: 3px;
-    background: var(--surface3);
-    overflow: hidden;
-  }
-  .wbar-fill {
-    height: 100%;
-    background: var(--cyan);
-    border-radius: 3px;
-  }
-  .wcount {
-    width: 44px;
-    text-align: right;
-    color: var(--text-muted);
-    font-size: 11px;
-    font-variant-numeric: tabular-nums;
-  }
   .more {
     color: var(--text-faint);
     font-size: 11px;

@@ -42,8 +42,21 @@ Listening UI is present but inert.
 - `commands::get_history` returns an enriched DTO (words sorted desc, jargon terms
   with counts + totals); entries whose term id was retired are dropped.
   `commands::clear_history` wipes it (the tab's "Clear history" button).
-- `History.svelte`: a stats row + a two-mode Counts view (jargon terms vs all spoken
-  words, the latter searchable) — pure frequency bars, no chronological view.
+  `commands::get_filler_words` returns the bundled filler tokens (see below).
+- `History.svelte`: a stats row + a Counts view driven by a **modular multi-select
+  filter** (`src/lib/historyFilters.ts`). Each filter is a `FilterDef` producing a
+  set of `DisplayItem` rows; the view unions the selected filters (de-duped by key),
+  frequency-sorts them (asc/desc toggle) and search-narrows by label. Built-in
+  filters: **Jargon** (all detected terms), **Filler words** (spoken words ∩ the
+  filler list), and one per jargon category present (**Tech / Business / Company**,
+  auto-derived from `data.terms` so new categories appear without code changes). Add
+  a filter type = add one `FilterDef`. Still pure frequency bars, no chronological view.
+- **Filler words** live in bundled `data/filler_words.json` (`{category, words:[…]}`),
+  loaded by `dictionary::load_filler_words` into `AppState.filler_words` as normalized
+  tokens and exposed via `get_filler_words`; membership is a client-side lookup against
+  the already-fetched spoken-word tallies. Grow the list with the discover-jargon
+  approach (judge true filler vs ordinary word). Entries must be single tokens — the
+  orderless history is a bag of single words, so multi-word fillers can't match.
 
 ## Growing the dictionary (discover-jargon skill)
 - `.claude/skills/discover-jargon/` (SKILL.md + `jargon_tool.py`): the model generates
@@ -60,7 +73,7 @@ Listening UI is present but inert.
   `relayout()`), so it rarely covers anything but the cards.
 
 ## Data compatibility (do not break)
-- `data/terms_*.json` + `data/library.json` keep the SAME format and **stable integer
+- `data/terms_*.json` + `data/library.json` + `data/filler_words.json` keep the SAME format and **stable integer
   term ids**. `config.json` + `knowledge.json` stay in `%APPDATA%\TermScope`. So a user's
   learned-term progress carries over between the Python app and this rewrite untouched.
 - Bundled data is wired via `tauri.conf.json` `bundle.resources`; `state.rs::resolve_data_dir`

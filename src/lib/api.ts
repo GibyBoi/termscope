@@ -11,6 +11,7 @@ import type {
 export const getEntries = () => invoke<Entry[]>("get_entries");
 export const getKnowledge = () => invoke<Knowledge>("get_knowledge");
 export const getHistory = () => invoke<History>("get_history");
+export const getFillerWords = () => invoke<string[]>("get_filler_words");
 export const clearHistory = () => invoke("clear_history");
 export const getLibraryDetail = (id: string) =>
   invoke<Detail | null>("get_library_detail", { id });
@@ -45,6 +46,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   business: "var(--orange)",
   companies: "var(--teal)",
   general: "var(--purple)",
+  filler: "var(--gold)",
 };
 
 export function categoryColor(category: string): string {
