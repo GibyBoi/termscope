@@ -107,6 +107,16 @@ pub fn get_history(state: State<AppState>) -> HistoryDto {
     }
 }
 
+/// The bundled filler-word tokens, for the History tab's "Filler words" filter.
+/// Returned to the frontend so filter membership stays a pure client-side lookup
+/// against the already-fetched spoken-word tallies (no extra per-word round-trip).
+#[tauri::command]
+pub fn get_filler_words(state: State<AppState>) -> Vec<String> {
+    let mut words: Vec<String> = state.filler_words.iter().cloned().collect();
+    words.sort();
+    words
+}
+
 #[tauri::command]
 pub fn clear_history(app: AppHandle, state: State<AppState>) {
     state.history.clear();

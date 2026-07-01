@@ -127,6 +127,62 @@ pub fn load_entries(files: &[std::path::PathBuf], enabled: &HashSet<String>) -> 
     entries
 }
 
+/// Load the bundled filler-word list (`filler_words.json`) as normalized tokens.
+///
+/// Filler words feed the History tab's "Filler words" filter, which is matched
+/// against the orderless spoken-word tallies — so each entry is reduced to the
+/// same lowercase alphanumeric token form the word counts use. A missing or
+/// unparseable file yields an empty set (the filter simply shows nothing) rather
+/// than failing the app. Multi-word entries collapse to their first token; the
+/// bag-of-words history has no phrases to match anyway.
+pub fn load_filler_words(data_dir: &Path) -> HashSet<String> {
+    let path = data_dir.join("filler_words.json");
+    let value: serde_json::Value = match std::fs::read_to_string(&path)
+        .ok()
+        .and_then(|t| serde_json::from_str(&t).ok())
+    {
+        Some(v) => v,
+        None => return HashSet::new(),
+    };
+    value
+        .get("words")
+        .and_then(|v| v.as_array())
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|w| w.as_str())
+                .filter_map(|w| tokenize(w).into_iter().next())
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+#[cfg(test)]
+mod filler_tests {
+    use super::*;
+
+    /// The bundled filler list parses and normalizes to non-empty tokens.
+    #[test]
+    fn bundled_filler_words_load() {
+        let data_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .parent()
+            .unwrap()
+            .join("data");
+        let filler = load_filler_words(&data_dir);
+        assert!(filler.contains("um"));
+        assert!(filler.contains("basically"));
+        // Every entry is a bare token (no whitespace/punctuation) so it can match
+        // the tokenized spoken-word counts.
+        assert!(filler.iter().all(|w| tokenize(w) == vec![w.clone()]));
+    }
+
+    /// A missing file is an empty set, not a failure.
+    #[test]
+    fn missing_filler_file_is_empty() {
+        let dir = std::env::temp_dir().join("termscope_no_such_dir_xyz");
+        assert!(load_filler_words(&dir).is_empty());
+    }
+}
+
 /// All term dictionaries (`terms_*.json`) in a data directory.
 pub fn bundled_term_files(data_dir: &Path) -> Vec<std::path::PathBuf> {
     let mut files: Vec<_> = std::fs::read_dir(data_dir)

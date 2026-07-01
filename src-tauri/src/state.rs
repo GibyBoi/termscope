@@ -28,6 +28,8 @@ pub struct AppState {
     pub library: Library,
     pub notifier: Mutex<Notifier>,
     pub audio: Audio,
+    /// Normalized filler-word tokens for the History tab's "Filler words" filter.
+    pub filler_words: HashSet<String>,
 }
 
 impl AppState {
@@ -44,6 +46,7 @@ impl AppState {
             .map(|(i, e)| (e.id.clone(), i))
             .collect();
         let matcher = Matcher::new(&entries);
+        let filler_words = dictionary::load_filler_words(&data_dir);
         let library = Library::load(&data_dir.join("library.json"));
         let knowledge = Knowledge::new(paths::knowledge_path());
         let history = History::new(paths::history_path());
@@ -58,6 +61,7 @@ impl AppState {
             library,
             notifier: Mutex::new(Notifier::new()),
             audio: Audio::new(),
+            filler_words,
         }
     }
 

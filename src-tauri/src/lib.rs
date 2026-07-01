@@ -125,6 +125,7 @@ pub fn run() {
             commands::get_entries,
             commands::get_knowledge,
             commands::get_history,
+            commands::get_filler_words,
             commands::clear_history,
             commands::get_library_detail,
             commands::get_config,

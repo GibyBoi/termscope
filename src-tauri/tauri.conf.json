@@ -39,6 +39,7 @@
       "../data/terms_tech.json": "data/terms_tech.json",
       "../data/terms_business.json": "data/terms_business.json",
       "../data/terms_companies.json": "data/terms_companies.json",
+      "../data/filler_words.json": "data/filler_words.json",
       "../data/library.json": "data/library.json",
       "../sidecar/listen.py": "sidecar/listen.py"
     }
