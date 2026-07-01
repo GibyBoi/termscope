@@ -32,23 +32,12 @@ export interface TermStat {
   count: number;
 }
 
-export interface LogStat {
-  id: string;
-  term: string;
-  category: string;
-  definition: string;
-  source: "audio" | "selection";
-  ts: number; // unix seconds
-  learned: boolean;
-}
-
 export interface History {
   total_words: number;
   unique_words: number;
   total_jargon: number;
   words: WordStat[];
   terms: TermStat[];
-  log: LogStat[];
 }
 
 export interface Config {

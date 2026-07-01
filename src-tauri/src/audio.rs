@@ -106,7 +106,8 @@ impl Audio {
 
         let app2 = app.clone();
         std::thread::spawn(move || {
-            // Mirror every sidecar stdout line to a log so audio issues are diagnosable.
+            // Mirror sidecar diagnostic lines (not transcribed speech) to a log so
+            // audio issues are diagnosable without persisting what was said.
             let log_path = crate::paths::user_data_dir().join("audio.log");
             let mut logf = std::fs::OpenOptions::new()
                 .create(true)
@@ -128,8 +129,12 @@ impl Audio {
                     Err(_) => continue,
                 };
                 let event = v.get("event").and_then(|e| e.as_str()).unwrap_or("");
-                // Log everything except the frequent level pings.
-                if event != "level" {
+                // Mirror only diagnostic events (status/errors). NEVER write the
+                // transcribed `text` — a verbatim, in-order transcript on disk would
+                // let past conversations be read straight back out, which the whole
+                // orderless-history design exists to prevent. `level` pings are just
+                // noise. Everything logged here is content-free.
+                if event != "level" && event != "text" {
                     if let Some(f) = logf.as_mut() {
                         let _ = writeln!(f, "{}", line);
                     }

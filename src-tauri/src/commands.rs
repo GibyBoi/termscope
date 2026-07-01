@@ -54,24 +54,12 @@ pub struct TermStat {
 }
 
 #[derive(Serialize)]
-pub struct LogStat {
-    pub id: String,
-    pub term: String,
-    pub category: String,
-    pub definition: String,
-    pub source: String,
-    pub ts: f64,
-    pub learned: bool,
-}
-
-#[derive(Serialize)]
 pub struct HistoryDto {
     pub total_words: u64,
     pub unique_words: usize,
     pub total_jargon: u64,
     pub words: Vec<WordStat>, // every spoken word, sorted by count desc
     pub terms: Vec<TermStat>, // jargon detected at least once, sorted by count desc
-    pub log: Vec<LogStat>,    // most-recent jargon occurrences, newest first
 }
 
 #[tauri::command]
@@ -110,29 +98,12 @@ pub fn get_history(state: State<AppState>) -> HistoryDto {
             .then_with(|| a.term.to_lowercase().cmp(&b.term.to_lowercase()))
     });
 
-    let log: Vec<LogStat> = snap
-        .log
-        .into_iter()
-        .filter_map(|le| {
-            state.entry(&le.id).map(|e| LogStat {
-                id: le.id.clone(),
-                term: e.term.clone(),
-                category: e.category.clone(),
-                definition: e.definition.clone(),
-                source: le.source,
-                ts: le.ts,
-                learned: state.knowledge.is_learned(&le.id),
-            })
-        })
-        .collect();
-
     HistoryDto {
         total_words,
         unique_words,
         total_jargon,
         words,
         terms,
-        log,
     }
 }
 
@@ -235,8 +206,8 @@ pub fn run_explain_selection(app: AppHandle) {
         }
         let state = app.state::<AppState>();
 
-        // History: log every jargon term in the selection (what the user looked up),
-        // independent of whether it's learned, so the chronological log is complete.
+        // History: tally every jargon term in the selection (what the user looked up),
+        // independent of whether it's learned, so the frequency counts are complete.
         let all = state.matcher.find(&text, &std::collections::HashSet::new());
         if state.config.lock().unwrap().track_history {
             let ids: Vec<String> = all

@@ -28,20 +28,22 @@ Listening UI is present but inert.
   structs; `app.css` holds the theme variables (ported from `legacy/.../ui/theme.py`).
 
 ## History tab
-- `history.rs` records, to `%APPDATA%\TermScope\history.json` (atomic): a tally of
-  **every spoken word** heard (`word_counts`), a tally of **every jargon detection**
-  (`term_counts`), and a rolling **log** of recent jargon occurrences. The log is
-  hard-capped at 100 (the slider's max) — older entries are dropped so we never
-  retain data the UI can't show.
+- `history.rs` records, to `%APPDATA%\TermScope\history.json` (atomic), two
+  **orderless** frequency tallies only: **every spoken word** heard (`word_counts`)
+  and **every jargon detection** (`term_counts`). There is deliberately **no
+  timeline** — no per-occurrence log, timestamps, or source. A conversation is a
+  sequence; storing only bag-of-words counts means past conversations can't be
+  reconstructed from the file. Old files that still carry a legacy `log` array load
+  fine (serde ignores it) and drop it on the next save.
 - Recording happens in `audio.rs::handle_heard_text` (all matches, ignoring
   learned/cooldown — history = what was *said*, not what we carded) and in
   `commands.rs::run_explain_selection` (selection jargon, no word tally). Each fires
   a `ts://history` event; `History.svelte` debounce-refetches on it.
 - `commands::get_history` returns an enriched DTO (words sorted desc, jargon terms
-  with counts, log newest-first); entries whose term id was retired are dropped.
+  with counts + totals); entries whose term id was retired are dropped.
   `commands::clear_history` wipes it (the tab's "Clear history" button).
-- `History.svelte`: two-mode Counts view (jargon terms vs all spoken words) + a
-  chronological log with a 20–100 slider and an All/Heard/Selected source filter.
+- `History.svelte`: a stats row + a two-mode Counts view (jargon terms vs all spoken
+  words, the latter searchable) — pure frequency bars, no chronological view.
 
 ## Growing the dictionary (discover-jargon skill)
 - `.claude/skills/discover-jargon/` (SKILL.md + `jargon_tool.py`): the model generates
