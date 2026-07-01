@@ -30,3 +30,4 @@ stress_test_log.jsonl
 desktop_probe.png
 notif_*_capture.png
 _import_terms.json
+.dev-shortcut-backup.json
