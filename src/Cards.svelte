@@ -10,7 +10,12 @@
     LogicalSize,
   } from "@tauri-apps/api/window";
   import Card from "./lib/components/Card.svelte";
-  import { focusLibraryTerm, getConfig, markLearned } from "./lib/api";
+  import {
+    focusLibraryTerm,
+    getConfig,
+    markLearned,
+    setConfigKey,
+  } from "./lib/api";
   import type { CardPayload, Entry } from "./lib/types";
 
   interface Item {
@@ -24,11 +29,18 @@
   const activeIds = new Set<string>();
   let maxCards = 6;
   let position = "bottom-right";
+  let customX = -1;
+  let customY = -1;
   let timeout = 12;
   let seq = 0;
   let stackEl: HTMLDivElement;
 
+  // Placement mode: the user drags a sample card to pick the custom popup spot.
+  let placementMode = $state(false);
+  let placeEl = $state<HTMLDivElement>();
+
   async function relayout() {
+    if (placementMode) return; // placement drives its own layout
     await tick();
     const win = getCurrentWindow();
     if (items.length === 0) {
@@ -46,15 +58,74 @@
     const sh = (mon?.size.height ?? 1080) / sf;
     const margin = 10;
     const taskbar = 48;
-    const right = position.includes("right");
-    const top = position.includes("top");
-    const x = right ? sw - w - margin : margin;
-    const y = top ? margin : sh - h - taskbar;
+
+    let x: number;
+    let y: number;
+    if (position === "custom" && customX >= 0 && customY >= 0) {
+      // Anchor the stack's top-left at the saved custom spot, clamped on-screen.
+      x = Math.min(Math.max(customX, margin), Math.max(margin, sw - w - margin));
+      y = Math.min(Math.max(customY, margin), Math.max(margin, sh - h - margin));
+    } else {
+      const right = position.includes("right");
+      const top = position.includes("top");
+      x = right ? sw - w - margin : margin;
+      y = top ? margin : sh - h - taskbar;
+    }
 
     await win.setSize(new LogicalSize(w, h));
     await win.setPosition(new LogicalPosition(Math.round(x), Math.round(y)));
     await win.setAlwaysOnTop(true);
     await win.show();
+  }
+
+  // ---- custom-location placement -------------------------------------------
+
+  async function showPlacement() {
+    await tick();
+    if (!placeEl) return;
+    const win = getCurrentWindow();
+    await win.setFocusable(true); // so the sample card can be dragged & clicked
+    const rect = placeEl.getBoundingClientRect();
+    const pad = 16;
+    const w = Math.ceil(rect.width) + pad;
+    const h = Math.ceil(rect.height) + pad;
+    await win.setSize(new LogicalSize(w, h));
+
+    // Start from the existing custom spot, or centered on first use.
+    let x = customX;
+    let y = customY;
+    if (x < 0 || y < 0) {
+      const mon = await currentMonitor();
+      const sf = mon?.scaleFactor ?? 1;
+      const sw = (mon?.size.width ?? 1920) / sf;
+      const sh = (mon?.size.height ?? 1080) / sf;
+      x = Math.round((sw - w) / 2);
+      y = Math.round((sh - h) / 2);
+    }
+    await win.setPosition(new LogicalPosition(Math.round(x), Math.round(y)));
+    await win.setAlwaysOnTop(true);
+    await win.show();
+    await win.setFocus();
+  }
+
+  async function savePlacement() {
+    const win = getCurrentWindow();
+    const pos = await win.outerPosition(); // physical, virtual-screen coords
+    const sf = await win.scaleFactor();
+    customX = Math.round(pos.x / sf);
+    customY = Math.round(pos.y / sf);
+    position = "custom";
+    await setConfigKey("card_custom_x", customX);
+    await setConfigKey("card_custom_y", customY);
+    await setConfigKey("card_position", "custom");
+    await endPlacement();
+  }
+
+  async function endPlacement() {
+    placementMode = false;
+    const win = getCurrentWindow();
+    await win.setFocusable(false); // restore the click-through-ish overlay behavior
+    await relayout(); // no items → hides; otherwise re-anchors
   }
 
   function add(entry: Entry, t: number) {
@@ -92,6 +163,8 @@
         const cfg = await getConfig();
         maxCards = cfg.card_max;
         position = cfg.card_position;
+        customX = cfg.card_custom_x;
+        customY = cfg.card_custom_y;
         timeout = cfg.notification_timeout;
       } catch {}
 
@@ -99,8 +172,21 @@
         await listen<CardPayload>("ts://card", (e) => {
           maxCards = e.payload.maxCards;
           position = e.payload.position;
+          customX = e.payload.customX;
+          customY = e.payload.customY;
           timeout = e.payload.timeout;
+          if (placementMode) return; // don't stack cards over the placement box
           add(e.payload.entry, e.payload.timeout);
+        }),
+      );
+      unlisteners.push(
+        await listen("ts://place-mode", () => {
+          placementMode = true;
+          // Clear any live cards so only the sample box shows while placing.
+          items = [];
+          queue = [];
+          activeIds.clear();
+          showPlacement();
         }),
       );
       unlisteners.push(
@@ -109,22 +195,43 @@
         ),
       );
       unlisteners.push(
-        await listen<{ timeout: number; maxCards: number; position: string }>(
-          "ts://config",
-          (e) => {
-            maxCards = e.payload.maxCards;
-            position = e.payload.position;
-            timeout = e.payload.timeout;
-            relayout();
-          },
-        ),
+        await listen<{
+          timeout: number;
+          maxCards: number;
+          position: string;
+          customX: number;
+          customY: number;
+        }>("ts://config", (e) => {
+          maxCards = e.payload.maxCards;
+          position = e.payload.position;
+          customX = e.payload.customX;
+          customY = e.payload.customY;
+          timeout = e.payload.timeout;
+          relayout();
+        }),
       );
     })();
     return () => unlisteners.forEach((u) => u());
   });
 </script>
 
-<div class="stack" bind:this={stackEl}>
+{#if placementMode}
+  <div class="place" bind:this={placeEl}>
+    <div class="place-grip" data-tauri-drag-region>
+      <span class="place-dots">⠿</span>
+      Drag me where you want popups to appear
+    </div>
+    <div class="place-body">
+      This is where your term cards will pop up. Position this box, then save.
+    </div>
+    <div class="place-actions">
+      <button class="place-cancel" onclick={endPlacement}>Cancel</button>
+      <button class="place-save" onclick={savePlacement}>Save location</button>
+    </div>
+  </div>
+{/if}
+
+<div class="stack" bind:this={stackEl} class:hidden={placementMode}>
   {#each items as item (item.key)}
     <div animate:flip={{ duration: 220 }} transition:fly={{ x: 60, duration: 200 }}>
       <Card
@@ -150,5 +257,69 @@
     flex-direction: column;
     gap: 12px;
     padding: 8px;
+  }
+  .stack.hidden {
+    display: none;
+  }
+
+  /* placement sample card (custom-location picker) */
+  .place {
+    width: 300px;
+    margin: 8px;
+    border-radius: var(--radius, 12px);
+    background: var(--surface, #1b1b22);
+    border: 1px solid var(--accent, #7c5cff);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+    color: var(--text, #eee);
+    font-family: system-ui, sans-serif;
+  }
+  .place-grip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--accent, #7c5cff);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: grab;
+    user-select: none;
+  }
+  .place-grip:active {
+    cursor: grabbing;
+  }
+  .place-dots {
+    font-size: 14px;
+    opacity: 0.9;
+  }
+  .place-body {
+    padding: 14px 12px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--text-muted, #aaa);
+  }
+  .place-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 0 12px 12px;
+  }
+  .place-actions button {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    border: 1px solid var(--border, #333);
+    cursor: pointer;
+  }
+  .place-cancel {
+    background: var(--surface2, #26262f);
+    color: var(--text-muted, #aaa);
+  }
+  .place-save {
+    background: var(--accent, #7c5cff);
+    border-color: var(--accent, #7c5cff);
+    color: #fff;
+    font-weight: 600;
   }
 </style>

@@ -152,10 +152,19 @@ pub fn set_config_key(
             "timeout": cfg.notification_timeout,
             "maxCards": cfg.card_max,
             "position": cfg.card_position,
+            "customX": cfg.card_custom_x,
+            "customY": cfg.card_custom_y,
         })
     };
     let _ = app.emit_to("cards", "ts://config", payload);
     Ok(())
+}
+
+/// Enter "placement mode" on the cards window so the user can drag a sample card
+/// to a spot and save it as the custom popup location (`card_position: custom`).
+#[tauri::command]
+pub fn begin_card_placement(app: AppHandle) {
+    let _ = app.emit_to("cards", "ts://place-mode", json!({}));
 }
 
 // ---- knowledge mutations ----------------------------------------------------
@@ -230,9 +239,15 @@ pub fn run_explain_selection(app: AppHandle) {
 
         let learned = state.knowledge.learned_ids();
         let matches = state.matcher.find(&text, &learned);
-        let (timeout, max_cards, position) = {
+        let (timeout, max_cards, position, custom_x, custom_y) = {
             let cfg = state.config.lock().unwrap();
-            (cfg.notification_timeout, cfg.card_max, cfg.card_position.clone())
+            (
+                cfg.notification_timeout,
+                cfg.card_max,
+                cfg.card_position.clone(),
+                cfg.card_custom_x,
+                cfg.card_custom_y,
+            )
         };
         for m in matches.into_iter().take(5) {
             let entry = &state.entries[m.entry_index];
@@ -246,6 +261,8 @@ pub fn run_explain_selection(app: AppHandle) {
                 "timeout": timeout,
                 "maxCards": max_cards,
                 "position": position,
+                "customX": custom_x,
+                "customY": custom_y,
             });
             let _ = app.emit_to("cards", "ts://card", payload);
         }

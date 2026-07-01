@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { ask, save as saveDialog } from "@tauri-apps/plugin-dialog";
   import {
+    beginCardPlacement,
     exportProgress,
     getConfig,
     setConfigKey,
@@ -28,6 +29,13 @@
     // Reassign (not mutate-by-dynamic-key) so Svelte reactively re-renders the control.
     cfg = { ...cfg, [key]: value };
     await setConfigKey(key as string, value);
+  }
+
+  async function placeCustomLocation() {
+    // Ensure custom is the active mode, then hand off to the cards window's
+    // drag-to-place overlay.
+    if (cfg.card_position !== "custom") await save("card_position", "custom");
+    await beginCardPlacement();
   }
 
   async function toggleStartup(v: boolean) {
@@ -58,6 +66,7 @@
     { label: "Bottom-left", value: "bottom-left" },
     { label: "Top-right", value: "top-right" },
     { label: "Top-left", value: "top-left" },
+    { label: "Custom", value: "custom" },
   ];
   const STYLES = [
     { label: "Floating card", value: "card" },
@@ -152,6 +161,18 @@
         <button class:active={cfg.card_position === p.value} onclick={() => save("card_position", p.value)}>{p.label}</button>
       {/each}
     </div>
+    {#if cfg.card_position === "custom"}
+      <div class="custom-place">
+        <button class="place-btn" onclick={placeCustomLocation}>
+          Drag to set location…
+        </button>
+        <span class="custom-hint">
+          {cfg.card_custom_x >= 0 && cfg.card_custom_y >= 0
+            ? `Saved at ${cfg.card_custom_x}, ${cfg.card_custom_y}. Click to reposition.`
+            : "Not set yet — click, drag the box, then Save location."}
+        </span>
+      </div>
+    {/if}
   </section>
 
   <section class="group">
@@ -311,6 +332,30 @@
   .segmented button.active {
     background: var(--accent-dim);
     color: var(--text);
+  }
+  .custom-place {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .place-btn {
+    padding: 7px 14px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+  }
+  .place-btn:hover {
+    filter: brightness(1.08);
+  }
+  .custom-hint {
+    color: var(--text-muted);
+    font-size: 11px;
   }
   .slider {
     margin: 10px 0;

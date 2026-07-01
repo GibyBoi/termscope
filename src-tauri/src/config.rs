@@ -21,8 +21,13 @@ pub struct Config {
     pub max_per_minute: u32,
     /// How long each notification card stays on screen (seconds).
     pub notification_timeout: u32,
-    /// Card corner: bottom-right | bottom-left | top-right | top-left.
+    /// Card corner: bottom-right | bottom-left | top-right | top-left | custom.
     pub card_position: String,
+    /// Custom card location — logical screen coords of the card stack's top-left,
+    /// used only when `card_position == "custom"`. `-1` means unset, so custom
+    /// falls back to the bottom-right corner until the user drags a location.
+    pub card_custom_x: i32,
+    pub card_custom_y: i32,
     /// How many cards may stack on screen at once.
     pub card_max: u32,
 
@@ -61,6 +66,8 @@ impl Default for Config {
             max_per_minute: 6,
             notification_timeout: 12,
             card_position: "bottom-right".into(),
+            card_custom_x: -1,
+            card_custom_y: -1,
             card_max: 6,
             listen_system_audio: true,
             listen_microphone: true,

@@ -234,12 +234,14 @@ fn handle_heard_text(app: &AppHandle, text: &str, _source: &str) {
     if matches.is_empty() {
         return;
     }
-    let (timeout, max_cards, position, cooldown, max_per_min) = {
+    let (timeout, max_cards, position, custom_x, custom_y, cooldown, max_per_min) = {
         let cfg = state.config.lock().unwrap();
         (
             cfg.notification_timeout,
             cfg.card_max,
             cfg.card_position.clone(),
+            cfg.card_custom_x,
+            cfg.card_custom_y,
             cfg.cooldown_seconds as f64,
             cfg.max_per_minute,
         )
@@ -262,6 +264,8 @@ fn handle_heard_text(app: &AppHandle, text: &str, _source: &str) {
             "timeout": timeout,
             "maxCards": max_cards,
             "position": position,
+            "customX": custom_x,
+            "customY": custom_y,
         });
         let _ = app.emit_to("cards", "ts://card", payload);
     }

@@ -130,6 +130,7 @@ pub fn run() {
             commands::get_library_detail,
             commands::get_config,
             commands::set_config_key,
+            commands::begin_card_placement,
             commands::mark_learned,
             commands::unlearn,
             commands::reset_progress,

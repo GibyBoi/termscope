@@ -19,6 +19,7 @@ export const getLibraryDetail = (id: string) =>
 export const getConfig = () => invoke<Config>("get_config");
 export const setConfigKey = (key: string, value: unknown) =>
   invoke("set_config_key", { key, value });
+export const beginCardPlacement = () => invoke("begin_card_placement");
 
 export const markLearned = (id: string) => invoke("mark_learned", { id });
 export const unlearn = (id: string) => invoke("unlearn", { id });

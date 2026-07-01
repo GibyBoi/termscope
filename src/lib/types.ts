@@ -47,6 +47,8 @@ export interface Config {
   max_per_minute: number;
   notification_timeout: number;
   card_position: string;
+  card_custom_x: number;
+  card_custom_y: number;
   card_max: number;
   listen_system_audio: boolean;
   listen_microphone: boolean;
@@ -73,4 +75,6 @@ export interface CardPayload {
   timeout: number;
   maxCards: number;
   position: string;
+  customX: number;
+  customY: number;
 }
