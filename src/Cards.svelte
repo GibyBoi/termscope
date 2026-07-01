@@ -7,7 +7,7 @@
     currentMonitor,
     getCurrentWindow,
     LogicalPosition,
-    LogicalSize,
+    PhysicalSize,
   } from "@tauri-apps/api/window";
   import Card from "./lib/components/Card.svelte";
   import {
@@ -39,6 +39,25 @@
   let placementMode = $state(false);
   let placeEl = $state<HTMLDivElement>();
 
+  /// Size the window to fit `el`, in PHYSICAL pixels. Sizing with LogicalSize
+  /// truncates on fractional display scaling (125%/150%), leaving the window a
+  /// hair smaller than the content — the long-standing "text cut off at the
+  /// card edge" bug. Measure in CSS px, convert with the webview's real
+  /// devicePixelRatio, ceil, and add slack so nothing ever clips.
+  async function fitWindowTo(el: HTMLElement): Promise<{ w: number; h: number }> {
+    const win = getCurrentWindow();
+    const rect = el.getBoundingClientRect();
+    const pad = 16; // matches the 8px margin around the content
+    const w = Math.ceil(rect.width) + pad;
+    const h = Math.ceil(rect.height) + pad;
+    const dpr = window.devicePixelRatio || 1;
+    const slack = 2; // physical px, absorbs subpixel rounding
+    await win.setSize(
+      new PhysicalSize(Math.ceil(w * dpr) + slack, Math.ceil(h * dpr) + slack),
+    );
+    return { w, h }; // logical, for position math
+  }
+
   async function relayout() {
     if (placementMode) return; // placement drives its own layout
     await tick();
@@ -47,10 +66,7 @@
       await win.hide();
       return;
     }
-    const rect = stackEl.getBoundingClientRect();
-    const pad = 16;
-    const w = Math.ceil(rect.width) + pad;
-    const h = Math.ceil(rect.height) + pad;
+    const { w, h } = await fitWindowTo(stackEl);
 
     const mon = await currentMonitor();
     const sf = mon?.scaleFactor ?? 1;
@@ -72,7 +88,6 @@
       y = top ? margin : sh - h - taskbar;
     }
 
-    await win.setSize(new LogicalSize(w, h));
     await win.setPosition(new LogicalPosition(Math.round(x), Math.round(y)));
     await win.setAlwaysOnTop(true);
     await win.show();
@@ -85,11 +100,7 @@
     if (!placeEl) return;
     const win = getCurrentWindow();
     await win.setFocusable(true); // so the sample card can be dragged & clicked
-    const rect = placeEl.getBoundingClientRect();
-    const pad = 16;
-    const w = Math.ceil(rect.width) + pad;
-    const h = Math.ceil(rect.height) + pad;
-    await win.setSize(new LogicalSize(w, h));
+    const { w, h } = await fitWindowTo(placeEl);
 
     // Start from the existing custom spot, or centered on first use.
     let x = customX;
@@ -219,7 +230,7 @@
   <div class="place" bind:this={placeEl}>
     <div class="place-grip" data-tauri-drag-region>
       <span class="place-dots">⠿</span>
-      Drag me where you want popups to appear
+      <span class="place-title">Drag me where you want popups to appear</span>
     </div>
     <div class="place-body">
       This is where your term cards will pop up. Position this box, then save.
@@ -292,6 +303,13 @@
   .place-dots {
     font-size: 14px;
     opacity: 0.9;
+    flex-shrink: 0;
+    pointer-events: none; /* clicks land on the drag-region grip */
+  }
+  .place-title {
+    flex: 1;
+    min-width: 0; /* allow wrapping instead of overflowing the box */
+    pointer-events: none; /* clicks land on the drag-region grip */
   }
   .place-body {
     padding: 14px 12px;
