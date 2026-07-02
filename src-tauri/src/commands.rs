@@ -167,6 +167,46 @@ pub fn begin_card_placement(app: AppHandle) {
     let _ = app.emit_to("cards", "ts://place-mode", json!({}));
 }
 
+#[derive(Serialize)]
+pub struct PlacementResult {
+    pub x: i32,
+    pub y: i32,
+}
+
+/// Save the cards window's CURRENT position as the custom popup location.
+/// Reads the position on the Rust side (no JS window-API permissions involved)
+/// and persists it atomically with `card_position = "custom"`. Errors are
+/// returned to the caller — never swallowed — so the placement UI can show them.
+#[tauri::command]
+pub fn save_card_placement(app: AppHandle, state: State<AppState>) -> Result<PlacementResult, String> {
+    let win = app
+        .get_webview_window("cards")
+        .ok_or("cards window not found")?;
+    let pos = win
+        .outer_position()
+        .map_err(|e| format!("could not read window position: {e}"))?;
+
+    let payload = {
+        let mut cfg = state.config.lock().unwrap();
+        cfg.card_custom_x = pos.x;
+        cfg.card_custom_y = pos.y;
+        cfg.card_position = "custom".into();
+        cfg.save();
+        json!({
+            "timeout": cfg.notification_timeout,
+            "maxCards": cfg.card_max,
+            "position": cfg.card_position,
+            "customX": cfg.card_custom_x,
+            "customY": cfg.card_custom_y,
+        })
+    };
+    // Notify BOTH windows: cards re-anchors, the Settings page refetches so the
+    // "Saved at x, y" hint reflects reality instead of staying stale.
+    let _ = app.emit_to("cards", "ts://config", payload.clone());
+    let _ = app.emit_to("main", "ts://config", payload);
+    Ok(PlacementResult { x: pos.x, y: pos.y })
+}
+
 // ---- knowledge mutations ----------------------------------------------------
 
 #[tauri::command]

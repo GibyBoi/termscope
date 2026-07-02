@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { listen, type UnlistenFn } from "@tauri-apps/api/event";
   import { ask, save as saveDialog } from "@tauri-apps/plugin-dialog";
   import {
     beginCardPlacement,
@@ -16,13 +17,33 @@
   let cfg = $state({ ...config });
   let startup = $state(false);
 
-  onMount(async () => {
-    try {
-      cfg = await getConfig(); // show the latest saved values, not a stale prop
-    } catch {}
-    try {
-      startup = await startupEnabled();
-    } catch {}
+  // Refetch when config changes elsewhere (e.g. the cards window saving a
+  // custom placement) so hints like "Saved at x, y" don't go stale. Debounced:
+  // our own save() calls also fire ts://config.
+  let cfgRefetch: ReturnType<typeof setTimeout> | undefined;
+
+  onMount(() => {
+    let unlisten: UnlistenFn | undefined;
+    (async () => {
+      try {
+        cfg = await getConfig(); // show the latest saved values, not a stale prop
+      } catch {}
+      try {
+        startup = await startupEnabled();
+      } catch {}
+      unlisten = await listen("ts://config", () => {
+        clearTimeout(cfgRefetch);
+        cfgRefetch = setTimeout(async () => {
+          try {
+            cfg = await getConfig();
+          } catch {}
+        }, 250);
+      });
+    })();
+    return () => {
+      clearTimeout(cfgRefetch);
+      unlisten?.();
+    };
   });
 
   async function save(key: keyof Config, value: unknown) {

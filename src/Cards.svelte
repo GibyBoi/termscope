@@ -15,7 +15,7 @@
     focusLibraryTerm,
     getConfig,
     markLearned,
-    setConfigKey,
+    saveCardPlacement,
   } from "./lib/api";
   import type { CardPayload, Entry } from "./lib/types";
 
@@ -39,6 +39,7 @@
   // Placement mode: the user drags a sample card to pick the custom popup spot.
   let placementMode = $state(false);
   let placeEl = $state<HTMLDivElement>();
+  let placeError = $state(""); // surfaced in the placement box — never swallowed
 
   /// Size the window to fit `el`, in PHYSICAL pixels. Sizing with LogicalSize
   /// truncates on fractional display scaling (125%/150%), leaving the window a
@@ -131,19 +132,20 @@
   }
 
   async function savePlacement() {
-    const win = getCurrentWindow();
-    // Store the RAW physical position. Converting to logical on save and back
-    // on show uses two potentially different scale factors (the hidden window's
-    // monitor is ambiguous), which visibly drifted the box on scaled displays —
-    // physical in, physical out is exact.
-    const pos = await win.outerPosition();
-    customX = Math.round(pos.x);
-    customY = Math.round(pos.y);
-    position = "custom";
-    await setConfigKey("card_custom_x", customX);
-    await setConfigKey("card_custom_y", customY);
-    await setConfigKey("card_position", "custom");
-    await endPlacement();
+    // One atomic Rust command: the backend reads this window's position itself
+    // (raw physical px — an exact round-trip with showPlacement, no scale-factor
+    // math to drift on scaled displays), persists it, and notifies both windows.
+    try {
+      const pos = await saveCardPlacement();
+      customX = pos.x;
+      customY = pos.y;
+      position = "custom";
+      await endPlacement();
+    } catch (e) {
+      placeError = `Could not save: ${e}`;
+      await tick();
+      if (placeEl) await fitWindowTo(placeEl); // grow the box to fit the error
+    }
   }
 
   async function endPlacement() {
@@ -207,6 +209,7 @@
       unlisteners.push(
         await listen("ts://place-mode", () => {
           placementMode = true;
+          placeError = "";
           // Clear any live cards so only the sample box shows while placing.
           items = [];
           queue = [];
@@ -249,6 +252,9 @@
     <div class="place-body">
       This is where your term cards will pop up. Position this box, then save.
     </div>
+    {#if placeError}
+      <div class="place-error">{placeError}</div>
+    {/if}
     <div class="place-actions">
       <button class="place-cancel" onclick={endPlacement}>Cancel</button>
       <button class="place-save" onclick={savePlacement}>Save location</button>
@@ -330,6 +336,17 @@
     font-size: 12px;
     line-height: 1.4;
     color: var(--text-muted, #aaa);
+  }
+  .place-error {
+    margin: 0 12px 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: rgba(220, 60, 60, 0.15);
+    border: 1px solid rgba(220, 60, 60, 0.5);
+    color: #ff8a8a;
+    font-size: 11px;
+    line-height: 1.4;
+    word-break: break-word;
   }
   .place-actions {
     display: flex;
