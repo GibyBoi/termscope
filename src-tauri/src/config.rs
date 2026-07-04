@@ -53,6 +53,13 @@ pub struct Config {
     /// words or jargon occurrences are tallied or logged (existing history is
     /// kept until the user clears it).
     pub track_history: bool,
+
+    /// Forward compatibility: settings this build doesn't know (written by a
+    /// newer version, or by the legacy Python app) are retained here and
+    /// round-tripped on save instead of being silently deleted. Rolling back a
+    /// version must never cost the user the settings the newer version saved.
+    #[serde(flatten)]
+    pub extra: serde_json::Map<String, serde_json::Value>,
 }
 
 impl Default for Config {
@@ -82,6 +89,7 @@ impl Default for Config {
             appearance: "dark".into(),
             minimize_hint_shown: false,
             track_history: true,
+            extra: serde_json::Map::new(),
         }
     }
 }
@@ -108,8 +116,72 @@ impl Config {
     }
 
     pub fn save_to(&self, path: &Path) {
+        // Atomic write (tmp + rename, like history.rs): a crash mid-write must
+        // never leave a half-written config.json that costs the user their
+        // settings on the next launch.
         if let Ok(text) = serde_json::to_string_pretty(self) {
-            let _ = std::fs::write(path, text);
+            let tmp = path.with_extension("tmp");
+            if std::fs::write(&tmp, text).is_ok() {
+                let _ = std::fs::rename(&tmp, path);
+            }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Settings from a newer version (or the legacy Python app) that this build
+    /// doesn't recognize must survive a load → save round-trip, so a version
+    /// rollback never deletes them.
+    #[test]
+    fn unknown_settings_survive_resave() {
+        let path = std::env::temp_dir().join("termscope_test_config_extra.json");
+        let _ = std::fs::remove_file(&path);
+        std::fs::write(
+            &path,
+            r#"{"notifier":"card","future_setting":42,"another_new_one":{"nested":true}}"#,
+        )
+        .unwrap();
+
+        let loaded = crate::paths::load_json_store::<Config>(&path);
+        assert!(loaded.savable);
+        let cfg = loaded.value;
+        assert_eq!(cfg.notifier, "card");
+        assert_eq!(cfg.extra.get("future_setting"), Some(&serde_json::json!(42)));
+
+        cfg.save_to(&path);
+        let raw: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
+        assert_eq!(raw.get("future_setting"), Some(&serde_json::json!(42)));
+        assert_eq!(
+            raw.get("another_new_one"),
+            Some(&serde_json::json!({"nested": true}))
+        );
+        // Known fields were written too (missing ones filled with defaults).
+        assert_eq!(raw.get("card_position"), Some(&serde_json::json!("bottom-right")));
+        let _ = std::fs::remove_file(&path);
+    }
+
+    /// An old config missing newly-added fields loads with defaults and keeps
+    /// every value it did have — adding settings in an update is always safe.
+    #[test]
+    fn old_config_gains_new_fields_without_losing_values() {
+        let path = std::env::temp_dir().join("termscope_test_config_old.json");
+        let _ = std::fs::remove_file(&path);
+        // A config written before card_custom_x/y existed.
+        std::fs::write(
+            &path,
+            r#"{"notifier":"win11toast","cooldown_seconds":99,"card_position":"top-left"}"#,
+        )
+        .unwrap();
+
+        let cfg = crate::paths::load_json_store::<Config>(&path).value;
+        assert_eq!(cfg.notifier, "win11toast"); // kept
+        assert_eq!(cfg.cooldown_seconds, 99); // kept
+        assert_eq!(cfg.card_position, "top-left"); // kept
+        assert_eq!(cfg.card_custom_x, -1); // new field defaulted, not an error
+        let _ = std::fs::remove_file(&path);
     }
 }

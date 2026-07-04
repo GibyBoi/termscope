@@ -95,6 +95,11 @@ terms, `config.json`) must survive every app update. The rules a future version 
 - **Keep persisted structs additively compatible**: every field `#[serde(default)]`, add
   fields (don't rename/retype existing ones), so old files keep parsing and no field is
   silently dropped. Renaming a field IS data loss — migrate it in the loader instead.
+- **Config round-trips unknown settings**: `Config.extra` (`#[serde(flatten)]`) retains
+  keys this build doesn't recognize (from a newer version or the legacy Python app) and
+  writes them back on save, so a rollback never deletes settings a newer version added.
+  Config saves are atomic (tmp + rename), like history. Regression tests:
+  `config::tests::{unknown_settings_survive_resave, old_config_gains_new_fields_without_losing_values}`.
 - **Deletion is user-only**: the sole code paths that remove user data are `History::clear`
   (History-tab "Clear") and `Knowledge::reset` (Reset learned). No load, migration, or update
   path may delete or blank a file.
