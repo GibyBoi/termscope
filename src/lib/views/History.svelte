@@ -116,6 +116,25 @@
     else next.add(key);
     selected = next;
   }
+
+  // ---- per-row deletion (two-step: first click arms, second confirms) --------
+
+  let armedDelete = $state<string | null>(null);
+  let armTimer: ReturnType<typeof setTimeout> | undefined;
+
+  async function requestDelete(item: DisplayItem) {
+    if (armedDelete !== item.key) {
+      armedDelete = item.key; // step 1: arm — a second click confirms
+      clearTimeout(armTimer);
+      armTimer = setTimeout(() => (armedDelete = null), 4000);
+      return;
+    }
+    clearTimeout(armTimer); // step 2: confirmed
+    armedDelete = null;
+    if (item.termId) await api.removeTerm(item.termId);
+    else await api.removeWord(item.label);
+    await load(); // ts://history also fires, but refresh immediately
+  }
 </script>
 
 <div class="scroll">
@@ -266,6 +285,18 @@
                 {#if i.learned}<span class="learned">✓ learned</span>{/if}
                 <span class="spacer"></span>
                 <span class="count">{i.count}×</span>
+                <button
+                  class="del"
+                  class:armed={armedDelete === i.key}
+                  title={armedDelete === i.key
+                    ? "Click again to permanently delete"
+                    : i.termId
+                      ? "Not jargon? Delete this term from TermScope everywhere"
+                      : "Delete this word and never count it again"}
+                  onclick={() => requestDelete(i)}
+                >
+                  {armedDelete === i.key ? "Delete?" : "🗑"}
+                </button>
               </div>
               <div class="cbar">
                 <div
@@ -570,6 +601,29 @@
     color: var(--text);
     font-weight: 600;
     font-size: 13px;
+  }
+  .del {
+    margin-left: 8px;
+    height: 24px;
+    min-width: 28px;
+    padding: 0 6px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-faint);
+    background: transparent;
+    border: 1px solid transparent;
+    transition: color 0.12s, background 0.12s, border-color 0.12s;
+  }
+  .del:hover {
+    color: var(--red);
+    border-color: var(--red);
+  }
+  .del.armed {
+    background: var(--red);
+    border-color: var(--red);
+    color: var(--bg);
+    font-weight: 600;
+    font-size: 11px;
   }
 
   .more {

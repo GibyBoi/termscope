@@ -17,6 +17,8 @@ export interface DisplayItem {
   count: number;
   /** True for a dictionary/jargon term (carries a definition), false for a spoken word. */
   isTerm: boolean;
+  /** Dictionary term id, set only when isTerm — used by the row's delete action. */
+  termId?: string;
   category?: string;
   definition?: string;
   learned?: boolean;
@@ -48,6 +50,7 @@ function termItem(t: TermStat): DisplayItem {
     label: t.term,
     count: t.count,
     isTerm: true,
+    termId: t.id,
     category: t.category,
     definition: t.definition,
     learned: t.learned,

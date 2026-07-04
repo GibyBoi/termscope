@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { categoryColor } from "../api";
+  import { categoryColor, removeTerm } from "../api";
   import type { Entry } from "../types";
 
   let {
@@ -20,6 +20,23 @@
   const total = Math.max(1, timeout) * 1000;
   let remaining = $state(total);
   let paused = $state(false);
+
+  // Two-step "not jargon" delete: first click arms, second permanently removes
+  // the term from TermScope for this user.
+  let armedDelete = $state(false);
+  let armTimer: ReturnType<typeof setTimeout> | undefined;
+
+  async function requestDelete() {
+    if (!armedDelete) {
+      armedDelete = true;
+      clearTimeout(armTimer);
+      armTimer = setTimeout(() => (armedDelete = false), 4000);
+      return;
+    }
+    clearTimeout(armTimer);
+    await removeTerm(entry.id);
+    onDismiss();
+  }
 
   onMount(() => {
     const id = setInterval(() => {
@@ -57,6 +74,16 @@
     <div class="btns">
       <button class="learn-more" onclick={onLearnMore}>Learn more</button>
       <button class="learned" onclick={onLearned}>✓ Learned</button>
+      <button
+        class="not-jargon"
+        class:armed={armedDelete}
+        title={armedDelete
+          ? "Click again to permanently delete this term"
+          : "Just a normal word? Delete it from TermScope"}
+        onclick={requestDelete}
+      >
+        {armedDelete ? "Sure?" : "🗑"}
+      </button>
       <button class="dismiss" onclick={onDismiss} aria-label="Dismiss">✕</button>
     </div>
     <div class="cbar"><div class="cfill" style="width: {progress * 100}%"></div></div>
@@ -140,8 +167,24 @@
   .learned:hover {
     background: var(--green-hover);
   }
-  .dismiss {
+  .not-jargon {
     margin-left: auto;
+    color: var(--text-muted);
+    min-width: 30px;
+    padding: 0 6px;
+    border: 1px solid transparent;
+  }
+  .not-jargon:hover {
+    color: var(--red);
+    border-color: var(--red);
+  }
+  .not-jargon.armed {
+    background: var(--red);
+    border-color: var(--red);
+    color: var(--bg);
+    font-weight: 600;
+  }
+  .dismiss {
     color: var(--text-muted);
     width: 30px;
     padding: 0;

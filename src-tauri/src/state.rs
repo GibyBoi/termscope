@@ -17,6 +17,7 @@ use crate::library::Library;
 use crate::matcher::Matcher;
 use crate::notifier::Notifier;
 use crate::paths;
+use crate::removed::Removed;
 
 pub struct AppState {
     pub config: Mutex<Config>,
@@ -30,6 +31,8 @@ pub struct AppState {
     pub audio: Audio,
     /// Normalized filler-word tokens for the History tab's "Filler words" filter.
     pub filler_words: HashSet<String>,
+    /// User-deleted terms/words (the "not jargon" overlay) — see `removed.rs`.
+    pub removed: Removed,
 }
 
 impl AppState {
@@ -50,6 +53,7 @@ impl AppState {
         let library = Library::load(&data_dir.join("library.json"));
         let knowledge = Knowledge::new(paths::knowledge_path());
         let history = History::new(paths::history_path());
+        let removed = Removed::new(paths::removed_path());
 
         Self {
             config: Mutex::new(config),
@@ -62,6 +66,7 @@ impl AppState {
             notifier: Mutex::new(Notifier::new()),
             audio: Audio::new(),
             filler_words,
+            removed,
         }
     }
 

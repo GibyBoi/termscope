@@ -60,6 +60,20 @@ Listening UI is present but inert.
   approach (judge true filler vs ordinary word). Entries must be single tokens — the
   orderless history is a bag of single words, so multi-word fillers can't match.
 
+## User deletions (removed.rs) & custom hotkeys
+- `removed.rs` → `%APPDATA%\TermScope\removed.json`: per-user overlay of deleted
+  dictionary terms (`term_ids`) and spoken words (`words`). A removed term is never
+  matched/carded/listed/tallied; a removed word's tally is purged and never recounted.
+  Delete controls (two-step: click arms → click again confirms, 4s auto-disarm) live on
+  History rows, the Library detail pane, and each popup card ("🗑"/"Sure?"). Bundled
+  dictionaries stay read-only — deletions are this per-user overlay, so they survive
+  updates. `remove_term`/`remove_word` commands purge history and emit refreshes.
+- **Hotkeys are user-rebindable** in Settings (click binding → press combo → Esc
+  cancels). `set_hotkey` validates + registers the new combo BEFORE saving, rolls back
+  to the old combo on failure, and rejects duplicates across the three actions; the
+  frontend requires a modifier (F-keys exempt). All three hotkeys (explain selection,
+  mark last learned, toggle listening) are registered at startup and live-rebound.
+
 ## Growing the dictionary (discover-jargon skill)
 - `.claude/skills/discover-jargon/` (SKILL.md + `jargon_tool.py`): the model generates
   candidate jargon, `jargon_tool.py check` reports which TermScope is missing (same

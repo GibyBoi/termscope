@@ -220,14 +220,17 @@ fn handle_heard_text(app: &AppHandle, text: &str, _source: &str) {
     let state = app.state::<AppState>();
 
     // Find ALL jargon in the utterance (ignore learned/cooldown) — history records
-    // what was actually said, not just what we decide to pop a card for.
+    // what was actually said, not just what we decide to pop a card for. Terms and
+    // words the user deleted (removed.rs) are excluded everywhere.
     let matches = state.matcher.find(text, &std::collections::HashSet::new());
     if state.config.lock().unwrap().track_history {
         let jargon_ids: Vec<String> = matches
             .iter()
             .map(|m| state.entries[m.entry_index].id.clone())
+            .filter(|id| !state.removed.is_term_removed(id))
             .collect();
-        state.history.record_audio(text, &jargon_ids);
+        let blocked = state.removed.removed_words();
+        state.history.record_audio(text, &jargon_ids, &blocked);
         let _ = app.emit_to("main", "ts://history", json!({}));
     }
 
@@ -248,6 +251,9 @@ fn handle_heard_text(app: &AppHandle, text: &str, _source: &str) {
     };
     for m in matches {
         let entry = &state.entries[m.entry_index];
+        if state.removed.is_term_removed(&entry.id) {
+            continue; // user deleted this term — never card it
+        }
         if state.knowledge.is_learned(&entry.id) {
             continue;
         }

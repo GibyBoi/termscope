@@ -20,7 +20,12 @@ pub struct KnowledgeDto {
 
 #[tauri::command]
 pub fn get_entries(state: State<AppState>) -> Vec<TermEntry> {
-    state.entries.clone()
+    state
+        .entries
+        .iter()
+        .filter(|e| !state.removed.is_term_removed(&e.id))
+        .cloned()
+        .collect()
 }
 
 #[tauri::command]
@@ -72,15 +77,17 @@ pub fn get_history(state: State<AppState>) -> HistoryDto {
     let mut words: Vec<WordStat> = snap
         .word_counts
         .into_iter()
+        .filter(|(word, _)| !state.removed.is_word_removed(word))
         .map(|(word, count)| WordStat { word, count })
         .collect();
     words.sort_by(|a, b| b.count.cmp(&a.count).then_with(|| a.word.cmp(&b.word)));
 
     // Only terms still present in the dictionary can be displayed; drop any whose
-    // id was retired (delete data we can no longer show).
+    // id was retired (delete data we can no longer show) or user-deleted.
     let mut terms: Vec<TermStat> = snap
         .term_counts
         .iter()
+        .filter(|(id, _)| !state.removed.is_term_removed(id))
         .filter_map(|(id, &count)| {
             state.entry(id).map(|e| TermStat {
                 id: id.clone(),
@@ -207,6 +214,115 @@ pub fn save_card_placement(app: AppHandle, state: State<AppState>) -> Result<Pla
     Ok(PlacementResult { x: pos.x, y: pos.y })
 }
 
+// ---- word/term deletion (user-invoked, the "not jargon" overlay) -------------
+
+/// Permanently delete a dictionary term for this user: never matched, carded,
+/// listed or tallied again, and its existing history counts are purged.
+/// The UI double-confirms before calling this.
+#[tauri::command]
+pub fn remove_term(app: AppHandle, state: State<AppState>, id: String) {
+    state.removed.remove_term(&id);
+    state.history.remove_term(&id);
+    // Yank any live card for it and refresh both the library and history views.
+    let _ = app.emit_to("cards", "ts://card-remove", json!({ "id": id }));
+    let _ = app.emit_to("main", "ts://refresh", json!({}));
+    let _ = app.emit_to("main", "ts://history", json!({}));
+}
+
+/// Permanently delete a spoken word for this user: its tally is purged and the
+/// word is never counted again. The UI double-confirms before calling this.
+#[tauri::command]
+pub fn remove_word(app: AppHandle, state: State<AppState>, word: String) {
+    // Normalize to the same token form the tallies use.
+    let tok = crate::dictionary::tokenize(&word)
+        .into_iter()
+        .next()
+        .unwrap_or_else(|| word.to_lowercase());
+    state.removed.remove_word(&tok);
+    state.history.remove_word(&tok);
+    let _ = app.emit_to("main", "ts://history", json!({}));
+}
+
+// ---- hotkeys ------------------------------------------------------------------
+
+/// Rebind a global hotkey. Validates and registers the new combo BEFORE saving:
+/// on a bad/unavailable combo the old binding is restored and an error returned,
+/// so the user is never left with a dead hotkey.
+#[tauri::command]
+pub fn set_hotkey(
+    app: AppHandle,
+    state: State<AppState>,
+    key: String,
+    combo: String,
+) -> Result<(), String> {
+    use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
+
+    let combo = combo.trim().to_lowercase();
+    let new_sc: Shortcut = combo
+        .parse()
+        .map_err(|_| format!("\"{combo}\" is not a usable shortcut"))?;
+
+    let (old, conflicts) = {
+        let cfg = state.config.lock().unwrap();
+        let old = match key.as_str() {
+            "hotkey_explain_selection" => cfg.hotkey_explain_selection.clone(),
+            "hotkey_mark_last_learned" => cfg.hotkey_mark_last_learned.clone(),
+            "hotkey_toggle_listening" => cfg.hotkey_toggle_listening.clone(),
+            _ => return Err(format!("unknown hotkey \"{key}\"")),
+        };
+        let mut others = vec![
+            ("Explain selection", cfg.hotkey_explain_selection.clone()),
+            ("Mark last learned", cfg.hotkey_mark_last_learned.clone()),
+            ("Toggle listening", cfg.hotkey_toggle_listening.clone()),
+        ];
+        others.retain(|(_, c)| c.to_lowercase() != old.to_lowercase());
+        (old, others)
+    };
+    if let Some((label, _)) = conflicts
+        .iter()
+        .find(|(_, c)| c.to_lowercase() == combo)
+    {
+        return Err(format!("\"{combo}\" is already used by {label}"));
+    }
+
+    let gs = app.global_shortcut();
+    if let Ok(old_sc) = old.parse::<Shortcut>() {
+        let _ = gs.unregister(old_sc);
+    }
+    if let Err(e) = gs.register(new_sc) {
+        // Roll back so the previous binding keeps working.
+        if let Ok(old_sc) = old.parse::<Shortcut>() {
+            let _ = gs.register(old_sc);
+        }
+        return Err(format!("could not register \"{combo}\": {e}"));
+    }
+
+    let payload = {
+        let mut cfg = state.config.lock().unwrap();
+        match key.as_str() {
+            "hotkey_explain_selection" => cfg.hotkey_explain_selection = combo,
+            "hotkey_mark_last_learned" => cfg.hotkey_mark_last_learned = combo,
+            "hotkey_toggle_listening" => cfg.hotkey_toggle_listening = combo,
+            _ => unreachable!(),
+        }
+        cfg.save();
+        json!({})
+    };
+    let _ = app.emit_to("main", "ts://config", payload);
+    Ok(())
+}
+
+/// Worker for the toggle-listening global hotkey.
+pub fn run_toggle_listening(app: AppHandle) {
+    let state = app.state::<AppState>();
+    if state.audio.is_listening() {
+        state.audio.stop();
+        let _ = app.emit_to("main", "ts://audio-status", state.audio.status());
+    } else if let Err(e) = state.audio.start(&app) {
+        eprintln!("[termscope] toggle-listening hotkey: {e}");
+    }
+}
+
 // ---- knowledge mutations ----------------------------------------------------
 
 #[tauri::command]
@@ -267,11 +383,13 @@ pub fn run_explain_selection(app: AppHandle) {
 
         // History: tally every jargon term in the selection (what the user looked up),
         // independent of whether it's learned, so the frequency counts are complete.
+        // User-deleted terms are excluded everywhere.
         let all = state.matcher.find(&text, &std::collections::HashSet::new());
         if state.config.lock().unwrap().track_history {
             let ids: Vec<String> = all
                 .iter()
                 .map(|m| state.entries[m.entry_index].id.clone())
+                .filter(|id| !state.removed.is_term_removed(id))
                 .collect();
             state.history.record_selection(&ids);
             let _ = app.emit_to("main", "ts://history", json!({}));
@@ -291,6 +409,9 @@ pub fn run_explain_selection(app: AppHandle) {
         };
         for m in matches.into_iter().take(5) {
             let entry = &state.entries[m.entry_index];
+            if state.removed.is_term_removed(&entry.id) {
+                continue; // user deleted this term — never card it
+            }
             if state.knowledge.is_learned(&entry.id) {
                 continue;
             }

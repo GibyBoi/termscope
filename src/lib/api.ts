@@ -23,6 +23,11 @@ export const beginCardPlacement = () => invoke("begin_card_placement");
 export const saveCardPlacement = () =>
   invoke<{ x: number; y: number }>("save_card_placement");
 
+export const removeTerm = (id: string) => invoke("remove_term", { id });
+export const removeWord = (word: string) => invoke("remove_word", { word });
+export const setHotkey = (key: string, combo: string) =>
+  invoke("set_hotkey", { key, combo });
+
 export const markLearned = (id: string) => invoke("mark_learned", { id });
 export const unlearn = (id: string) => invoke("unlearn", { id });
 export const resetProgress = () => invoke("reset_progress");

@@ -7,6 +7,7 @@
     exportProgress,
     getConfig,
     setConfigKey,
+    setHotkey,
     setStartup,
     startupEnabled,
   } from "../api";
@@ -43,6 +44,7 @@
     return () => {
       clearTimeout(cfgRefetch);
       unlisten?.();
+      stopRecording();
     };
   });
 
@@ -95,10 +97,66 @@
   ];
 
   const hotkeys = $derived([
-    { label: "Explain selection", value: cfg.hotkey_explain_selection },
-    { label: "Mark last term learned", value: cfg.hotkey_mark_last_learned },
-    { label: "Toggle listening", value: cfg.hotkey_toggle_listening },
+    { key: "hotkey_explain_selection", label: "Explain selection", value: cfg.hotkey_explain_selection },
+    { key: "hotkey_mark_last_learned", label: "Mark last term learned", value: cfg.hotkey_mark_last_learned },
+    { key: "hotkey_toggle_listening", label: "Toggle listening", value: cfg.hotkey_toggle_listening },
   ]);
+
+  // ---- hotkey recorder --------------------------------------------------------
+  // Click a binding → press the new combo → it's validated and registered by the
+  // backend (which rolls back to the old combo on failure and reports why).
+
+  let recordingKey = $state<string | null>(null);
+  let hotkeyError = $state("");
+
+  function startRecording(key: string) {
+    hotkeyError = "";
+    recordingKey = key;
+    window.addEventListener("keydown", onRecordKeydown, { capture: true });
+  }
+
+  function stopRecording() {
+    recordingKey = null;
+    window.removeEventListener("keydown", onRecordKeydown, { capture: true });
+  }
+
+  function comboFromEvent(e: KeyboardEvent): string | null {
+    let k = e.key.toLowerCase();
+    if (["control", "alt", "shift", "meta", "os"].includes(k)) return null; // wait for a real key
+    if (k === " ") k = "space";
+    else if (k.startsWith("arrow")) k = k.slice(5); // arrowup -> up
+    const mods = [
+      e.ctrlKey ? "ctrl" : "",
+      e.altKey ? "alt" : "",
+      e.shiftKey ? "shift" : "",
+      e.metaKey ? "super" : "",
+    ].filter(Boolean);
+    return [...mods, k].join("+");
+  }
+
+  async function onRecordKeydown(e: KeyboardEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.key === "Escape") {
+      stopRecording();
+      return;
+    }
+    const combo = comboFromEvent(e);
+    if (!combo) return; // modifier-only press — keep listening
+    // Bare keys would fire while typing anywhere; require a modifier (F-keys ok).
+    if (!combo.includes("+") && !/^f\d{1,2}$/.test(combo)) {
+      hotkeyError = "Add a modifier (Ctrl/Alt/Shift) so normal typing can't trigger it.";
+      return;
+    }
+    const key = recordingKey!;
+    stopRecording();
+    try {
+      await setHotkey(key, combo);
+      cfg = { ...cfg, [key]: combo };
+    } catch (err) {
+      hotkeyError = String(err);
+    }
+  }
 </script>
 
 <div class="scroll">
@@ -198,12 +256,28 @@
 
   <section class="group">
     <h2>Global hotkeys</h2>
+    <p class="hotkey-hint">Click a binding, then press the new key combination.</p>
     {#each hotkeys as h}
       <div class="hotkey-row">
         <span>{h.label}</span>
-        <span class="kbd">{h.value.toUpperCase()}</span>
+        {#if recordingKey === h.key}
+          <button class="kbd recording" onclick={stopRecording}>
+            Press keys… (Esc cancels)
+          </button>
+        {:else}
+          <button
+            class="kbd kbd-btn"
+            title="Click to change this hotkey"
+            onclick={() => startRecording(h.key)}
+          >
+            {h.value.toUpperCase()}
+          </button>
+        {/if}
       </div>
     {/each}
+    {#if hotkeyError}
+      <p class="hotkey-error">{hotkeyError}</p>
+    {/if}
   </section>
 
   <section class="group">
@@ -398,6 +472,33 @@
     background: var(--surface2);
     border-radius: 6px;
     padding: 4px 8px;
+  }
+  .kbd-btn {
+    border: 1px solid transparent;
+    cursor: pointer;
+  }
+  .kbd-btn:hover {
+    border-color: var(--accent);
+  }
+  .kbd.recording {
+    color: var(--gold);
+    border: 1px dashed var(--gold);
+    animation: pulse 1.1s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    50% {
+      opacity: 0.55;
+    }
+  }
+  .hotkey-hint {
+    color: var(--text-muted);
+    font-size: 11px;
+    margin: 0 0 10px;
+  }
+  .hotkey-error {
+    color: var(--red);
+    font-size: 11px;
+    margin: 8px 0 0;
   }
   .actions {
     display: flex;

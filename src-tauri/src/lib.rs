@@ -12,6 +12,7 @@ mod library;
 mod matcher;
 mod notifier;
 mod paths;
+mod removed;
 mod selection;
 mod startup;
 mod state;
@@ -37,6 +38,8 @@ fn handle_shortcut(
         commands::run_explain_selection(app.clone());
     } else if parse(&cfg.hotkey_mark_last_learned).as_ref() == Some(shortcut) {
         commands::run_mark_last_learned(app.clone());
+    } else if parse(&cfg.hotkey_toggle_listening).as_ref() == Some(shortcut) {
+        commands::run_toggle_listening(app.clone());
     }
 }
 
@@ -88,7 +91,11 @@ pub fn run() {
                 use tauri_plugin_global_shortcut::GlobalShortcutExt;
                 let cfg = handle.state::<AppState>().config.lock().unwrap().clone();
                 let gs = handle.global_shortcut();
-                for combo in [&cfg.hotkey_explain_selection, &cfg.hotkey_mark_last_learned] {
+                for combo in [
+                    &cfg.hotkey_explain_selection,
+                    &cfg.hotkey_mark_last_learned,
+                    &cfg.hotkey_toggle_listening,
+                ] {
                     if let Ok(sc) = combo.parse::<tauri_plugin_global_shortcut::Shortcut>() {
                         let _ = gs.register(sc);
                     }
@@ -130,6 +137,9 @@ pub fn run() {
             commands::get_library_detail,
             commands::get_config,
             commands::set_config_key,
+            commands::set_hotkey,
+            commands::remove_term,
+            commands::remove_word,
             commands::begin_card_placement,
             commands::save_card_placement,
             commands::mark_learned,

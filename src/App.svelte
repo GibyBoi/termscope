@@ -95,7 +95,14 @@
           else levelSys = e.payload.value;
         }),
       );
-      unlisteners.push(await listen("ts://refresh", () => refreshKnowledge()));
+      unlisteners.push(
+        await listen("ts://refresh", async () => {
+          await refreshKnowledge();
+          // Entries can change too (e.g. a term the user deleted) — refetch so
+          // the Library and Dashboard drop it immediately.
+          entries = await api.getEntries();
+        }),
+      );
       unlisteners.push(
         await listen<{ id: string }>("ts://open-term", (e) => {
           pendingTermId = e.payload.id;

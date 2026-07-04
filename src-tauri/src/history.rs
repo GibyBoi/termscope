@@ -8,7 +8,7 @@
 //! reconstructed from `history.json` — there is no order to read back out.
 
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use std::sync::Mutex;
 
@@ -73,15 +73,35 @@ impl History {
     ///
     /// `jargon_ids` are ALL terms found (independent of learned/cooldown) — the
     /// history reflects what was actually said, not what we chose to pop a card for.
-    pub fn record_audio(&self, text: &str, jargon_ids: &[String]) {
+    /// Words in `blocked` (user-deleted, see `removed.rs`) are never tallied.
+    pub fn record_audio(&self, text: &str, jargon_ids: &[String], blocked: &HashSet<String>) {
         let mut g = self.inner.lock().unwrap();
         for tok in tokenize(text) {
+            if blocked.contains(&tok) {
+                continue;
+            }
             *g.word_counts.entry(tok).or_insert(0) += 1;
         }
         for id in jargon_ids {
             *g.term_counts.entry(id.clone()).or_insert(0) += 1;
         }
         self.save(&g);
+    }
+
+    /// Purge one term's tally (user-invoked deletion via "remove term").
+    pub fn remove_term(&self, id: &str) {
+        let mut g = self.inner.lock().unwrap();
+        if g.term_counts.remove(id).is_some() {
+            self.save(&g);
+        }
+    }
+
+    /// Purge one spoken word's tally (user-invoked deletion via "remove word").
+    pub fn remove_word(&self, word: &str) {
+        let mut g = self.inner.lock().unwrap();
+        if g.word_counts.remove(word).is_some() {
+            self.save(&g);
+        }
     }
 
     /// Record jargon surfaced from a highlighted text selection. No word tally —
@@ -128,7 +148,7 @@ mod tests {
     #[test]
     fn tallies_spoken_words_and_jargon() {
         let (h, path) = fresh("words");
-        h.record_audio("the API talks to the API", &["334".into()]);
+        h.record_audio("the API talks to the API", &["334".into()], &HashSet::new());
         let s = h.snapshot();
         assert_eq!(s.word_counts.get("the"), Some(&2)); // every spoken word counted
         assert_eq!(s.word_counts.get("api"), Some(&2));
@@ -154,7 +174,7 @@ mod tests {
         for _ in 0..150 {
             h.record_selection(&["42".into()]);
         }
-        h.record_audio("data data data", &["42".into()]);
+        h.record_audio("data data data", &["42".into()], &HashSet::new());
         let s = h.snapshot();
         assert_eq!(s.term_counts.get("42"), Some(&151)); // cumulative, unbounded
         assert_eq!(s.word_counts.get("data"), Some(&3));
@@ -162,9 +182,30 @@ mod tests {
     }
 
     #[test]
+    fn removed_words_are_purged_and_never_retallied() {
+        let (h, path) = fresh("removed");
+        h.record_audio("um the api um", &[], &HashSet::new());
+        assert_eq!(h.snapshot().word_counts.get("um"), Some(&2));
+
+        h.remove_word("um"); // user deletes the word → tally purged
+        assert_eq!(h.snapshot().word_counts.get("um"), None);
+        assert_eq!(h.snapshot().word_counts.get("api"), Some(&1)); // others kept
+
+        let blocked: HashSet<String> = ["um".to_string()].into();
+        h.record_audio("um again um", &[], &blocked); // spoken again → still not tallied
+        assert_eq!(h.snapshot().word_counts.get("um"), None);
+        assert_eq!(h.snapshot().word_counts.get("again"), Some(&1));
+
+        h.record_selection(&["334".into()]);
+        h.remove_term("334"); // deleted term's tally purged too
+        assert_eq!(h.snapshot().term_counts.get("334"), None);
+        let _ = std::fs::remove_file(&path);
+    }
+
+    #[test]
     fn clear_wipes_everything() {
         let (h, path) = fresh("clear");
-        h.record_audio("API and SDK", &["334".into(), "335".into()]);
+        h.record_audio("API and SDK", &["334".into(), "335".into()], &HashSet::new());
         h.clear();
         let s = h.snapshot();
         assert!(s.word_counts.is_empty());
@@ -178,7 +219,7 @@ mod tests {
         let _ = std::fs::remove_file(&path);
         {
             let h = History::new(path.clone());
-            h.record_audio("vector database", &["999".into()]);
+            h.record_audio("vector database", &["999".into()], &HashSet::new());
         }
         let s = History::new(path.clone()).snapshot(); // fresh instance, same file
         assert_eq!(s.term_counts.get("999"), Some(&1));
@@ -216,7 +257,7 @@ mod tests {
         assert_eq!(backups.len(), 1, "corrupt history must be preserved as a backup");
 
         // New activity now persists cleanly to the freed canonical path.
-        h.record_audio("api", &[]);
+        h.record_audio("api", &[], &HashSet::new());
         assert_eq!(
             History::new(path.clone()).snapshot().word_counts.get("api"),
             Some(&1)

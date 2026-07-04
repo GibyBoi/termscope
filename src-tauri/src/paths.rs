@@ -36,6 +36,10 @@ pub fn history_path() -> PathBuf {
     user_data_dir().join("history.json")
 }
 
+pub fn removed_path() -> PathBuf {
+    user_data_dir().join("removed.json")
+}
+
 fn dirs_home() -> PathBuf {
     std::env::var_os("USERPROFILE")
         .or_else(|| std::env::var_os("HOME"))

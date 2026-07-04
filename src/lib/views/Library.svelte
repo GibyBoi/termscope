@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { categoryColor, getLibraryDetail, openUrl } from "../api";
+  import { categoryColor, getLibraryDetail, openUrl, removeTerm } from "../api";
   import type { Detail, Entry } from "../types";
 
   let {
@@ -49,7 +49,28 @@
   async function select(e: Entry) {
     selected = e;
     detail = null;
+    armedRemove = false;
     detail = await getLibraryDetail(e.id);
+  }
+
+  // Two-step delete: first click arms, second click permanently removes the
+  // term for this user (it stops being matched, carded, listed and tallied).
+  let armedRemove = $state(false);
+  let armTimer: ReturnType<typeof setTimeout> | undefined;
+
+  async function requestRemove() {
+    if (!selected) return;
+    if (!armedRemove) {
+      armedRemove = true;
+      clearTimeout(armTimer);
+      armTimer = setTimeout(() => (armedRemove = false), 4000);
+      return;
+    }
+    clearTimeout(armTimer);
+    armedRemove = false;
+    await removeTerm(selected.id); // App refetches entries on ts://refresh
+    selected = null;
+    detail = null;
   }
 
   $effect(() => {
@@ -135,7 +156,23 @@
           {:else}
             <button class="btn-green" onclick={() => toggleLearned(selected!.id)}>✓ Mark learned</button>
           {/if}
+          <button
+            class="btn-danger"
+            class:armed={armedRemove}
+            title={armedRemove
+              ? "Click again to permanently delete this term"
+              : "Not jargon? Delete this term from TermScope everywhere"}
+            onclick={requestRemove}
+          >
+            {armedRemove ? "Click again to delete" : "🗑 Delete term"}
+          </button>
         </div>
+        {#if armedRemove}
+          <p class="danger-note">
+            This removes “{selected.term}” everywhere — no more popups, library
+            entry, or history counts. (Restore later by editing removed.json.)
+          </p>
+        {/if}
       {/if}
     </div>
   </div>
@@ -320,6 +357,28 @@
   }
   .btn-muted:hover {
     background: var(--border);
+  }
+  .btn-danger {
+    margin-left: auto;
+    border: 1px solid var(--border);
+    color: var(--text-faint);
+    background: transparent;
+  }
+  .btn-danger:hover {
+    color: var(--red);
+    border-color: var(--red);
+  }
+  .btn-danger.armed {
+    background: var(--red);
+    border-color: var(--red);
+    color: var(--bg);
+    font-weight: 600;
+  }
+  .danger-note {
+    color: var(--red);
+    font-size: 11px;
+    line-height: 1.5;
+    margin: 10px 0 0;
   }
   .empty {
     padding: 24px;
