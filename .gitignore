@@ -24,10 +24,6 @@ termscope.log
 *.log
 models/
 
-# Local artifacts produced by running tests/manual or diagnostics
+# Local artifacts from the manual audio tests under legacy/tests/manual/
 *.wav
 stress_test_log.jsonl
-desktop_probe.png
-notif_*_capture.png
-_import_terms.json
-.dev-shortcut-backup.json

@@ -36,10 +36,22 @@ app lives under [`legacy/`](legacy/) for reference.
 | Mark last shown term learned | `Ctrl+Alt+K` |
 | Toggle listening | `Ctrl+Alt+Space` |
 
-The Listening controls are live: enable system audio and/or microphone in Settings and
-TermScope transcribes offline with **Whisper**, catching spoken jargon and feeding the
-History tallies. (The original app used Vosk; see [`legacy/`](legacy/).) Hotkeys are
-rebindable in Settings — the table above shows the defaults.
+Hotkeys are rebindable in Settings — the table above shows the defaults.
+
+### Listening requirements
+
+Listening runs through a small Python sidecar bundled with the app
+([`sidecar/listen.py`](sidecar/listen.py)). It needs **Python 3 on your PATH** with the
+dependencies from [`sidecar/requirements.txt`](sidecar/requirements.txt):
+
+```sh
+python -m pip install --user -r sidecar/requirements.txt
+```
+
+The first listening session downloads the Whisper model (base.en, ~140 MB) into
+`%APPDATA%\TermScope\models`; after that transcription is fully offline. Without
+Python (or the packages) the rest of the app works normally — Settings simply shows
+why Listening is unavailable. (The original app used Vosk; see [`legacy/`](legacy/).)
 
 ## Develop
 
@@ -58,16 +70,20 @@ cd src-tauri && cargo test   # matcher / dictionary unit tests
 termscope/
   src/                 Svelte 5 frontend
     App.svelte         hub shell (sidebar + views)
-    lib/views/         Dashboard / Library / Settings
+    lib/views/         Dashboard / Library / History / Settings
     Cards.svelte       floating-card overlay window
     lib/components/Card.svelte
     lib/api.ts         invoke() wrappers   lib/types.ts   app.css (theme)
   src-tauri/           Rust backend
-    src/dictionary.rs matcher.rs knowledge.rs config.rs library.rs   (pure-logic ports)
-    src/selection.rs startup.rs notifier.rs tray.rs commands.rs state.rs lib.rs
+    src/dictionary.rs matcher.rs knowledge.rs config.rs library.rs
+        history.rs removed.rs paths.rs                    (pure-logic core)
+    src/selection.rs startup.rs notifier.rs tray.rs audio.rs
+        commands.rs state.rs lib.rs                       (system glue)
     tauri.conf.json    capabilities/   icons/
+  sidecar/             Python audio sidecar (WASAPI capture + faster-whisper STT)
   data/                bundled term dictionaries + enriched library (stable ids)
-  legacy/              the original Python app
+  assets/              logo source image (regenerate: scripts/make_icon.py)
+  legacy/              the original Python app, kept as reference
 ```
 
 ## Configuration & privacy
@@ -76,8 +92,9 @@ Settings live in `%APPDATA%\TermScope\config.json`; learned terms + anti-spam st
 `knowledge.json` — both shared with the legacy app's format. Listening history lives in
 `history.json` as **orderless frequency counts only** — just how many times each word and
 jargon term came up, with no order, timestamps, or per-utterance log, so it can never be
-read back as a conversation (and transcribed speech is never written to any log). No
-network access at runtime; "Learn more" opens a source link in your browser only when you
-click it.
+read back as a conversation (and transcribed speech is never written to any log). The app
+makes no network requests, with two exceptions: the one-time Whisper model download when
+Listening is first enabled, and "Learn more", which opens a source link in your browser
+only when you click it.
 
 See [CLAUDE.md](CLAUDE.md) for architecture notes.

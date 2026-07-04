@@ -33,11 +33,10 @@ pub struct Config {
     /// How many cards may stack on screen at once.
     pub card_max: u32,
 
-    // Audio capture (deferred to v2 — stored but inert in this build).
+    // Audio capture (which sources the Listening sidecar opens).
     pub listen_system_audio: bool,
     pub listen_microphone: bool,
     pub listen_on_startup: bool,
-    pub vosk_model_path: String,
 
     // Global hotkeys.
     pub hotkey_explain_selection: String,
@@ -81,7 +80,6 @@ impl Default for Config {
             listen_system_audio: true,
             listen_microphone: true,
             listen_on_startup: false,
-            vosk_model_path: String::new(),
             hotkey_explain_selection: "ctrl+alt+e".into(),
             hotkey_mark_last_learned: "ctrl+alt+k".into(),
             hotkey_toggle_listening: "ctrl+alt+space".into(),

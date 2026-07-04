@@ -4,8 +4,9 @@
 Concept: a blue "scope" lens (ring) with a green pupil; three blue signal waves
 sweeping out to the upper-right; and a green "C" arc wrapping the left side.
 Evokes a scope actively listening and picking up terms. Rendered supersampled for
-crisp edges on a transparent background; saved as a 1024px PNG (source for
-`tauri icon`) plus a multi-size .ico.
+crisp edges on a transparent background; saved as a 1024px PNG — the single
+source image for `npm run tauri icon assets/termscope.png`, which generates the
+platform icon set under `src-tauri/icons/` (including the Windows .ico).
 """
 from pathlib import Path
 
@@ -13,7 +14,6 @@ from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
 PNG_OUT = ROOT / "assets" / "termscope.png"
-ICO_OUT = ROOT / "assets" / "termscope.ico"
 
 BLUE = (43, 163, 227, 255)    # azure ~ #2BA3E3 (lens + signal waves)
 GREEN = (54, 169, 76, 255)    # ~ #36A94C (pupil + left arc)
@@ -50,11 +50,8 @@ def render(size: int) -> Image.Image:
 
 def main() -> int:
     PNG_OUT.parent.mkdir(parents=True, exist_ok=True)
-    base = render(1024)
-    base.save(PNG_OUT)
-    base.save(ICO_OUT, sizes=[(16, 16), (24, 24), (32, 32), (48, 48),
-                              (64, 64), (128, 128), (256, 256)])
-    print(f"wrote {PNG_OUT} and {ICO_OUT}")
+    render(1024).save(PNG_OUT)
+    print(f"wrote {PNG_OUT}")
     return 0
 
 

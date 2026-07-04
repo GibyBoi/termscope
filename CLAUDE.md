@@ -7,8 +7,9 @@ Python/customtkinter app (which now lives under `legacy/` as reference).
 Highlight any text and press the global hotkey → floating cards pop in front of all
 windows explaining each unknown term (Learn more / ✓ Learned / Dismiss). A hub window
 has a Dashboard (progress + milestones), a searchable Library (Wikipedia-enriched
-definitions), and Settings. **Audio capture + offline STT is deferred to v2** — the
-Listening UI is present but inert.
+definitions), History, and Settings. **Listening** (system audio + mic → offline STT)
+works through a Python sidecar (`sidecar/listen.py`, faster-whisper) — see the
+"Audio sidecar" section below.
 
 ## Architecture
 - **Rust core ports** (faithful 1:1 of the Python, in `src-tauri/src/`):
@@ -18,7 +19,8 @@ Listening UI is present but inert.
   `history.rs` (spoken-word + jargon tallies, see History tab below).
 - **System glue**: `tray.rs` (Tauri tray), `startup.rs` (HKCU Run), `selection.rs`
   (clipboard + `enigo` Ctrl+C capture), `commands.rs` (all `#[tauri::command]`s +
-  hotkey workers), `state.rs` (`AppState` = the old `TermScopeApp`).
+  hotkey workers), `audio.rs` (spawns the Python sidecar, parses its JSON-line
+  stdout, cards heard jargon), `state.rs` (`AppState` = the old `TermScopeApp`).
 - **lib.rs** wires plugins (single-instance, global-shortcut, opener, dialog), builds
   the tray, creates the transparent always-on-top **cards** window, registers hotkeys,
   and handles X-closes-to-tray-vs-quit.
@@ -124,10 +126,14 @@ terms, `config.json`) must survive every app update. The rules a future version 
   Never add it.
 
 ## Events (Rust → JS)
-- `ts://card` (to `cards`): `{ entry, timeout, maxCards, position }` — show a card.
-- `ts://card-remove` (to `cards`): `{ id }`. `ts://config` (to `cards`): live card options.
-- `ts://refresh` (to `main`): knowledge changed. `ts://open-term` (to `main`): `{ id }`
-  from a card's "Learn more".
+- To `cards`: `ts://card` `{ entry, timeout, maxCards, position, customX, customY }` —
+  show a card; `ts://card-remove` `{ id }` — yank one; `ts://config` — live card
+  options; `ts://place-mode` — enter drag-to-place mode.
+- To `main`: `ts://refresh` — knowledge/dictionary changed; `ts://history` — tallies
+  changed; `ts://open-term` `{ id }` — a card's "Learn more" deep-link;
+  `ts://audio-status` — listening state; `ts://heard` `{ text }` — live transcription
+  (RAM only, never persisted); `ts://level` `{ value, source }` — audio meter.
+  `ts://config` also reaches `main` after hotkey/placement saves.
 
 ## Commands
 `npm install` once. Then:
@@ -143,14 +149,14 @@ terms, `config.json`) must survive every app update. The rules a future version 
   `ERR_CONNECTION_REFUSED` with no dev server. Only `npm run tauri build` embeds the
   frontend (`frontendDist`/`../dist`) for a standalone app. Verify screen-free by checking
   the exe doesn't open a socket to 1420 (TcpListener probe).
-- **EXE icon doesn't re-embed.** `tauri build`'s build-script icon embedding caches the
-  old icon resource, so changing `icons/icon.ico` doesn't update the exe's Windows icon
-  (it keeps shipping the stale placeholder). Fix the final exe with
-  `npm run fix-icon` (rcedit, rewrites only the PE icon resource — frontend untouched),
-  or use `npm run build:app` (= `tauri build` + fix-icon). The bundled NSIS installer's
-  exe still carries the old icon unless you `cargo clean` before building.
-- Regenerate the whole icon set from the source PNG: `python scripts/make_icon.py` then
-  `npm run tauri icon assets/termscope.png`.
+- **If `icons/icon.ico` changes, `cargo clean` before building.** Cargo caches the
+  compiled Windows resource, so an incremental `tauri build` can ship an exe that
+  still embeds the previous icon. A clean build always embeds the current one.
+- The icon pipeline is: `python scripts/make_icon.py` redraws the logo →
+  `assets/termscope.png` (single source image), then `npm run tauri icon
+  assets/termscope.png` regenerates `src-tauri/icons/`. The app is Windows-only
+  (NSIS), so only the Windows icons are kept — delete the android/ios/Square/Store/
+  icns extras that `tauri icon` also emits.
 - Verify an exe's real embedded icon via `[System.Drawing.Icon]::ExtractAssociatedIcon`
   on a **fresh copy at a non-`%LOCALAPPDATA%` path** (the Claude sandbox virtualizes
   `%APPDATA%`/`%LOCALAPPDATA%`, so reads there can be stale).
@@ -165,6 +171,14 @@ Add `~/.cargo/bin` to PATH in fresh shells (`export PATH="$HOME/.cargo/bin:$PATH
 - Selection capture (`selection.rs`) uses `enigo` to release modifiers then send Ctrl+C,
   mirroring the Python trick — unvalidated on hardware yet.
 
-## Deferred to v2
-WASAPI loopback + mic capture and offline Vosk STT (native Rust: `cpal` + `vosk-rs`).
-The full pipeline still exists in `legacy/` if needed as a reference or sidecar.
+## Audio sidecar (Listening)
+`sidecar/listen.py` captures WASAPI loopback (system audio) + microphone with
+`pyaudiowpatch` and transcribes offline with **faster-whisper** (base.en, int8, CPU).
+It is bundled as a resource (`tauri.conf.json`) and spawned by `audio.rs` via the
+system `python` on PATH — it is NOT compiled in. Requirements on the machine:
+Python 3 + `pip install -r sidecar/requirements.txt`; the first listening session
+downloads the Whisper model (~140 MB) into `%APPDATA%\TermScope\models`, after which
+everything is offline. Missing Python/deps degrade gracefully: the sidecar emits a
+`status ready:false` JSON line and Settings shows the reason — the rest of the app is
+unaffected. A native Rust port (`cpal` + whisper) remains a possible future cleanup;
+the original Vosk pipeline lives in `legacy/` as reference.

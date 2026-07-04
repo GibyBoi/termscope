@@ -1,5 +1,5 @@
-//! Audio listening via a Python sidecar that captures system + mic audio and
-//! transcribes it offline with Vosk (reusing the proven legacy pipeline). The
+//! Audio listening via a Python sidecar (`sidecar/listen.py`) that captures
+//! system + mic audio and transcribes it offline with faster-whisper. The
 //! sidecar emits recognized text as JSON lines on stdout; we feed each line
 //! through the matcher and surface unknown terms as cards (cooldown + rate
 //! limited, like the legacy `NotificationManager.offer`).
@@ -69,7 +69,7 @@ impl Audio {
             return Err("Enable system audio and/or microphone in Settings first.".into());
         }
 
-        // Capture the sidecar's stderr (Vosk/python errors) to a log for diagnosis.
+        // Capture the sidecar's stderr (Python/Whisper errors) to a log for diagnosis.
         let err_path = crate::paths::user_data_dir().join("audio.err.log");
         let err_out = std::fs::File::create(&err_path)
             .map(Stdio::from)

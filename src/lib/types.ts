@@ -53,7 +53,6 @@ export interface Config {
   listen_system_audio: boolean;
   listen_microphone: boolean;
   listen_on_startup: boolean;
-  vosk_model_path: string;
   hotkey_explain_selection: string;
   hotkey_mark_last_learned: string;
   hotkey_toggle_listening: string;

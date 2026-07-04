@@ -10,7 +10,6 @@ use std::time::Instant;
 
 pub struct Notifier {
     recent: VecDeque<String>, // entry ids, newest at the back
-    #[allow(dead_code)] // drives the per-minute rate limit on the audio path (v2)
     shown_times: VecDeque<Instant>,
 }
 
@@ -23,7 +22,6 @@ impl Notifier {
     }
 
     /// Sliding-window rate limit: at most `max_per_minute` shows in any 60s.
-    #[allow(dead_code)] // used by the audio-driven `offer` path (v2)
     pub fn rate_ok(&mut self, max_per_minute: u32) -> bool {
         let now = Instant::now();
         while let Some(front) = self.shown_times.front() {

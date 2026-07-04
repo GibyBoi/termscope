@@ -100,7 +100,6 @@ impl Knowledge {
     }
 
     /// True if the term has never been shown or its cooldown has elapsed.
-    #[allow(dead_code)] // used by the audio-driven `offer` path (v2)
     pub fn can_show(&self, id: &str, cooldown_seconds: f64) -> bool {
         let g = self.inner.lock().unwrap();
         match g.seen.get(id) {
