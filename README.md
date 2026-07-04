@@ -9,12 +9,11 @@ you've learned. Everything runs offline.
 This is the **Tauri V2 rewrite** (Rust + Svelte 5). The original Python/customtkinter
 app lives under [`legacy/`](legacy/) for reference.
 
-> **Release: “WhisperOfHistory.”** The project is still called **TermScope** — this is
-> just the name of the current release, which is where TermScope started using the
-> **Whisper** offline voice-detection model to hear spoken jargon and added the
-> **History** tab. History is stored as **orderless frequency counts only** (how often
-> each word/term came up), never a timeline, so past conversations can't be
-> reconstructed from disk.
+> The project (and this repository) is named **TermScope**. An earlier release carried
+> the codename “WhisperOfHistory” — that's when TermScope started using the **Whisper**
+> offline voice-detection model to hear spoken jargon and added the **History** tab.
+> History is stored as **orderless frequency counts only** (how often each word/term
+> came up), never a timeline, so past conversations can't be reconstructed from disk.
 
 ## Features
 
@@ -26,7 +25,7 @@ app lives under [`legacy/`](legacy/) for reference.
   come up. Stored as **orderless frequency counts only** (no order, timestamps, or log),
   so the file can't be replayed as a conversation.
 - **Hub window** — Dashboard (progress, milestones, per-category bars), Library (search +
-  filter ~500 terms with extended definitions), and Settings (all saved live).
+  filter ~785 terms with extended definitions), and Settings (all saved live).
 - **Learned tracker** — mark terms learned so they stop interrupting you; progress lives
   in `%APPDATA%\TermScope` and survives updates (stable term ids).
 - **Tray + autostart** — runs from the system tray; optional start-with-Windows.
@@ -37,10 +36,10 @@ app lives under [`legacy/`](legacy/) for reference.
 | Mark last shown term learned | `Ctrl+Alt+K` |
 | Toggle listening | `Ctrl+Alt+Space` |
 
-As of the **WhisperOfHistory** release, the Listening controls are live: enable system
-audio and/or microphone in Settings and TermScope transcribes offline with **Whisper**,
-catching spoken jargon and feeding the History tallies. (The original app used Vosk; see
-[`legacy/`](legacy/).)
+The Listening controls are live: enable system audio and/or microphone in Settings and
+TermScope transcribes offline with **Whisper**, catching spoken jargon and feeding the
+History tallies. (The original app used Vosk; see [`legacy/`](legacy/).) Hotkeys are
+rebindable in Settings — the table above shows the defaults.
 
 ## Develop
 
