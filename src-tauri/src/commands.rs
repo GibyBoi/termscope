@@ -58,6 +58,14 @@ pub struct TermStat {
     pub count: u64,
 }
 
+/// One calendar day's microphone totals, for the filler-goal trend chart.
+#[derive(Serialize)]
+pub struct DayStat {
+    pub date: String, // "YYYY-MM-DD" (local)
+    pub mic_words: u64,
+    pub mic_filler: u64,
+}
+
 #[derive(Serialize)]
 pub struct HistoryDto {
     pub total_words: u64,
@@ -65,6 +73,11 @@ pub struct HistoryDto {
     pub total_jargon: u64,
     pub words: Vec<WordStat>, // every spoken word, sorted by count desc
     pub terms: Vec<TermStat>, // jargon detected at least once, sorted by count desc
+    // Microphone-only filler tracking (the filler-reduction goals):
+    pub mic_words: u64,             // total words heard via the microphone
+    pub mic_filler: u64,            // how many of them were filler
+    pub mic_fillers: Vec<WordStat>, // per-filler-word mic counts, sorted desc
+    pub days: Vec<DayStat>,         // per-day mic totals, oldest → newest
 }
 
 #[tauri::command]
@@ -105,12 +118,36 @@ pub fn get_history(state: State<AppState>) -> HistoryDto {
             .then_with(|| a.term.to_lowercase().cmp(&b.term.to_lowercase()))
     });
 
+    let mut mic_fillers: Vec<WordStat> = snap
+        .mic_filler_counts
+        .into_iter()
+        .filter(|(word, _)| !state.removed.is_word_removed(word))
+        .map(|(word, count)| WordStat { word, count })
+        .collect();
+    mic_fillers.sort_by(|a, b| b.count.cmp(&a.count).then_with(|| a.word.cmp(&b.word)));
+    let mic_filler: u64 = mic_fillers.iter().map(|w| w.count).sum();
+
+    // BTreeMap iterates keys in order, and "YYYY-MM-DD" sorts chronologically.
+    let days: Vec<DayStat> = snap
+        .mic_days
+        .into_iter()
+        .map(|(date, d)| DayStat {
+            date,
+            mic_words: d.mic_words,
+            mic_filler: d.mic_filler,
+        })
+        .collect();
+
     HistoryDto {
         total_words,
         unique_words,
         total_jargon,
         words,
         terms,
+        mic_words: snap.mic_word_total,
+        mic_filler,
+        mic_fillers,
+        days,
     }
 }
 

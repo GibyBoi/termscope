@@ -1,5 +1,43 @@
 # TermScope (Tauri V2) — notes for Claude
 
+## v3-dev branch: the red "TermScope 3 Dev" edition (this branch)
+This branch is TermScope 3 **as a separate development app** that runs alongside
+the user's installed TermScope 2.x — nothing here may touch the 2.x install or
+its data. The separation knobs, and the checklist to revert when v3 ships:
+- `tauri.conf.json`: productName **"TermScope 3 Dev"**, identifier
+  `com.0xygenbreather.termscope.dev` (own single-instance mutex + install dir),
+  window title. → On release: back to "TermScope" / `com.0xygenbreather.termscope`.
+- `paths.rs`: `APP_NAME = "TermScope3Dev"` → data in `%APPDATA%\TermScope3Dev`
+  (seeded once with COPIES of the real history/knowledge + synthetic `mic_days`
+  for chart development — safe to wipe). → On release: `"TermScope"` again; the
+  additive history schema needs no migration.
+- `config.rs`: default hotkeys are `ctrl+shift+alt+…` so they don't collide with
+  a running 2.x (`ctrl+alt+…`). → On release: revert defaults.
+- Icon: all-red via `python scripts/make_icon.py --dev` (writes `assets/` +
+  `src/assets/` PNGs) + `npm run tauri icon assets/termscope.png`. The sidebar
+  badge ("x.y dev", red) is in `App.svelte`; tray labels in `tray.rs`.
+  → On release: rerun `make_icon.py` WITHOUT `--dev`, regenerate icons,
+  `cargo clean` (icon cache gotcha below), un-red the badge/tray.
+
+### v3 features (this branch)
+- **Mic-only filler tracking** (`history.rs`): the sidecar has always tagged text
+  events with `source`; `audio.rs` now passes `mic = source=="microphone"` into
+  `record_audio`, which additionally tallies `mic_filler_counts` (per filler
+  word), `mic_word_total`, and `mic_days` — per-day `{mic_words, mic_filler}`
+  aggregates (BTreeMap, local "YYYY-MM-DD" via chrono). The day buckets are the
+  only time-shaped data in the app and hold two counters/day, no words — filler
+  goals need a trend, conversations still can't be reconstructed. System audio
+  NEVER feeds these (goals measure the user, not their speakers).
+- **Filler goal** (History tab): `config.filler_goal_percent` (0 = off, default
+  5.0), goal panel with recent (last 7 recorded days) vs all-time rate,
+  `TrendChart.svelte` (SVG line, dashed goal line, hover crosshair), top-filler
+  chips. DTO additions in `commands.rs::get_history` (`mic_words`, `mic_filler`,
+  `mic_fillers`, `days`).
+- **Dictation** (`views/Dictation.svelte`): mic-only speech-to-text pad that cuts
+  filler words as utterances arrive (`ts://heard` now carries `source`; the view
+  keeps only `microphone`). Start auto-enables Listening (and turns it back off
+  if dictation turned it on); Copy/Clear; the text is RAM-only, never persisted.
+
 Local-only Windows 11 desktop app that explains tech/business/company jargon. A
 **Rust (Tauri V2) backend** + **Svelte 5 (Vite) frontend** rewrite of the original
 Python/customtkinter app (which now lives under `legacy/` as reference).

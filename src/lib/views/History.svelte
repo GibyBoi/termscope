@@ -15,12 +15,16 @@
   import DonutChart, {
     type Slice,
   } from "../components/DonutChart.svelte";
+  import TrendChart, {
+    type TrendPoint,
+  } from "../components/TrendChart.svelte";
 
   let data: History | null = $state(null);
   let fillerWords = $state<Set<string>>(new Set());
   let categories = $state<string[]>([]); // config.enabled_categories, for filters
   let loaded = $state(false);
   let trackingOn = $state(true); // mirrors config.track_history, for the paused hint
+  let fillerGoal = $state(0); // mirrors config.filler_goal_percent (0 = off)
 
   // The Counts view is driven by a modular multi-select filter (see
   // historyFilters.ts): each selected filter contributes a set of rows, unioned
@@ -42,8 +46,14 @@
       const cfg = await api.getConfig();
       trackingOn = cfg.track_history;
       categories = cfg.enabled_categories;
+      fillerGoal = cfg.filler_goal_percent;
     } catch {}
     loaded = true;
+  }
+
+  async function saveGoal(value: number) {
+    fillerGoal = Math.max(0, Math.min(100, value));
+    await api.setConfigKey("filler_goal_percent", fillerGoal);
   }
 
   async function clearAll() {
@@ -172,6 +182,33 @@
   function pct1(v: number): string {
     return v > 0 && v < 1 ? "<1" : v.toFixed(0);
   }
+
+  // ---- filler-reduction goal (microphone only) --------------------------------
+
+  const TREND_DAYS = 45; // most recent day-buckets plotted
+  let trend = $derived.by<TrendPoint[]>(() => {
+    if (!data) return [];
+    return data.days.slice(-TREND_DAYS).map((d) => ({
+      date: d.date,
+      pct: d.mic_words > 0 ? (d.mic_filler / d.mic_words) * 100 : 0,
+      words: d.mic_words,
+      filler: d.mic_filler,
+    }));
+  });
+
+  // "Recent" = the last 7 recorded days, so a quiet week doesn't blank the stat.
+  let recent = $derived.by(() => {
+    if (!data) return { pct: 0, words: 0, filler: 0 };
+    const last = data.days.slice(-7);
+    const words = last.reduce((s, d) => s + d.mic_words, 0);
+    const filler = last.reduce((s, d) => s + d.mic_filler, 0);
+    return { pct: words > 0 ? (filler / words) * 100 : 0, words, filler };
+  });
+  let allTimePct = $derived(
+    data && data.mic_words > 0 ? (data.mic_filler / data.mic_words) * 100 : 0,
+  );
+  let onGoal = $derived(fillerGoal > 0 && recent.pct <= fillerGoal);
+  let topFillers = $derived(data ? data.mic_fillers.slice(0, 5) : []);
 
   function toggleFilter(key: string) {
     const next = new Set(selected);
@@ -346,6 +383,89 @@
       </div>
     </section>
 
+    <!-- ---- filler-reduction goal (microphone only) ------------------------ -->
+    <section class="block">
+      <div class="block-head">
+        <h2>Filler goal</h2>
+        <label class="goal-set">
+          <span>Target</span>
+          <input
+            class="goal-input"
+            type="number"
+            min="0"
+            max="100"
+            step="0.5"
+            value={fillerGoal}
+            onchange={(e) => saveGoal(Number(e.currentTarget.value))}
+            title="Max % of your spoken words that may be filler. 0 turns the goal off."
+          />
+          <span>%</span>
+        </label>
+      </div>
+      <p class="hint">
+        How much of what <em>you say</em> is filler — counted from the
+        microphone only, never from system audio.
+      </p>
+
+      {#if data.mic_words === 0}
+        <p class="empty">
+          Nothing heard from the microphone yet. Turn on <strong>Listening</strong>
+          with the microphone enabled in Settings, and your filler rate will
+          chart here day by day.
+        </p>
+      {:else}
+        <div class="goal-stats">
+          <div class="goal-stat">
+            <span
+              class="goal-num"
+              style="color: {fillerGoal > 0
+                ? onGoal
+                  ? 'var(--green)'
+                  : 'var(--red)'
+                : 'var(--gold)'}">{recent.pct.toFixed(1)}%</span
+            >
+            <span class="goal-label"
+              >last {Math.min(data.days.length, 7)} recorded day{data.days
+                .length === 1
+                ? ""
+                : "s"}</span
+            >
+            {#if fillerGoal > 0}
+              <span class="goal-verdict" class:ok={onGoal}>
+                {onGoal
+                  ? "✓ on goal"
+                  : `${(recent.pct - fillerGoal).toFixed(1)}% over goal`}
+              </span>
+            {/if}
+          </div>
+          <div class="goal-stat">
+            <span class="goal-num" style="color: var(--text-muted)"
+              >{allTimePct.toFixed(1)}%</span
+            >
+            <span class="goal-label"
+              >all time — {data.mic_filler.toLocaleString()} filler of
+              {data.mic_words.toLocaleString()} words</span
+            >
+          </div>
+        </div>
+
+        {#if trend.length > 0}
+          <TrendChart points={trend} goal={fillerGoal} />
+        {/if}
+
+        {#if topFillers.length > 0}
+          <div class="top-fillers">
+            <span class="tf-label">Your top fillers:</span>
+            {#each topFillers as f (f.word)}
+              <span class="tf-chip"
+                >{f.word} <strong>{f.count.toLocaleString()}×</strong></span
+              >
+            {/each}
+          </div>
+        {/if}
+      {/if}
+    </section>
+
     <!-- ---- counts -------------------------------------------------------- -->
     <section class="block">
       <div class="block-head">
@@ -469,8 +589,10 @@
     </section>
 
     <p class="privacy">
-      🔒 Only these frequency counts are saved to disk — never the order or timing
-      of what was said, so past conversations can't be reconstructed.
+      🔒 Only frequency counts are saved to disk — never the order or timing of
+      what was said, so past conversations can't be reconstructed. The filler
+      goal additionally keeps two anonymous totals per day (words and filler
+      heard from the mic) to chart your progress — no words, no text.
     </p>
   {/if}
 </div>
@@ -710,6 +832,84 @@
     font-size: 11px;
     margin: 8px 0 0;
     line-height: 1.4;
+  }
+
+  /* filler goal */
+  .goal-set {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .goal-input {
+    width: 64px;
+    height: 30px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 0 8px;
+    font-size: 13px;
+  }
+  .goal-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .goal-stats {
+    display: flex;
+    gap: 28px;
+    align-items: baseline;
+    flex-wrap: wrap;
+    margin: 4px 0 14px;
+  }
+  .goal-stat {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .goal-num {
+    font-size: 30px;
+    font-weight: 600;
+  }
+  .goal-label {
+    color: var(--text-muted);
+    font-size: 11px;
+  }
+  .goal-verdict {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--red);
+    background: color-mix(in srgb, var(--red) 14%, transparent);
+    border-radius: 6px;
+    padding: 2px 8px;
+  }
+  .goal-verdict.ok {
+    color: var(--green);
+    background: color-mix(in srgb, var(--green) 14%, transparent);
+  }
+  .top-fillers {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  .tf-label {
+    color: var(--text-muted);
+    font-size: 11px;
+  }
+  .tf-chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 12px;
+    color: var(--gold);
+  }
+  .tf-chip strong {
+    color: var(--text-muted);
+    font-weight: 600;
   }
 
   /* multi-select filter dropdown */

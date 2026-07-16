@@ -213,10 +213,11 @@ impl Default for Audio {
 }
 
 /// Scan heard text and surface unknown terms (cooldown + rate limited).
-fn handle_heard_text(app: &AppHandle, text: &str, _source: &str) {
+fn handle_heard_text(app: &AppHandle, text: &str, source: &str) {
     // Surface the raw transcription in the UI so listening is observable — lets the
-    // user see it's hearing them even when a word isn't in the dictionary.
-    let _ = app.emit_to("main", "ts://heard", json!({ "text": text }));
+    // user see it's hearing them even when a word isn't in the dictionary. The
+    // source tag lets the Dictation view keep only what came from the microphone.
+    let _ = app.emit_to("main", "ts://heard", json!({ "text": text, "source": source }));
     let state = app.state::<AppState>();
 
     // Find ALL jargon in the utterance (ignore learned/cooldown) — history records
@@ -230,7 +231,12 @@ fn handle_heard_text(app: &AppHandle, text: &str, _source: &str) {
             .filter(|id| !state.removed.is_term_removed(id))
             .collect();
         let blocked = state.removed.removed_words();
-        state.history.record_audio(text, &jargon_ids, &blocked);
+        // Mic-only filler tracking: only the user's own speech counts toward the
+        // filler-reduction goals, never words played through system audio.
+        let mic = source == "microphone";
+        state
+            .history
+            .record_audio(text, &jargon_ids, &blocked, mic, &state.filler_words);
         let _ = app.emit_to("main", "ts://history", json!({}));
     }
 

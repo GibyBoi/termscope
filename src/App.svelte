@@ -7,6 +7,7 @@
   import Library from "./lib/views/Library.svelte";
   import Settings from "./lib/views/Settings.svelte";
   import History from "./lib/views/History.svelte";
+  import Dictation from "./lib/views/Dictation.svelte";
   import logoUrl from "./assets/termscope.png";
 
   // Injected from package.json by Vite (see vite.config.ts) — bump it there for
@@ -14,7 +15,8 @@
   declare const __APP_VERSION__: string;
   const version = __APP_VERSION__.split(".").slice(0, 2).join(".");
 
-  let view: "dashboard" | "library" | "history" | "settings" = $state("dashboard");
+  let view: "dashboard" | "library" | "history" | "dictation" | "settings" =
+    $state("dashboard");
   let entries: Entry[] = $state([]);
   let learned: Set<string> = $state(new Set());
   let config: Config | null = $state(null);
@@ -120,6 +122,7 @@
     { key: "dashboard", label: "Dashboard", icon: "▣" },
     { key: "library", label: "Library", icon: "▤" },
     { key: "history", label: "History", icon: "↺" },
+    { key: "dictation", label: "Dictation", icon: "✎" },
     { key: "settings", label: "Settings", icon: "⚙" },
   ] as const;
 </script>
@@ -129,7 +132,7 @@
     <div class="brand">
       <img class="logo" src={logoUrl} alt="TermScope" />
       <span class="brand-name">TermScope</span>
-      <span class="brand-ver">{version}</span>
+      <span class="brand-ver">{version} dev</span>
     </div>
 
     <nav>
@@ -187,6 +190,8 @@
       />
     {:else if view === "history"}
       <History />
+    {:else if view === "dictation"}
+      <Dictation {audio} />
     {:else if config}
       <Settings {config} onReset={resetAll} />
     {/if}
@@ -227,7 +232,8 @@
   .brand-ver {
     font-size: 11px;
     font-weight: 600;
-    color: var(--accent);
+    /* red on the v3-dev branch, matching the dev icon — revert on release */
+    color: var(--red);
     background: var(--surface3);
     border-radius: 6px;
     padding: 1px 6px;

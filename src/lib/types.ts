@@ -32,12 +32,24 @@ export interface TermStat {
   count: number;
 }
 
+/** One calendar day's microphone totals (aggregates only, no content). */
+export interface DayStat {
+  date: string; // "YYYY-MM-DD" (local)
+  mic_words: number;
+  mic_filler: number;
+}
+
 export interface History {
   total_words: number;
   unique_words: number;
   total_jargon: number;
   words: WordStat[];
   terms: TermStat[];
+  /** Microphone-only filler tracking (the filler-reduction goals). */
+  mic_words: number;
+  mic_filler: number;
+  mic_fillers: WordStat[];
+  days: DayStat[];
 }
 
 export interface Config {
@@ -60,6 +72,8 @@ export interface Config {
   appearance: string;
   minimize_hint_shown: boolean;
   track_history: boolean;
+  /** Filler-reduction goal: max % of mic words that may be filler; 0 = off. */
+  filler_goal_percent: number;
 }
 
 export interface AudioStatus {

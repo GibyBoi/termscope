@@ -9,7 +9,10 @@ use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-pub const APP_NAME: &str = "TermScope";
+// v3-dev branch: a distinct data dir so the dev app NEVER reads or writes the
+// real TermScope 2.x data in `%APPDATA%\TermScope`. Revert to "TermScope" (with
+// a one-time migration) when v3 ships as the real app — see CLAUDE.md checklist.
+pub const APP_NAME: &str = "TermScope3Dev";
 
 /// Per-user writable directory (e.g. `%APPDATA%\TermScope`), created on demand.
 pub fn user_data_dir() -> PathBuf {

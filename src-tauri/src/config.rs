@@ -53,6 +53,10 @@ pub struct Config {
     /// kept until the user clears it).
     pub track_history: bool,
 
+    /// Filler-reduction goal: target percentage of microphone words that may be
+    /// filler (e.g. 5.0 = "at most 5% filler"). 0 disables the goal display.
+    pub filler_goal_percent: f64,
+
     /// Forward compatibility: settings this build doesn't know (written by a
     /// newer version, or by the legacy Python app) are retained here and
     /// round-tripped on save instead of being silently deleted. Rolling back a
@@ -80,13 +84,17 @@ impl Default for Config {
             listen_system_audio: true,
             listen_microphone: true,
             listen_on_startup: false,
-            hotkey_explain_selection: "ctrl+alt+e".into(),
-            hotkey_mark_last_learned: "ctrl+alt+k".into(),
-            hotkey_toggle_listening: "ctrl+alt+space".into(),
+            // v3-dev branch: shifted defaults so the dev app's global hotkeys
+            // don't collide with an installed TermScope 2.x running alongside
+            // (its defaults are ctrl+alt+…). Revert on release — CLAUDE.md.
+            hotkey_explain_selection: "ctrl+shift+alt+e".into(),
+            hotkey_mark_last_learned: "ctrl+shift+alt+k".into(),
+            hotkey_toggle_listening: "ctrl+shift+alt+space".into(),
             close_to_tray: false,
             appearance: "dark".into(),
             minimize_hint_shown: false,
             track_history: true,
+            filler_goal_percent: 5.0,
             extra: serde_json::Map::new(),
         }
     }
