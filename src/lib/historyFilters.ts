@@ -68,8 +68,19 @@ const CATEGORY_LABELS: Record<string, string> = {
   companies: "Company",
 };
 
-function categoryLabel(cat: string): string {
+export function categoryLabel(cat: string): string {
   return CATEGORY_LABELS[cat] ?? cat.charAt(0).toUpperCase() + cat.slice(1);
+}
+
+/** Stable preferred category order (tech, business, companies, then the rest
+ * alphabetically) — keeps filter lists and chart slices in a fixed order so a
+ * category's position (and color) never depends on its current counts. */
+export function orderedCategories(all: Set<string>): string[] {
+  const order = ["tech", "business", "companies"];
+  return [
+    ...order.filter((c) => all.has(c)),
+    ...[...all].filter((c) => !order.includes(c)).sort(),
+  ];
 }
 
 /**
@@ -104,12 +115,7 @@ export function buildFilters(ctx: FilterContext): FilterDef[] {
   // configured categories so Tech/Business/Company are always selectable, plus
   // any extra category actually seen in the data.
   const present = new Set(data.terms.map((t) => t.category));
-  const order = ["tech", "business", "companies"];
-  const all = new Set([...categories, ...present]);
-  const cats = [
-    ...order.filter((c) => all.has(c)),
-    ...[...all].filter((c) => !order.includes(c)).sort(),
-  ];
+  const cats = orderedCategories(new Set([...categories, ...present]));
   for (const cat of cats) {
     filters.push({
       key: `cat:${cat}`,

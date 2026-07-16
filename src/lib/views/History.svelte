@@ -6,10 +6,15 @@
   import type { History } from "../types";
   import {
     buildFilters,
+    categoryLabel,
     collectItems,
+    orderedCategories,
     type DisplayItem,
     type FilterDef,
   } from "../historyFilters";
+  import DonutChart, {
+    type Slice,
+  } from "../components/DonutChart.svelte";
 
   let data: History | null = $state(null);
   let fillerWords = $state<Set<string>>(new Set());
@@ -110,6 +115,64 @@
     items.reduce((m, i) => (i.count > m ? i.count : m), 1),
   );
 
+  // ---- insights charts --------------------------------------------------------
+  // All derived from the same orderless tallies as everything else — pure
+  // frequency aggregates, so nothing here introduces a timeline either.
+
+  // Jargon detections summed per category, in the stable category order so a
+  // slice's position and color never depend on current counts.
+  let catSlices = $derived.by<Slice[]>(() => {
+    if (!data) return [];
+    const sums = new Map<string, number>();
+    for (const t of data.terms)
+      sums.set(t.category, (sums.get(t.category) ?? 0) + t.count);
+    return orderedCategories(new Set(sums.keys())).map((c) => ({
+      label: categoryLabel(c),
+      value: sums.get(c) ?? 0,
+      color: categoryColor(c),
+    }));
+  });
+
+  const TOP_N = 8;
+  let topJargon = $derived(
+    data
+      ? [...data.terms]
+          .sort((a, b) => b.count - a.count || a.term.localeCompare(b.term))
+          .slice(0, TOP_N)
+      : [],
+  );
+  let topMax = $derived(topJargon[0]?.count ?? 1);
+
+  // Filler share: how much of everything heard was verbal filler.
+  let fillerCount = $derived(
+    data
+      ? data.words.reduce(
+          (s, w) => (fillerWords.has(w.word) ? s + w.count : s),
+          0,
+        )
+      : 0,
+  );
+  let fillerPct = $derived(
+    data && data.total_words > 0
+      ? (fillerCount / data.total_words) * 100
+      : 0,
+  );
+
+  // Learned coverage: of the unique jargon terms actually heard, how many are
+  // already marked learned.
+  let learnedHeard = $derived(
+    data ? data.terms.filter((t) => t.learned).length : 0,
+  );
+  let learnedPct = $derived(
+    data && data.terms.length > 0
+      ? (learnedHeard / data.terms.length) * 100
+      : 0,
+  );
+
+  function pct1(v: number): string {
+    return v > 0 && v < 1 ? "<1" : v.toFixed(0);
+  }
+
   function toggleFilter(key: string) {
     const next = new Set(selected);
     if (next.has(key)) next.delete(key);
@@ -194,6 +257,94 @@
         ><span class="stat-label">Unique jargon</span>
       </div>
     </div>
+
+    <!-- ---- insights charts ------------------------------------------------ -->
+    <section class="block">
+      <div class="block-head">
+        <h2>At a glance</h2>
+      </div>
+      <p class="hint">
+        Frequency breakdowns of the same tallies below — still counts only, no
+        timeline.
+      </p>
+
+      <div class="charts">
+        <div class="chart-cell">
+          <h3>Jargon by category</h3>
+          {#if data.total_jargon > 0}
+            <DonutChart
+              slices={catSlices}
+              centerValue={data.total_jargon.toLocaleString()}
+              centerLabel="jargon heard"
+            />
+          {:else}
+            <p class="empty">No jargon detected yet.</p>
+          {/if}
+        </div>
+
+        <div class="chart-cell">
+          <h3>Top jargon</h3>
+          {#if topJargon.length > 0}
+            <div class="tj-list">
+              {#each topJargon as t (t.id)}
+                {@const accent = categoryColor(t.category)}
+                <div class="tj-row" title="{t.term} — {t.definition}">
+                  <span class="tj-label">{t.term}</span>
+                  <div class="tj-bar">
+                    <div
+                      class="tj-fill"
+                      style="width: {(t.count / topMax) * 100}%; background: {accent}"
+                    ></div>
+                  </div>
+                  <span class="tj-count">{t.count}×</span>
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="empty">No jargon detected yet.</p>
+          {/if}
+        </div>
+      </div>
+
+      <div class="meters">
+        <div class="meter">
+          <div class="meter-top">
+            <span class="meter-name">Filler words</span>
+            <span class="meter-val" style="color: var(--gold)"
+              >{pct1(fillerPct)}%</span
+            >
+          </div>
+          <div class="mbar">
+            <div
+              class="mbar-fill"
+              style="width: {Math.min(fillerPct, 100)}%; background: var(--gold)"
+            ></div>
+          </div>
+          <p class="meter-hint">
+            {fillerCount.toLocaleString()} of {data.total_words.toLocaleString()}
+            words heard were filler (um, like, basically…).
+          </p>
+        </div>
+        <div class="meter">
+          <div class="meter-top">
+            <span class="meter-name">Learned coverage</span>
+            <span class="meter-val" style="color: var(--green)"
+              >{pct1(learnedPct)}%</span
+            >
+          </div>
+          <div class="mbar">
+            <div
+              class="mbar-fill"
+              style="width: {Math.min(learnedPct, 100)}%; background: var(--green)"
+            ></div>
+          </div>
+          <p class="meter-hint">
+            {learnedHeard.toLocaleString()} of {data.terms.length.toLocaleString()}
+            unique jargon terms you've heard are marked learned.
+          </p>
+        </div>
+      </div>
+    </section>
 
     <!-- ---- counts -------------------------------------------------------- -->
     <section class="block">
@@ -446,6 +597,119 @@
     display: flex;
     align-items: center;
     gap: 10px;
+  }
+
+  /* insights charts */
+  h3 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: 0 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 4px;
+  }
+  @media (max-width: 860px) {
+    .charts {
+      grid-template-columns: 1fr;
+    }
+  }
+  .chart-cell {
+    background: var(--surface2);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    min-width: 0;
+  }
+  .tj-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .tj-row {
+    display: grid;
+    grid-template-columns: 110px 1fr 42px;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+  }
+  .tj-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .tj-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--surface3);
+    overflow: hidden;
+  }
+  .tj-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s;
+  }
+  .tj-count {
+    color: var(--text-muted);
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .meters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  @media (max-width: 860px) {
+    .meters {
+      grid-template-columns: 1fr;
+    }
+  }
+  .meter {
+    background: var(--surface2);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    min-width: 0;
+  }
+  .meter-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .meter-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .meter-val {
+    font-size: 20px;
+    font-weight: 600;
+  }
+  .mbar {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--surface3);
+    overflow: hidden;
+  }
+  .mbar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s;
+  }
+  .meter-hint {
+    color: var(--text-faint);
+    font-size: 11px;
+    margin: 8px 0 0;
+    line-height: 1.4;
   }
 
   /* multi-select filter dropdown */

@@ -45,8 +45,15 @@ works through a Python sidecar (`sidecar/listen.py`, faster-whisper) — see the
   with counts + totals); entries whose term id was retired are dropped.
   `commands::clear_history` wipes it (the tab's "Clear history" button).
   `commands::get_filler_words` returns the bundled filler tokens (see below).
-- `History.svelte`: a stats row + a Counts view driven by a **modular multi-select
-  filter** (`src/lib/historyFilters.ts`). Each filter is a `FilterDef` producing a
+- `History.svelte`: a stats row + an **"At a glance" charts panel** + a Counts view
+  driven by a **modular multi-select filter** (`src/lib/historyFilters.ts`). The
+  charts are pure frequency aggregates of the same tallies (still no timeline):
+  a jargon-by-category donut (`lib/components/DonutChart.svelte` — reusable SVG
+  stroke-arc donut with center figure, direct-labeled legend, hover tooltip +
+  dimming), a top-8 jargon bar list, and two meters (filler share of all words,
+  learned share of unique jargon heard). Slice order/colors come from
+  `orderedCategories` + `categoryColor` so a category's position and color never
+  depend on its counts. Each filter is a `FilterDef` producing a
   set of `DisplayItem` rows; the view unions the selected filters (de-duped by key),
   frequency-sorts them (asc/desc toggle) and search-narrows by label. Built-in
   filters: **Jargon** (all detected terms), **Filler words** (spoken words ∩ the
