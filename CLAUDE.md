@@ -88,8 +88,11 @@ works through a Python sidecar (`sidecar/listen.py`, faster-whisper) — see the
   charts are pure frequency aggregates of the same tallies (still no timeline):
   a jargon-by-category donut (`lib/components/DonutChart.svelte` — reusable SVG
   stroke-arc donut with center figure, direct-labeled legend, hover tooltip +
-  dimming), a top-8 jargon bar list, and two meters (filler share of all words,
-  learned share of unique jargon heard). Slice order/colors come from
+  dimming), a top-8 jargon bar list, and two meters (filler share of **mic**
+  words — the all-audio share is a secondary line only — and learned share of
+  unique jargon heard). **Filler is mic-first everywhere**: the Counts filters
+  are "Filler (mic)" (from `mic_fillers`, the primary metric) and "Filler (all
+  audio)" (words ∩ filler list, the bonus view). Slice order/colors come from
   `orderedCategories` + `categoryColor` so a category's position and color never
   depend on its counts. Each filter is a `FilterDef` producing a
   set of `DisplayItem` rows; the view unions the selected filters (de-duped by key),

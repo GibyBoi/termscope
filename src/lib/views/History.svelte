@@ -346,20 +346,31 @@
       <div class="meters">
         <div class="meter">
           <div class="meter-top">
-            <span class="meter-name">Filler words</span>
+            <span class="meter-name">Filler words (mic)</span>
             <span class="meter-val" style="color: var(--gold)"
-              >{pct1(fillerPct)}%</span
+              >{data.mic_words > 0 ? `${pct1(allTimePct)}%` : "—"}</span
             >
           </div>
           <div class="mbar">
             <div
               class="mbar-fill"
-              style="width: {Math.min(fillerPct, 100)}%; background: var(--gold)"
+              style="width: {Math.min(allTimePct, 100)}%; background: var(--gold)"
             ></div>
           </div>
           <p class="meter-hint">
-            {fillerCount.toLocaleString()} of {data.total_words.toLocaleString()}
-            words heard were filler (um, like, basically…).
+            {#if data.mic_words > 0}
+              {data.mic_filler.toLocaleString()} of {data.mic_words.toLocaleString()}
+              words <em>you spoke</em> were filler (um, like, basically…).
+            {:else}
+              Nothing heard from your microphone yet — this counts only what
+              you say, never system audio.
+            {/if}
+            {#if fillerCount > 0}
+              <span class="meter-extra"
+                >Across all audio incl. system sounds: {pct1(fillerPct)}% ({fillerCount.toLocaleString()}
+                of {data.total_words.toLocaleString()}).</span
+              >
+            {/if}
           </p>
         </div>
         <div class="meter">
@@ -832,6 +843,12 @@
     font-size: 11px;
     margin: 8px 0 0;
     line-height: 1.4;
+  }
+  .meter-extra {
+    display: block;
+    margin-top: 4px;
+    color: var(--text-faint);
+    opacity: 0.8;
   }
 
   /* filler goal */

@@ -101,9 +101,28 @@ export function buildFilters(ctx: FilterContext): FilterDef[] {
       build: () => data.terms.map(termItem),
     },
     {
+      // The primary filler view: what the USER says. Counted from the
+      // microphone only — system audio never feeds it.
+      key: "filler-mic",
+      label: "Filler (mic)",
+      hint: "Filler words you said into the microphone (um, like, basically…).",
+      build: () =>
+        data.mic_fillers.map((w) => ({
+          // Distinct key from the all-audio row on purpose: same word, different
+          // metric — selecting both filters legitimately shows both counts.
+          key: `mic:${w.word}`,
+          label: w.word,
+          count: w.count,
+          isTerm: false,
+          category: "filler",
+        })),
+    },
+    {
+      // The bonus view: filler heard ANYWHERE (mic + system audio) — fun to
+      // see, but not what the filler goal measures.
       key: "filler",
-      label: "Filler words",
-      hint: "Spoken words that are common verbal filler (um, like, basically…).",
+      label: "Filler (all audio)",
+      hint: "Filler words heard anywhere — your mic and system sounds combined.",
       build: () =>
         data.words
           .filter((w) => fillerWords.has(w.word))
