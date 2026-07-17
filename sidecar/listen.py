@@ -29,10 +29,20 @@ import threading
 import time
 
 MODEL_SIZE = "base.en"      # tiny.en | base.en | small.en | medium.en
-WINDOW_SECONDS = 3.0        # audio transcribed per pass
-OVERLAP_SECONDS = 0.4       # carried between windows so words aren't clipped
-SILENCE_FLOOR = 60          # int16 peak below which a window is skipped
+SILENCE_FLOOR = 60          # int16 peak below which audio counts as silence
 LEVEL_INTERVAL = 0.35       # how often the heartbeat emits the level meter value
+
+# Utterance endpointing (see Endpointer). Speech is cut at natural pauses and
+# transcribed as WHOLE utterances — never as fixed windows with overlap. The
+# old 3s-window + 0.4s-overlap design transcribed the overlap twice (doubled
+# words at every boundary: "if if", "putting putting") and let Whisper
+# punctuate each 3s slice as its own sentence (stray mid-sentence periods).
+SILENCE_HANG = 0.6          # trailing quiet (s) that ends an utterance
+PRE_ROLL = 0.25             # quiet lead-in (s) kept so onsets aren't clipped
+MIN_UTTERANCE = 0.3         # utterances shorter than this (s) are noise; dropped
+MAX_UTTERANCE = 12.0        # force a cut after this much buffered audio (s)
+FORCED_CUT_SEARCH = 2.0     # forced cuts pick the quietest spot in this tail (s)
+FORCED_CUT_SPAN = 0.1       # width (s) of the quietest-spot search window
 
 
 def emit(obj: dict) -> None:
@@ -50,6 +60,87 @@ def _resample_16k(x_f32, src_rate, np):
     n = max(1, int(len(x_f32) * 16000 / src_rate))
     idx = np.linspace(0, len(x_f32) - 1, n)
     return np.interp(idx, np.arange(len(x_f32)), x_f32).astype(np.float32)
+
+
+class Endpointer:
+    """Cuts a continuous mono float32 stream into whole utterances at pauses.
+
+    Pure state machine (numpy in, list of utterances out) so it is testable
+    without any audio device. `feed(chunk)` returns zero or more
+    `(samples, forced)` tuples:
+
+    - An utterance ends when speech has been heard and `SILENCE_HANG` seconds
+      of quiet follow; the utterance keeps `PRE_ROLL` of lead-in/out quiet so
+      Whisper sees word onsets, and `forced` is False.
+    - If speech runs past `MAX_UTTERANCE` with no pause, the buffer is cut at
+      the QUIETEST `FORCED_CUT_SPAN` stretch of its recent tail and the
+      remainder carries over — a split, never an overlap, so no audio is ever
+      transcribed twice; `forced` is True (the consumer may de-dup one
+      boundary word for a word clipped mid-cut).
+    - While idle (no speech yet), only `PRE_ROLL` of audio is retained.
+    """
+
+    def __init__(self, rate, np):
+        self._rate = rate
+        self._np = np
+        self._buf = np.zeros(0, dtype=np.float32)
+        self._has_speech = False
+        self._quiet = 0  # trailing quiet samples
+        self._speech = 0  # samples of actual speech heard (loud chunks)
+        self._floor = SILENCE_FLOOR / 32768.0
+
+    def feed(self, arr):
+        np = self._np
+        rate = self._rate
+        out = []
+        self._buf = np.concatenate([self._buf, arr])
+        if arr.size:
+            if float(np.abs(arr).max()) >= self._floor:
+                self._has_speech = True
+                self._speech += arr.size
+                self._quiet = 0
+            else:
+                self._quiet += arr.size
+
+        if not self._has_speech:
+            # Idle: keep only a short pre-roll so the eventual onset is intact.
+            keep = int(rate * PRE_ROLL)
+            if len(self._buf) > keep:
+                self._buf = self._buf[-keep:]
+            return out
+
+        hang = int(rate * SILENCE_HANG)
+        if self._quiet >= hang:
+            # Natural pause: emit up to a little past the end of speech. The
+            # minimum is judged on SPEECH heard, not buffer length — padding
+            # must not qualify a sub-minimum blip.
+            end = len(self._buf) - self._quiet + int(rate * PRE_ROLL)
+            utt = self._buf[: max(0, end)]
+            if self._speech >= int(rate * MIN_UTTERANCE):
+                out.append((utt, False))
+            self._buf = np.zeros(0, dtype=np.float32)
+            self._has_speech = False
+            self._quiet = 0
+            self._speech = 0
+            return out
+
+        if len(self._buf) >= int(rate * MAX_UTTERANCE):
+            # No pause in a long stretch: split at the quietest recent spot.
+            span = int(rate * FORCED_CUT_SPAN)
+            search = min(int(rate * FORCED_CUT_SEARCH), len(self._buf) - span)
+            tail = self._buf[-search - span : ]
+            energy = np.abs(tail)
+            # Sliding-sum of |x| over `span` samples; the minimum is the cut.
+            csum = np.concatenate([[0.0], np.cumsum(energy, dtype=np.float64)])
+            sums = csum[span:] - csum[:-span]
+            k = int(np.argmin(sums))
+            cut = len(self._buf) - (search + span) + k + span // 2
+            utt, rest = self._buf[:cut], self._buf[cut:]
+            if len(utt) >= int(rate * MIN_UTTERANCE):
+                out.append((utt, True))
+            self._buf = rest.copy()
+            # Speech state continues into the carried remainder.
+        return out
 
 
 class SourceWorker(threading.Thread):
@@ -120,10 +211,7 @@ class SourceWorker(threading.Thread):
             return  # _open already emitted a detailed warn
         st, rate, ch, is_float = opened
 
-        win = int(rate * WINDOW_SECONDS)
-        carry = int(rate * OVERLAP_SECONDS)
-        floor = SILENCE_FLOOR / 32768.0
-        buf = np.zeros(0, dtype=np.float32)
+        endpointer = Endpointer(rate, np)
         while not self._stop.is_set():
             try:
                 data = st.read(4000, exception_on_overflow=False)
@@ -135,17 +223,13 @@ class SourceWorker(threading.Thread):
                 arr = np.frombuffer(data, dtype=np.int16).astype(np.float32) / 32768.0
             if ch > 1:
                 arr = arr.reshape(-1, ch).mean(axis=1)
-            buf = np.concatenate([buf, arr])
             if arr.size:
                 self.peak = max(self.peak, int(float(np.abs(arr).max()) * 32768))
-            if len(buf) >= win:
-                window = buf
-                buf = buf[-carry:].copy() if carry > 0 else np.zeros(0, dtype=np.float32)
-                if float(np.abs(window).max()) >= floor:
-                    try:
-                        self._jobs.put_nowait((_resample_16k(window, rate, np), self.source))
-                    except queue.Full:
-                        pass
+            for utt, forced in endpointer.feed(arr):
+                try:
+                    self._jobs.put_nowait((_resample_16k(utt, rate, np), self.source, forced))
+                except queue.Full:
+                    pass
         try:
             st.stop_stream()
             st.close()
@@ -214,9 +298,17 @@ def main() -> int:
                 emit({"event": "level", "source": w.source, "value": val})
     threading.Thread(target=heartbeat, daemon=True).start()
 
+    # Across a FORCED cut (a word may be clipped mid-split and heard on both
+    # sides) the first word of the next utterance is dropped when it repeats
+    # the last word of the previous one. Natural-pause boundaries are left
+    # alone — "No. No." across a real pause is legitimate speech.
+    strip_tok = lambda w: "".join(c for c in w.lower() if c.isalnum())
+    last_word: dict = {}   # source -> last emitted token (normalized)
+    after_forced: dict = {}  # source -> was the previous utterance force-cut?
+
     while not stop.is_set():
         try:
-            audio, source = jobs.get(timeout=0.3)
+            audio, source, forced = jobs.get(timeout=0.3)
         except queue.Empty:
             continue
         try:
@@ -226,7 +318,19 @@ def main() -> int:
         except Exception:
             text = ""
         if text:
+            words = text.split()
+            if (
+                after_forced.get(source)
+                and words
+                and strip_tok(words[0])
+                and strip_tok(words[0]) == last_word.get(source)
+            ):
+                words = words[1:]
+            text = " ".join(words)
+        if text:
+            last_word[source] = strip_tok(text.split()[-1])
             emit({"event": "text", "text": text, "source": source})
+        after_forced[source] = forced
 
     try:
         pa.terminate()  # exactly once, after everything has stopped

@@ -250,6 +250,15 @@ Add `~/.cargo/bin` to PATH in fresh shells (`export PATH="$HOME/.cargo/bin:$PATH
 ## Audio sidecar (Listening)
 `sidecar/listen.py` captures WASAPI loopback (system audio) + microphone with
 `pyaudiowpatch` and transcribes offline with **faster-whisper** (base.en, int8, CPU).
+Speech is segmented by the **`Endpointer`** (v3): whole utterances cut at natural
+pauses (0.6s hang, 0.25s pre-roll, sub-0.3s blips dropped), with a forced SPLIT
+(never an overlap) at the quietest recent stretch after 12s of pauseless speech —
+the consumer de-dups one boundary word across forced cuts only. This replaced the
+old fixed 3s windows + 0.4s overlap, which transcribed the overlap twice (doubled
+words at every boundary) and let Whisper punctuate each slice as its own sentence
+(stray mid-sentence periods). The Endpointer is a pure state machine —
+`sidecar/test_endpointer.py` covers it with synthetic audio (`python
+sidecar/test_endpointer.py`, needs numpy only).
 It is bundled as a resource (`tauri.conf.json`) and spawned by `audio.rs` via the
 system `python` on PATH — it is NOT compiled in. Requirements on the machine:
 Python 3 + `pip install -r sidecar/requirements.txt`; the first listening session
