@@ -26,7 +26,9 @@
   }
 
   let items: Item[] = $state([]);
-  let dictating = $state(false); // hotkey dictation live → show the speaking badge
+  let dictating = $state(false); // dictation live → show the speaking badge
+  let dictError = $state(""); // a failed dictation start, shown briefly
+  let dictErrTimer: ReturnType<typeof setTimeout> | undefined;
   let queue: Item[] = [];
   const activeIds = new Set<string>();
   let maxCards = 6;
@@ -65,7 +67,7 @@
     if (placementMode) return; // placement drives its own layout
     await tick();
     const win = getCurrentWindow();
-    if (items.length === 0 && !dictating) {
+    if (items.length === 0 && !dictating && !dictError) {
       await win.hide();
       return;
     }
@@ -224,8 +226,17 @@
         ),
       );
       unlisteners.push(
-        await listen<{ active: boolean }>("ts://dictate", (e) => {
+        await listen<{ active: boolean; error?: string }>("ts://dictate", (e) => {
           dictating = e.payload.active;
+          clearTimeout(dictErrTimer);
+          dictError = e.payload.error ?? "";
+          if (dictError) {
+            // Show the failure where the speaking badge would be, briefly.
+            dictErrTimer = setTimeout(() => {
+              dictError = "";
+              relayout();
+            }, 6000);
+          }
           relayout();
         }),
       );
@@ -274,6 +285,10 @@
     <div class="dictate-badge" transition:fly={{ y: 10, duration: 150 }}>
       <span class="dictate-dot"></span>
       <span class="dictate-mic">🎙</span> Transcribing…
+    </div>
+  {:else if dictError}
+    <div class="dictate-badge error" transition:fly={{ y: 10, duration: 150 }}>
+      <span class="dictate-mic">🎙</span> Dictation failed: {dictError}
     </div>
   {/if}
   {#each items as item (item.key)}
@@ -333,6 +348,15 @@
   }
   .dictate-mic {
     font-size: 13px;
+  }
+  .dictate-badge.error {
+    border-color: #e33b3b;
+    background: #2a1518;
+    color: #ff8a8a;
+    white-space: normal;
+    max-width: 340px;
+    border-radius: 12px;
+    font-weight: 500;
   }
   @keyframes dictate-pulse {
     50% {

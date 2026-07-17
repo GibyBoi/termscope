@@ -1,6 +1,6 @@
 [package]
 name = "termscope"
-version = "3.0.0"
+version = "3.1.0"
 description = "TermScope — explains tech & business jargon you hear or highlight"
 authors = ["0xygenBreather"]
 edition = "2021"

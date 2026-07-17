@@ -397,10 +397,18 @@ pub fn run_dictate_event(app: AppHandle, pressed: bool) {
     };
     std::thread::spawn(move || {
         let state = app.state::<AppState>();
+        // A failed start must be VISIBLE — a hotkey user gets no console. The
+        // cards overlay shows the error where the speaking badge would be.
+        let report = |e: String| {
+            eprintln!("[termscope] dictate hotkey: {e}");
+            let payload = json!({ "active": false, "error": e });
+            let _ = app.emit_to("cards", "ts://dictate", payload.clone());
+            let _ = app.emit_to("main", "ts://dictate", payload);
+        };
         if hold {
             if pressed && !state.audio.is_dictating() {
                 if let Err(e) = state.audio.dictate_start(&app) {
-                    eprintln!("[termscope] dictate hotkey: {e}");
+                    report(e);
                 }
             } else if !pressed && state.audio.is_dictating() {
                 state.audio.dictate_stop(&app);
@@ -420,7 +428,7 @@ pub fn run_dictate_event(app: AppHandle, pressed: bool) {
         if state.audio.is_dictating() {
             state.audio.dictate_stop(&app);
         } else if let Err(e) = state.audio.dictate_start(&app) {
-            eprintln!("[termscope] dictate hotkey: {e}");
+            report(e);
         }
     });
 }

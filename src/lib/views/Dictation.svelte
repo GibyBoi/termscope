@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { listen, type UnlistenFn } from "@tauri-apps/api/event";
+  import { emitTo, listen, type UnlistenFn } from "@tauri-apps/api/event";
   import * as api from "../api";
   import type { AudioStatus } from "../types";
 
@@ -16,9 +16,15 @@
   let fillersCut = $state(0);
   let fillerWords = $state<Set<string>>(new Set());
   let micEnabled = $state(true); // mirrors config.listen_microphone
+  let hotkey = $state(""); // config.hotkey_dictate, shown as a reference only
   let startedListening = false; // we turned Listening on → turn it off after
   let copied = $state(false);
   let error = $state("");
+
+  /** The speaking badge in the cards overlay tracks view sessions too. */
+  function indicator(active: boolean) {
+    emitTo("cards", "ts://dictate", { active }).catch(() => {});
+  }
 
   /** Same normalization as the Rust tokenizer: lowercase alphanumeric core. */
   function norm(word: string): string {
@@ -47,7 +53,9 @@
 
   async function refreshMicEnabled() {
     try {
-      micEnabled = (await api.getConfig()).listen_microphone;
+      const cfg = await api.getConfig();
+      micEnabled = cfg.listen_microphone;
+      hotkey = cfg.hotkey_dictate;
     } catch {}
   }
 
@@ -65,10 +73,12 @@
       }
     }
     active = true;
+    indicator(true);
   }
 
   async function stop() {
     active = false;
+    indicator(false);
     // If dictation turned Listening on, turn it back off — leave the app the
     // way the user had it.
     if (startedListening) {
@@ -129,6 +139,7 @@
     })();
     return () => {
       unlisteners.forEach((u) => u());
+      if (active) indicator(false); // leaving the view ends the session
       if (startedListening) {
         // Leaving the view mid-dictation: release the mic we turned on.
         api.isListening().then((on) => {
@@ -146,6 +157,15 @@
       <p class="subtitle">
         Speak into your microphone — your words appear here with the filler cut
         out.
+      </p>
+      <p class="hotkey-ref">
+        {#if hotkey}
+          Anywhere on your PC: press <span class="kbd">{hotkey.toUpperCase()}</span>
+          to dictate straight to your cursor. Change the binding in Settings.
+        {:else}
+          No dictation hotkey is set — bind one under Settings → Global hotkeys
+          to dictate from anywhere.
+        {/if}
       </p>
     </div>
     <button
@@ -224,7 +244,20 @@
   }
   .subtitle {
     color: var(--text-muted);
+    margin: 0 0 4px;
+  }
+  .hotkey-ref {
+    color: var(--text-faint);
+    font-size: 11px;
     margin: 0 0 14px;
+  }
+  .kbd {
+    font-weight: 600;
+    font-size: 10px;
+    color: var(--accent);
+    background: var(--surface2);
+    border-radius: 5px;
+    padding: 2px 6px;
   }
   .rec-btn {
     flex-shrink: 0;

@@ -47,7 +47,12 @@ its data. The separation knobs, and the checklist to revert when v3 ships:
   in `commands::run_dictate_event`) or "hold" (key release — `lib.rs` forwards
   BOTH shortcut edges for this hotkey only). While live, `ts://dictate
   {active}` drives a pulsing red mic badge in the cards overlay (the overlay
-  window now shows when `dictating` even with zero cards).
+  window now shows when `dictating` even with zero cards). The Dictation VIEW
+  emits the same event for its sessions (`emitTo` from JS), so the badge covers
+  both flows; a failed hotkey start emits `{active:false, error}` and the
+  overlay shows the error for 6s — dictation failures are never silent. The
+  view also displays the current `hotkey_dictate` as a read-only reference
+  (binding is changed in Settings only).
 - **Hotkeys are unbindable**: "" = unbound (skipped at registration; Esc in the
   Settings recorder unbinds; `set_hotkey` accepts empty; `reset_hotkey` restores
   the build default and returns it; per-row ↺ button in Settings).
