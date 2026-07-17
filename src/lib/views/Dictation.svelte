@@ -31,12 +31,28 @@
     return word.toLowerCase().replace(/[^a-z0-9]/g, "");
   }
 
-  /** Cut filler words from an utterance; count what was dropped. */
+  /** Collapse letter runs to at most n ("ummmmm" → "um"/"umm"/"ummm"). */
+  function collapseRuns(s: string, n: number): string {
+    return s.replace(new RegExp(`(.)\\1{${n},}`, "g"), "$1".repeat(n));
+  }
+
+  function isFiller(word: string): boolean {
+    const core = norm(word);
+    if (!core) return false;
+    return (
+      fillerWords.has(core) ||
+      fillerWords.has(collapseRuns(core, 3)) ||
+      fillerWords.has(collapseRuns(core, 2)) ||
+      fillerWords.has(collapseRuns(core, 1))
+    );
+  }
+
+  /** Cut filler words (stretched forms too) from an utterance. */
   function clean(utterance: string): string {
     const kept: string[] = [];
     for (const w of utterance.split(/\s+/)) {
       if (!w) continue;
-      if (fillerWords.has(norm(w))) {
+      if (isFiller(w)) {
         fillersCut += 1;
         continue;
       }

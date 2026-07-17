@@ -306,7 +306,7 @@ impl Audio {
             }
         }
         let _ = app.emit_to("main", "ts://audio-status", self.status());
-        let text = session.buffer.trim().to_string();
+        let text = finalize_dictation(&session.buffer);
         if !text.is_empty() {
             crate::selection::paste_text(&text);
         }
@@ -332,21 +332,75 @@ fn broadcast(app: &AppHandle, event: &str, payload: serde_json::Value) {
     let _ = app.emit_to("main", event, payload);
 }
 
+/// Collapse every run of a repeated character down to at most `max` — so a
+/// stretched "ummmmm" can be matched against the bundled "um"/"umm"/"ummm".
+fn collapse_runs(s: &str, max: usize) -> String {
+    let mut out = String::with_capacity(s.len());
+    let mut last = '\0';
+    let mut run = 0;
+    for c in s.chars() {
+        if c == last {
+            run += 1;
+        } else {
+            last = c;
+            run = 1;
+        }
+        if run <= max {
+            out.push(c);
+        }
+    }
+    out
+}
+
 /// Remove filler words from an utterance, keeping everything else verbatim.
 /// Tokens are matched by their normalized (lowercase alphanumeric) core, same
-/// as the tallies, so "Um," and "um" both drop.
+/// as the tallies; stretched forms ("ummmmm") are collapsed before matching so
+/// they drop too. Runs of identical punctuation-only tokens left behind by a
+/// removal collapse to one.
 fn clean_fillers(text: &str, fillers: &std::collections::HashSet<String>) -> String {
-    text.split_whitespace()
-        .filter(|w| {
-            let core: String = w
-                .chars()
-                .filter(|c| c.is_ascii_alphanumeric())
-                .collect::<String>()
-                .to_lowercase();
-            core.is_empty() || !fillers.contains(&core)
-        })
-        .collect::<Vec<_>>()
-        .join(" ")
+    let mut kept: Vec<&str> = Vec::new();
+    for w in text.split_whitespace() {
+        let core: String = w
+            .chars()
+            .filter(|c| c.is_ascii_alphanumeric())
+            .collect::<String>()
+            .to_lowercase();
+        let is_filler = !core.is_empty()
+            && (fillers.contains(&core)
+                || fillers.contains(&collapse_runs(&core, 3))
+                || fillers.contains(&collapse_runs(&core, 2))
+                || fillers.contains(&collapse_runs(&core, 1)));
+        if is_filler {
+            continue;
+        }
+        if core.is_empty() && kept.last() == Some(&w) {
+            continue; // "— —" after a removal → keep one
+        }
+        kept.push(w);
+    }
+    kept.join(" ")
+}
+
+/// Final polish for a finished dictation, SpeakEasy-style: collapse repeated
+/// punctuation ("!!"/".." → one), then capitalize the first letter. Runs once
+/// on the assembled session text, right before it is pasted.
+fn finalize_dictation(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut last = '\0';
+    for c in text.trim().chars() {
+        if matches!(c, '.' | ',' | '!' | '?') && c == last {
+            continue;
+        }
+        last = c;
+        out.push(c);
+    }
+    let mut done = String::with_capacity(out.len());
+    let mut chars = out.chars();
+    if let Some(first) = chars.next() {
+        done.extend(first.to_uppercase());
+        done.push_str(chars.as_str());
+    }
+    done
 }
 
 impl Default for Audio {
@@ -428,7 +482,7 @@ fn handle_heard_text(app: &AppHandle, text: &str, source: &str) {
 
 #[cfg(test)]
 mod tests {
-    use super::clean_fillers;
+    use super::{clean_fillers, finalize_dictation};
     use std::collections::HashSet;
 
     #[test]
@@ -440,8 +494,27 @@ mod tests {
         );
         assert_eq!(clean_fillers("um UM Um.", &f), "");
         assert_eq!(clean_fillers("", &f), "");
-        // Punctuation-only tokens are never treated as filler.
-        assert_eq!(clean_fillers("wait — um — what", &f), "wait — — what");
+        // Punctuation-only tokens left doubled by a removal collapse to one.
+        assert_eq!(clean_fillers("wait — um — what", &f), "wait — what");
+    }
+
+    #[test]
+    fn clean_fillers_catches_stretched_forms() {
+        let f: HashSet<String> = ["um".to_string(), "hmm".to_string()].into();
+        assert_eq!(clean_fillers("ummmmm right", &f), "right");
+        assert_eq!(clean_fillers("Hmmmmm, maybe.", &f), "maybe.");
+        // A legitimately doubled letter is not a stretched filler.
+        assert_eq!(clean_fillers("moon buggy", &f), "moon buggy");
+    }
+
+    #[test]
+    fn finalize_capitalizes_and_collapses_punctuation() {
+        assert_eq!(
+            finalize_dictation("so we ship friday.. yes!!"),
+            "So we ship friday. yes!"
+        );
+        assert_eq!(finalize_dictation("  hello  "), "Hello");
+        assert_eq!(finalize_dictation(""), "");
     }
 }
 
