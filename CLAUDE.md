@@ -169,6 +169,15 @@ hold-to-talk, Wispr Flow replacement). Reviewed 2026-07-17. **Adopted**:
   Computing… between stop and paste; a watchdog + sidecar-exit abort path
   guarantee the session can't hang. Raw text also feeds `handle_heard_text`
   so History/goals still count dictated speech (fillers included).
+  Start/stop edges: the pill shows a gray "starting…" sweep until the sidecar's
+  `capturing` event says the mic stream is truly open (words spoken before that
+  are lost — the wave must not imply otherwise; `Audio.mic_capturing`); stop
+  keeps recording for `config.dictate_tail_seconds` (default 1.5s, both finish
+  modes, sidecar-owned timer) so releasing the key never clips the last word —
+  the wave keeps going through the tail, then Computing…. Paste uses
+  `selection::paste_text_smart`: a Shift+Left / copy / Right probe reads the
+  char before the cursor (clipboard stashed+restored) and prepends a space when
+  landing directly after a word or punctuation.
 - **Engines** (`config.transcribe_engine`, sidecar `--engine`): whisper
   (default, faster-whisper) | moonshine (fastest) | parakeet (most accurate),
   the sherpa-onnx pair auto-downloads models on first use (progress via status

@@ -6,7 +6,7 @@
 
 use std::io::{BufRead, BufReader, Write};
 use std::process::{Child, ChildStdin, Command, Stdio};
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Mutex;
 
 use serde::Serialize;
@@ -63,6 +63,10 @@ pub struct Audio {
     dictation: Mutex<Option<Dictation>>,
     /// Bumped per dictation; lets the completion watchdog detect staleness.
     dictation_gen: AtomicU64,
+    /// True once the sidecar reports the mic stream is genuinely open. Drives
+    /// the pill's warm-up state: words spoken before this are lost, so the
+    /// wave must not show until this flips.
+    mic_capturing: AtomicBool,
 }
 
 impl Audio {
@@ -73,6 +77,7 @@ impl Audio {
             status: Mutex::new(AudioStatus::default()),
             dictation: Mutex::new(None),
             dictation_gen: AtomicU64::new(0),
+            mic_capturing: AtomicBool::new(false),
         }
     }
 
@@ -155,6 +160,8 @@ impl Audio {
             .map_err(|e| format!("could not start the audio sidecar (is Python installed?): {e}"))?;
         let stdout = child.stdout.take().ok_or("sidecar produced no stdout")?;
         *self.stdin.lock().unwrap() = child.stdin.take();
+        // A fresh sidecar hasn't opened any stream yet.
+        self.mic_capturing.store(false, Ordering::SeqCst);
 
         {
             let mut st = self.status.lock().unwrap();
@@ -230,6 +237,25 @@ impl Audio {
                         let state = app2.state::<AppState>();
                         state.audio.dictation_result(&app2, text);
                     }
+                    "capturing" => {
+                        let source = v.get("source").and_then(|s| s.as_str()).unwrap_or("");
+                        if source == "microphone" {
+                            let state = app2.state::<AppState>();
+                            state.audio.mic_capturing.store(true, Ordering::SeqCst);
+                            // Warm-up over: if a dictation is recording, flip
+                            // the pill from "starting" to the live wave.
+                            if state
+                                .audio
+                                .dictation
+                                .lock()
+                                .unwrap()
+                                .as_ref()
+                                .is_some_and(|d| d.recording)
+                            {
+                                broadcast(&app2, "ts://dictate", json!({ "active": true }));
+                            }
+                        }
+                    }
                     "level" => {
                         let value = v.get("value").and_then(|x| x.as_i64()).unwrap_or(0);
                         let source = v.get("source").and_then(|s| s.as_str()).unwrap_or("system");
@@ -245,6 +271,7 @@ impl Audio {
             if let Ok(mut g) = state.audio.child.lock() {
                 *g = None;
             }
+            state.audio.mic_capturing.store(false, Ordering::SeqCst);
             // A dictation waiting on this sidecar can never complete now.
             state.audio.dictation_abort(&app2, "the transcriber exited");
             let payload = {
@@ -262,6 +289,7 @@ impl Audio {
 
     pub fn stop(&self) {
         *self.stdin.lock().unwrap() = None; // EOF tells a live sidecar to exit
+        self.mic_capturing.store(false, Ordering::SeqCst);
         if let Some(mut child) = self.child.lock().unwrap().take() {
             let _ = child.kill();
             let _ = child.wait();
@@ -318,7 +346,11 @@ impl Audio {
             deliver,
             recording: true,
         });
-        broadcast(app, "ts://dictate", json!({ "active": true }));
+        // Until the mic stream is truly open (Windows lights its own mic
+        // indicator at that moment), anything said is lost — show "starting"
+        // rather than a wave that implies we're hearing them.
+        let warming = !self.mic_capturing.load(Ordering::SeqCst);
+        broadcast(app, "ts://dictate", json!({ "active": true, "warming": warming }));
         let _ = app.emit_to("main", "ts://audio-status", self.status());
         Ok(())
     }
@@ -334,18 +366,35 @@ impl Audio {
                 _ => return, // idle, or already computing
             }
         }
-        broadcast(app, "ts://dictate", json!({ "active": false, "computing": true }));
-        if self.send_cmd(json!({ "cmd": "dictate", "on": false })).is_err() {
+        // Keep capturing for a short tail so releasing the key never clips the
+        // last word; the sidecar owns the actual tail timer.
+        let tail = {
+            let state = app.state::<AppState>();
+            let cfg = state.config.lock().unwrap();
+            cfg.dictate_tail_seconds.clamp(0.0, 5.0)
+        };
+        if self
+            .send_cmd(json!({ "cmd": "dictate", "on": false, "tail": tail }))
+            .is_err()
+        {
             // Sidecar already gone — nothing will ever answer.
             self.dictation_abort(app, "the transcriber is not running");
             return;
         }
-        // Watchdog: a wedged sidecar must not leave the app stuck "computing".
         let generation = self.dictation_gen.load(Ordering::SeqCst);
         let app2 = app.clone();
         std::thread::spawn(move || {
-            std::thread::sleep(std::time::Duration::from_secs(120));
+            // The pill keeps waving through the tail (still honestly
+            // recording), then flips to Computing….
+            std::thread::sleep(std::time::Duration::from_millis((tail * 1000.0) as u64));
             let state = app2.state::<AppState>();
+            if state.audio.dictation_gen.load(Ordering::SeqCst) == generation
+                && state.audio.is_dictating()
+            {
+                broadcast(&app2, "ts://dictate", json!({ "active": false, "computing": true }));
+            }
+            // Watchdog: a wedged sidecar must not leave the app stuck there.
+            std::thread::sleep(std::time::Duration::from_secs(120));
             if state.audio.dictation_gen.load(Ordering::SeqCst) == generation
                 && state.audio.is_dictating()
             {
@@ -392,7 +441,7 @@ impl Audio {
             match session.deliver {
                 Deliver::Paste => {
                     if !text.is_empty() {
-                        crate::selection::paste_text(&text);
+                        crate::selection::paste_text_smart(&text);
                     }
                 }
                 Deliver::View => {

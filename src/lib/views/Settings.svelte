@@ -393,6 +393,24 @@
       >
     </div>
 
+    <div class="slider">
+      <div class="field-label">
+        Keep recording after stop: {cfg.dictate_tail_seconds.toFixed(1)}s
+      </div>
+      <input
+        type="range"
+        min="0"
+        max="3"
+        step="0.5"
+        value={cfg.dictate_tail_seconds}
+        oninput={(e) => save("dictate_tail_seconds", Number(e.currentTarget.value))}
+      />
+      <div class="note">
+        A short grace period after the second press or key release, so ending
+        the dictation never clips your last word. Applies to both finish modes.
+      </div>
+    </div>
+
     <div class="field-label">AI polish (optional)</div>
     <div class="segmented">
       <button

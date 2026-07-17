@@ -255,7 +255,9 @@ DICTATION_MAX_SECONDS = 300  # hard RAM cap on one recording (~19 MB at 16k)
 
 class DictationRecorder:
     """Buffers raw microphone audio (RAM only) while dictation is on. On stop
-    the whole recording is queued for a single transcription pass."""
+    the recording keeps rolling for a short TAIL (so releasing the hotkey
+    mid-word never clips the ending), then the whole recording is queued for a
+    single transcription pass."""
 
     def __init__(self, np, jobs):
         self._np = np
@@ -263,6 +265,7 @@ class DictationRecorder:
         self._lock = threading.Lock()
         self._chunks = []
         self._rate = 16000
+        self._timer = None
         self.on = False
 
     def feed(self, arr, rate):
@@ -273,23 +276,39 @@ class DictationRecorder:
             if sum(len(c) for c in self._chunks) < rate * DICTATION_MAX_SECONDS:
                 self._chunks.append(arr.copy())
 
-    def set(self, on):
-        np = self._np
+    def set(self, on, tail=0.0):
         with self._lock:
             if on and not self.on:
+                if self._timer is not None:  # can't happen via the app's state
+                    self._timer.cancel()     # machine, but never merge takes
+                    self._timer = None
                 self._chunks = []
                 self.on = True
                 return
-            if not on and self.on:
-                self.on = False
-                chunks, rate = self._chunks, self._rate
-                self._chunks = []
+            if not on and self.on and self._timer is None:
+                if tail > 0:
+                    # Keep capturing through the tail, then finalize.
+                    self._timer = threading.Timer(tail, self._finalize)
+                    self._timer.daemon = True
+                    self._timer.start()
+                    return
             else:
                 return
+        self._finalize()
+
+    def _finalize(self):
+        np = self._np
+        with self._lock:
+            if not self.on:
+                return
+            self.on = False
+            self._timer = None
+            chunks, rate = self._chunks, self._rate
+            self._chunks = []
         audio = np.concatenate(chunks) if chunks else np.zeros(0, dtype=np.float32)
         try:
             # Always queued, even empty — the app is waiting on a completion.
-            self._jobs.put(( _resample_16k(audio, rate, np), "microphone", False, True))
+            self._jobs.put((_resample_16k(audio, rate, np), "microphone", False, True))
         except Exception:
             pass
 
@@ -443,6 +462,10 @@ class SourceWorker(threading.Thread):
         if opened is None:
             return  # _open already emitted a detailed warn
         st, rate, ch, is_float = opened
+        # The stream is genuinely open now (this is also the moment Windows
+        # lights its own mic-in-use indicator) — tell the app, so the pill can
+        # stop showing "starting" the instant audio is real.
+        emit({"event": "capturing", "source": self.source})
 
         endpointer = Endpointer(rate, np)
         was_dictating = False
@@ -495,7 +518,11 @@ def _watch_stdin(stop, recorder):
             except Exception:
                 continue
             if cmd.get("cmd") == "dictate" and recorder is not None:
-                recorder.set(bool(cmd.get("on")))
+                try:
+                    tail = max(0.0, min(5.0, float(cmd.get("tail", 0.0))))
+                except (TypeError, ValueError):
+                    tail = 0.0
+                recorder.set(bool(cmd.get("on")), tail)
     except Exception:
         pass
     stop.set()

@@ -83,6 +83,66 @@ pub fn capture_selection() -> String {
     text.trim().to_string()
 }
 
+/// Peek at the character immediately before the cursor in the focused field:
+/// Shift+Left selects it, the sentinel/Ctrl+C trick reads it, and Right
+/// collapses the selection back to the original caret position. Returns None
+/// when there is nothing before the cursor (or no text field has focus).
+/// The user's clipboard is stashed and restored exactly like a capture.
+fn char_before_cursor() -> Option<char> {
+    let mut clipboard = arboard::Clipboard::new().ok()?;
+    let previous = match clipboard.get_text() {
+        Ok(t) => Stash::Text(t),
+        Err(_) => match clipboard.get_image() {
+            Ok(img) => Stash::Image(img.to_owned_img()),
+            Err(_) => Stash::None,
+        },
+    };
+    let mut enigo = Enigo::new(&Settings::default()).ok()?;
+    release_modifiers(&mut enigo);
+    sleep(Duration::from_millis(30));
+    let _ = clipboard.set_text(SENTINEL);
+
+    let _ = enigo.key(Key::Shift, Press);
+    let _ = enigo.key(Key::LeftArrow, Click);
+    let _ = enigo.key(Key::Shift, Release);
+    let _ = enigo.key(Key::Control, Press);
+    let _ = enigo.key(Key::Unicode('c'), Click);
+    let _ = enigo.key(Key::Control, Release);
+    sleep(Duration::from_millis(90));
+    let grabbed = clipboard.get_text().unwrap_or_default();
+    // Collapse the probe selection back to where the caret was.
+    let _ = enigo.key(Key::RightArrow, Click);
+    sleep(Duration::from_millis(20));
+
+    match previous {
+        Stash::Text(prev) => {
+            let _ = clipboard.set_text(prev);
+        }
+        Stash::Image(img) => {
+            let _ = clipboard.set_image(img);
+        }
+        Stash::None => {
+            let _ = clipboard.clear();
+        }
+    }
+    if grabbed == SENTINEL {
+        return None; // nothing before the cursor / copy didn't take
+    }
+    grabbed.chars().next()
+}
+
+/// `paste_text`, but with a leading space added when the cursor sits directly
+/// after a word or punctuation ("meet at 3." + dictation → "meet at 3. And…").
+/// Used by dictation so pasted speech never fuses onto existing text.
+pub fn paste_text_smart(text: &str) {
+    let needs_space = char_before_cursor().is_some_and(|c| !c.is_whitespace());
+    if needs_space {
+        paste_text(&format!(" {text}"));
+    } else {
+        paste_text(text);
+    }
+}
+
 /// Put `text` on the clipboard and synthesize Ctrl+V so it lands at the cursor.
 /// If no text field has focus the paste is a harmless no-op and the text simply
 /// stays on the clipboard — used by hotkey dictation, where "it's on your

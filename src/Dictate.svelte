@@ -18,6 +18,7 @@
   const BOTTOM_MARGIN = 64; // logical px above the screen's bottom edge
 
   let active = $state(false);
+  let warming = $state(false); // mic stream not open yet — words would be lost
   let computing = $state(false); // stopped, waiting on the one-pass transcription
   let error = $state("");
   let amp = $state(0.45); // 0.3–1, follows the mic level
@@ -60,8 +61,14 @@
     }, 250);
     (async () => {
       unlisteners.push(
-        await listen<{ active: boolean; computing?: boolean; error?: string }>("ts://dictate", (e) => {
+        await listen<{
+          active: boolean;
+          warming?: boolean;
+          computing?: boolean;
+          error?: string;
+        }>("ts://dictate", (e) => {
           active = e.payload.active;
+          warming = e.payload.warming ?? false;
           computing = e.payload.computing ?? false;
           clearTimeout(errTimer);
           error = e.payload.error ?? "";
@@ -100,6 +107,25 @@
         />
       </svg>
       <span class="err-text">Dictation failed: {error}</span>
+    </div>
+  {:else if active && warming}
+    <!-- Mic stream not open yet: anything said right now is LOST. A distinct
+         loading sweep (hollow mic, dim gray bars) says "wait for the wave". -->
+    <div class="pill warming" bind:this={pillEl}>
+      <svg class="mic dim" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3Zm-6.5 8a.9.9 0 0 1 1.8 0 4.7 4.7 0 0 0 9.4 0 .9.9 0 0 1 1.8 0 6.5 6.5 0 0 1-5.6 6.42V20h2.2a.9.9 0 0 1 0 1.8H8.9a.9.9 0 0 1 0-1.8h2.2v-2.58A6.5 6.5 0 0 1 5.5 11Z"
+        />
+      </svg>
+      <div class="bars" aria-label="Starting">
+        {#each Array(BARS) as _, i}
+          <span
+            class="bar loading"
+            style="animation-delay: {(i * 0.09).toFixed(2)}s"
+          ></span>
+        {/each}
+      </div>
+      <span class="warm-label">starting…</span>
     </div>
   {:else if active}
     <div class="pill" bind:this={pillEl} style="--amp: {amp}">
@@ -185,6 +211,32 @@
   .pill.error {
     border-radius: 14px;
     max-width: 380px;
+  }
+  .pill.warming {
+    border-color: #7982a9;
+  }
+  .mic.dim {
+    fill: #7982a9;
+  }
+  .bar.loading {
+    background: #7982a9;
+    animation: load-sweep 0.9s ease-in-out infinite;
+  }
+  .warm-label {
+    color: #7982a9;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  @keyframes load-sweep {
+    0%,
+    100% {
+      transform: scaleY(0.18);
+      opacity: 0.5;
+    }
+    50% {
+      transform: scaleY(0.7);
+      opacity: 1;
+    }
   }
   .computing {
     color: #c0caf5;

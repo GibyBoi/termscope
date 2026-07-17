@@ -72,6 +72,8 @@ export interface Config {
   hotkey_dictate: string;
   /** How hotkey dictation ends: "toggle" (second press) | "hold" (release). */
   dictate_mode: string;
+  /** Seconds to keep recording after dictation stop (both modes). */
+  dictate_tail_seconds: number;
   close_to_tray: boolean;
   appearance: string;
   minimize_hint_shown: boolean;

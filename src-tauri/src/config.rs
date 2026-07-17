@@ -47,6 +47,9 @@ pub struct Config {
     pub hotkey_dictate: String,
     /// How hotkey dictation ends: "toggle" (press again) | "hold" (key release).
     pub dictate_mode: String,
+    /// Keep recording this long (seconds) after dictation is stopped, so
+    /// releasing the key never clips the last word. Applies to both modes.
+    pub dictate_tail_seconds: f64,
 
     // Window / app behavior.
     pub close_to_tray: bool,
@@ -106,6 +109,7 @@ impl Default for Config {
             hotkey_toggle_listening: "ctrl+shift+alt+space".into(),
             hotkey_dictate: "ctrl+shift+alt+d".into(),
             dictate_mode: "toggle".into(),
+            dictate_tail_seconds: 1.5,
             close_to_tray: false,
             appearance: "dark".into(),
             minimize_hint_shown: false,
