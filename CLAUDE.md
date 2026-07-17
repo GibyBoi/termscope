@@ -46,13 +46,18 @@ its data. The separation knobs, and the checklist to revert when v3 ships:
   is `config.dictate_mode`: "toggle" (second press, 500ms autorepeat debounce
   in `commands::run_dictate_event`) or "hold" (key release — `lib.rs` forwards
   BOTH shortcut edges for this hotkey only). While live, `ts://dictate
-  {active}` drives a pulsing red mic badge in the cards overlay (the overlay
-  window now shows when `dictating` even with zero cards). The Dictation VIEW
-  emits the same event for its sessions (`emitTo` from JS), so the badge covers
-  both flows; a failed hotkey start emits `{active:false, error}` and the
-  overlay shows the error for 6s — dictation failures are never silent. The
-  view also displays the current `hotkey_dictate` as a read-only reference
-  (binding is changed in Settings only).
+  {active}` drives the **dictation indicator pill**: a third window
+  ("dictate" — `dictate.html` + `src/Dictate.svelte`, built hidden in
+  `lib.rs`, `capabilities/dictate.json`), transparent/always-on-top/
+  skip-taskbar, which its own frontend sizes and centers just above the
+  screen's bottom edge while active. It shows a mic glyph + bars whose crest
+  travels end to end (staggered CSS keyframes) with height following the real
+  mic level (`ts://level` is broadcast to it). The Dictation VIEW emits the
+  same event for its sessions (`emitTo` from JS), so the pill covers both
+  flows; a failed hotkey start emits `{active:false, error}` and the pill
+  shows the error for 6s — dictation failures are never silent. The view also
+  displays the current `hotkey_dictate` as a read-only reference (binding is
+  changed in Settings only).
 - **Hotkeys are unbindable**: "" = unbound (skipped at registration; Esc in the
   Settings recorder unbinds; `set_hotkey` accepts empty; `reset_hotkey` restores
   the build default and returns it; per-row ↺ button in Settings).
