@@ -152,22 +152,39 @@ works through a Python sidecar (`sidecar/listen.py`, faster-whisper) — see the
   frontend requires a modifier (F-keys exempt). All three hotkeys (explain selection,
   mark last learned, toggle listening) are registered at startup and live-rebound.
 
-## SpeakEasy comparison — adopted + candidate ideas (v3)
+## SpeakEasy comparison — adopted ideas (v3)
 ForgeAISystem/speakeasy is Harsh's local dictation app (Electron + sherpa-onnx,
-hold-to-talk, Wispr Flow replacement). Reviewed 2026-07-17 for transcript
-quality. **Adopted**: stretched-filler collapse, doubled-punctuation collapse,
-first-letter capitalization (`audio.rs::{clean_fillers,finalize_dictation}`,
-mirrored in `Dictation.svelte`). **Candidates worth stealing later**:
-- Whole-recording transcription for dictation (one Whisper pass over the full
-  session instead of per-utterance emission — best possible punctuation).
-- Better models via sherpa-onnx: NVIDIA Parakeet (accuracy), Moonshine (speed);
-  transducer models don't hallucinate punctuation the way Whisper does.
-- Dictionary corrections ("it hears X, write Y") and voice snippets.
-- Optional LLM polish pass (Ollama local / Claude API) for false starts and
-  self-corrections — off by default; SpeakEasy's system prompt is a good base.
-- Audio safety net: recordings hit disk before transcription, retryable from
-  History on failure, recovered after a crash (TermScope would need this to
-  stay consistent with its no-audio-on-disk privacy stance — likely skip).
+hold-to-talk, Wispr Flow replacement). Reviewed 2026-07-17. **Adopted**:
+- Rule-based cleanup: stretched-filler collapse, doubled-punctuation collapse,
+  first-letter capitalization (`audio.rs::{clean_fillers,finalize_dictation}`).
+- **Whole-recording dictation**: dictation buffers the full mic recording in
+  the sidecar (RAM only, 5 min cap) and transcribes it in ONE pass on stop —
+  coherent punctuation, no seams. The utterance streaming (Endpointer) remains
+  ONLY for Listening (jargon cards + History tallies); mic streaming pauses
+  during a dictation so nothing is transcribed twice. Flow: stdin command
+  `{"cmd":"dictate","on":bool}` → sidecar `DictationRecorder` → `dictation`
+  event → `audio.rs::dictation_result` cleans (fillers → corrections →
+  finalize → optional polish), delivers (`Deliver::Paste` hotkey / `::View`
+  event `ts://dictation-result`), restores prior Listening. The pill shows
+  Computing… between stop and paste; a watchdog + sidecar-exit abort path
+  guarantee the session can't hang. Raw text also feeds `handle_heard_text`
+  so History/goals still count dictated speech (fillers included).
+- **Engines** (`config.transcribe_engine`, sidecar `--engine`): whisper
+  (default, faster-whisper) | moonshine (fastest) | parakeet (most accurate),
+  the sherpa-onnx pair auto-downloads models on first use (progress via status
+  events; SpeakEasy's known-good release URLs) and needs `pip install
+  sherpa-onnx`; anything missing falls back to whisper with a visible warn.
+- **Corrections** ("it hears X, write Y"): `corrections.rs` →
+  `corrections.json` (user data — storage-safety rules apply), applied to
+  dictation output with word boundaries + casing enforcement; editor in
+  Settings; empty `hears` = casing-only entry.
+- **Ollama polish** (`polish.rs`, off by default): local-only second pass
+  (127.0.0.1:11434, `config.polish_provider`/`polish_model`, keep_alive 30m),
+  any failure falls back to the rule-based text. No cloud provider on purpose.
+
+**Deliberately NOT adopted**: SpeakEasy's audio safety net (recordings written
+to disk before transcription) — it contradicts TermScope's no-audio-on-disk
+privacy stance. Voice snippets remain unadopted for now.
 
 ## Growing the dictionary (discover-jargon skill)
 - `.claude/skills/discover-jargon/` (SKILL.md + `jargon_tool.py`): the model generates

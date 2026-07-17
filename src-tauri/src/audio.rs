@@ -5,7 +5,8 @@
 //! limited, like the legacy `NotificationManager.offer`).
 
 use std::io::{BufRead, BufReader, Write};
-use std::process::{Child, Command, Stdio};
+use std::process::{Child, ChildStdin, Command, Stdio};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Mutex;
 
 use serde::Serialize;
@@ -34,25 +35,44 @@ enum PriorAudio {
     OnRestarted,
 }
 
-/// A live hotkey-dictation session: mic speech accumulating as cleaned text.
-/// RAM only — the buffer is never persisted; on stop it goes to the clipboard.
+/// Where a finished dictation's text goes.
+#[derive(Clone, Copy, PartialEq)]
+pub enum Deliver {
+    /// Clipboard + synthesized Ctrl+V at the cursor (the hotkey flow).
+    Paste,
+    /// `ts://dictation-result` to the hub's Dictation view.
+    View,
+}
+
+/// A live dictation session. The AUDIO is buffered in the sidecar (RAM only);
+/// this side tracks who gets the text and what Listening looked like before.
 struct Dictation {
-    buffer: String,
     prior: PriorAudio,
+    deliver: Deliver,
+    /// True while recording; false once stopped and waiting on the sidecar's
+    /// one-pass transcription (the "Computing…" phase).
+    recording: bool,
 }
 
 pub struct Audio {
     child: Mutex<Option<Child>>,
+    /// The sidecar's stdin — commands go down as JSON lines; dropping it (on
+    /// stop) is what tells the sidecar to shut down (EOF).
+    stdin: Mutex<Option<ChildStdin>>,
     status: Mutex<AudioStatus>,
     dictation: Mutex<Option<Dictation>>,
+    /// Bumped per dictation; lets the completion watchdog detect staleness.
+    dictation_gen: AtomicU64,
 }
 
 impl Audio {
     pub fn new() -> Self {
         Self {
             child: Mutex::new(None),
+            stdin: Mutex::new(None),
             status: Mutex::new(AudioStatus::default()),
             dictation: Mutex::new(None),
+            dictation_gen: AtomicU64::new(0),
         }
     }
 
@@ -108,12 +128,19 @@ impl Audio {
             .map(Stdio::from)
             .unwrap_or_else(|_| Stdio::null());
 
+        let engine = {
+            let state = app.state::<AppState>();
+            let cfg = state.config.lock().unwrap();
+            cfg.transcribe_engine.clone()
+        };
         let mut cmd = Command::new("python");
         cmd.arg(&script)
             .arg("--models-dir")
             .arg(&models_dir)
             .arg("--sources")
             .arg(sources.join(","))
+            .arg("--engine")
+            .arg(&engine)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(err_out);
@@ -127,6 +154,7 @@ impl Audio {
             .spawn()
             .map_err(|e| format!("could not start the audio sidecar (is Python installed?): {e}"))?;
         let stdout = child.stdout.take().ok_or("sidecar produced no stdout")?;
+        *self.stdin.lock().unwrap() = child.stdin.take();
 
         {
             let mut st = self.status.lock().unwrap();
@@ -194,18 +222,13 @@ impl Audio {
                     "text" => {
                         if let Some(text) = v.get("text").and_then(|s| s.as_str()) {
                             let source = v.get("source").and_then(|s| s.as_str()).unwrap_or("system");
-                            // Live dictation taps the mic stream (filler cut here,
-                            // RAM only) — and the normal pipeline still runs, so
-                            // cards and history behave exactly as when listening.
-                            if source == "microphone" {
-                                let state = app2.state::<AppState>();
-                                if state.audio.is_dictating() {
-                                    let cleaned = clean_fillers(text, &state.filler_words);
-                                    state.audio.dictation_append(&cleaned);
-                                }
-                            }
                             handle_heard_text(&app2, text, source);
                         }
+                    }
+                    "dictation" => {
+                        let text = v.get("text").and_then(|s| s.as_str()).unwrap_or("").to_string();
+                        let state = app2.state::<AppState>();
+                        state.audio.dictation_result(&app2, text);
                     }
                     "level" => {
                         let value = v.get("value").and_then(|x| x.as_i64()).unwrap_or(0);
@@ -222,6 +245,8 @@ impl Audio {
             if let Ok(mut g) = state.audio.child.lock() {
                 *g = None;
             }
+            // A dictation waiting on this sidecar can never complete now.
+            state.audio.dictation_abort(&app2, "the transcriber exited");
             let payload = {
                 let mut st = state.audio.status.lock().unwrap();
                 st.listening = false;
@@ -236,6 +261,7 @@ impl Audio {
     }
 
     pub fn stop(&self) {
+        *self.stdin.lock().unwrap() = None; // EOF tells a live sidecar to exit
         if let Some(mut child) = self.child.lock().unwrap().take() {
             let _ = child.kill();
             let _ = child.wait();
@@ -245,15 +271,23 @@ impl Audio {
         st.reason = "off".into();
     }
 
-    // ---- hotkey dictation -----------------------------------------------------
+    /// Send one JSON command line down the sidecar's stdin.
+    fn send_cmd(&self, cmd: serde_json::Value) -> Result<(), String> {
+        let mut guard = self.stdin.lock().unwrap();
+        let stdin = guard.as_mut().ok_or("transcriber is not running")?;
+        writeln!(stdin, "{cmd}").and_then(|_| stdin.flush()).map_err(|e| e.to_string())
+    }
+
+    // ---- dictation ------------------------------------------------------------
 
     pub fn is_dictating(&self) -> bool {
         self.dictation.lock().unwrap().is_some()
     }
 
-    /// Begin a dictation session: make sure the microphone is being captured
-    /// (borrowing or starting the sidecar as needed) and start accumulating.
-    pub fn dictate_start(&self, app: &AppHandle) -> Result<(), String> {
+    /// Begin a dictation session: ensure the microphone is being captured
+    /// (borrowing or starting the sidecar as needed) and tell the sidecar to
+    /// start buffering the whole recording.
+    pub fn dictate_start(&self, app: &AppHandle, deliver: Deliver) -> Result<(), String> {
         {
             let dict = self.dictation.lock().unwrap();
             if dict.is_some() {
@@ -269,7 +303,7 @@ impl Audio {
             self.start_with(app, Some(vec!["microphone"]))?;
             PriorAudio::Off
         } else if mic_configured {
-            // The running sidecar already captures the mic; just tap the stream.
+            // The running sidecar already captures the mic.
             PriorAudio::OnUntouched
         } else {
             // Listening is on but system-only: restart with the mic added.
@@ -277,25 +311,117 @@ impl Audio {
             self.start_with(app, Some(vec!["system", "microphone"]))?;
             PriorAudio::OnRestarted
         };
+        self.send_cmd(json!({ "cmd": "dictate", "on": true }))?;
+        self.dictation_gen.fetch_add(1, Ordering::SeqCst);
         *self.dictation.lock().unwrap() = Some(Dictation {
-            buffer: String::new(),
             prior,
+            deliver,
+            recording: true,
         });
         broadcast(app, "ts://dictate", json!({ "active": true }));
         let _ = app.emit_to("main", "ts://audio-status", self.status());
         Ok(())
     }
 
-    /// End the dictation session: restore Listening to how the user had it,
-    /// then deliver the cleaned text — pasted at the cursor via a synthesized
-    /// Ctrl+V, and left on the clipboard either way.
+    /// Stop recording: the sidecar transcribes the whole recording in one pass
+    /// and answers with a `dictation` event (handled by `dictation_result`).
+    /// Until then the session sits in the "Computing…" phase.
     pub fn dictate_stop(&self, app: &AppHandle) {
+        {
+            let mut guard = self.dictation.lock().unwrap();
+            match guard.as_mut() {
+                Some(d) if d.recording => d.recording = false,
+                _ => return, // idle, or already computing
+            }
+        }
+        broadcast(app, "ts://dictate", json!({ "active": false, "computing": true }));
+        if self.send_cmd(json!({ "cmd": "dictate", "on": false })).is_err() {
+            // Sidecar already gone — nothing will ever answer.
+            self.dictation_abort(app, "the transcriber is not running");
+            return;
+        }
+        // Watchdog: a wedged sidecar must not leave the app stuck "computing".
+        let generation = self.dictation_gen.load(Ordering::SeqCst);
+        let app2 = app.clone();
+        std::thread::spawn(move || {
+            std::thread::sleep(std::time::Duration::from_secs(120));
+            let state = app2.state::<AppState>();
+            if state.audio.dictation_gen.load(Ordering::SeqCst) == generation
+                && state.audio.is_dictating()
+            {
+                state.audio.dictation_abort(&app2, "transcription timed out");
+            }
+        });
+    }
+
+    /// A dictation completion arrived from the sidecar: clean the text,
+    /// deliver it, and put Listening back the way the user had it. Runs the
+    /// pipeline off the reader thread — polish may take seconds.
+    fn dictation_result(&self, app: &AppHandle, raw: String) {
+        let session = match self.dictation.lock().unwrap().take() {
+            Some(s) => s,
+            None => return, // aborted or never ours
+        };
+        self.dictation_gen.fetch_add(1, Ordering::SeqCst);
+        self.restore_prior(app, session.prior);
+        let app2 = app.clone();
+        std::thread::spawn(move || {
+            let state = app2.state::<AppState>();
+            // History/cards see the RAW text — history counts what was SAID,
+            // fillers included (the goals need them); cards may pop for jargon.
+            if !raw.is_empty() {
+                handle_heard_text(&app2, &raw, "microphone");
+            }
+            let (cleaned, fillers_cut) = clean_fillers(&raw, &state.filler_words);
+            let corrected = state.corrections.apply(&cleaned);
+            let mut text = finalize_dictation(&corrected);
+            let mut polished = false;
+            let (provider, model) = {
+                let cfg = state.config.lock().unwrap();
+                (cfg.polish_provider.clone(), cfg.polish_model.clone())
+            };
+            if provider == "ollama" && !text.is_empty() {
+                match crate::polish::ollama_polish(&text, &model) {
+                    Ok(p) => {
+                        text = p;
+                        polished = true;
+                    }
+                    Err(e) => eprintln!("[termscope] polish skipped: {e}"),
+                }
+            }
+            match session.deliver {
+                Deliver::Paste => {
+                    if !text.is_empty() {
+                        crate::selection::paste_text(&text);
+                    }
+                }
+                Deliver::View => {
+                    let _ = app2.emit_to(
+                        "main",
+                        "ts://dictation-result",
+                        json!({ "text": text, "fillersCut": fillers_cut, "polished": polished }),
+                    );
+                }
+            }
+            broadcast(&app2, "ts://dictate", json!({ "active": false }));
+            let _ = app2.emit_to("main", "ts://audio-status", state.audio.status());
+        });
+    }
+
+    /// Tear down a dictation session that can no longer complete.
+    pub fn dictation_abort(&self, app: &AppHandle, reason: &str) {
         let session = match self.dictation.lock().unwrap().take() {
             Some(s) => s,
             None => return,
         };
-        broadcast(app, "ts://dictate", json!({ "active": false }));
-        match session.prior {
+        self.dictation_gen.fetch_add(1, Ordering::SeqCst);
+        self.restore_prior(app, session.prior);
+        broadcast(app, "ts://dictate", json!({ "active": false, "error": reason }));
+        let _ = app.emit_to("main", "ts://audio-status", self.status());
+    }
+
+    fn restore_prior(&self, app: &AppHandle, prior: PriorAudio) {
+        match prior {
             PriorAudio::Off => self.stop(),
             PriorAudio::OnUntouched => {}
             PriorAudio::OnRestarted => {
@@ -304,24 +430,6 @@ impl Audio {
                     eprintln!("[termscope] dictation: could not restore listening: {e}");
                 }
             }
-        }
-        let _ = app.emit_to("main", "ts://audio-status", self.status());
-        let text = finalize_dictation(&session.buffer);
-        if !text.is_empty() {
-            crate::selection::paste_text(&text);
-        }
-    }
-
-    /// Feed a mic utterance into the live dictation buffer (filler already cut).
-    fn dictation_append(&self, cleaned: &str) {
-        if cleaned.is_empty() {
-            return;
-        }
-        if let Some(d) = self.dictation.lock().unwrap().as_mut() {
-            if !d.buffer.is_empty() {
-                d.buffer.push(' ');
-            }
-            d.buffer.push_str(cleaned);
         }
     }
 }
@@ -356,9 +464,10 @@ fn collapse_runs(s: &str, max: usize) -> String {
 /// Tokens are matched by their normalized (lowercase alphanumeric) core, same
 /// as the tallies; stretched forms ("ummmmm") are collapsed before matching so
 /// they drop too. Runs of identical punctuation-only tokens left behind by a
-/// removal collapse to one.
-fn clean_fillers(text: &str, fillers: &std::collections::HashSet<String>) -> String {
+/// removal collapse to one. Returns the cleaned text and how many fillers fell.
+fn clean_fillers(text: &str, fillers: &std::collections::HashSet<String>) -> (String, u64) {
     let mut kept: Vec<&str> = Vec::new();
+    let mut cut = 0u64;
     for w in text.split_whitespace() {
         let core: String = w
             .chars()
@@ -371,6 +480,7 @@ fn clean_fillers(text: &str, fillers: &std::collections::HashSet<String>) -> Str
                 || fillers.contains(&collapse_runs(&core, 2))
                 || fillers.contains(&collapse_runs(&core, 1)));
         if is_filler {
+            cut += 1;
             continue;
         }
         if core.is_empty() && kept.last() == Some(&w) {
@@ -378,7 +488,7 @@ fn clean_fillers(text: &str, fillers: &std::collections::HashSet<String>) -> Str
         }
         kept.push(w);
     }
-    kept.join(" ")
+    (kept.join(" "), cut)
 }
 
 /// Final polish for a finished dictation, SpeakEasy-style: collapse repeated
@@ -489,22 +599,22 @@ mod tests {
     fn clean_fillers_drops_normalized_tokens_keeps_rest() {
         let f: HashSet<String> = ["um".to_string(), "basically".to_string()].into();
         assert_eq!(
-            clean_fillers("Um, so basically we ship Friday.", &f),
+            clean_fillers("Um, so basically we ship Friday.", &f).0,
             "so we ship Friday."
         );
-        assert_eq!(clean_fillers("um UM Um.", &f), "");
-        assert_eq!(clean_fillers("", &f), "");
+        assert_eq!(clean_fillers("um UM Um.", &f), (String::new(), 3));
+        assert_eq!(clean_fillers("", &f), (String::new(), 0));
         // Punctuation-only tokens left doubled by a removal collapse to one.
-        assert_eq!(clean_fillers("wait — um — what", &f), "wait — what");
+        assert_eq!(clean_fillers("wait — um — what", &f).0, "wait — what");
     }
 
     #[test]
     fn clean_fillers_catches_stretched_forms() {
         let f: HashSet<String> = ["um".to_string(), "hmm".to_string()].into();
-        assert_eq!(clean_fillers("ummmmm right", &f), "right");
-        assert_eq!(clean_fillers("Hmmmmm, maybe.", &f), "maybe.");
+        assert_eq!(clean_fillers("ummmmm right", &f), ("right".to_string(), 1));
+        assert_eq!(clean_fillers("Hmmmmm, maybe.", &f).0, "maybe.");
         // A legitimately doubled letter is not a stretched filler.
-        assert_eq!(clean_fillers("moon buggy", &f), "moon buggy");
+        assert_eq!(clean_fillers("moon buggy", &f), ("moon buggy".to_string(), 0));
     }
 
     #[test]

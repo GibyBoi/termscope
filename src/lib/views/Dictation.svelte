@@ -1,114 +1,40 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { emitTo, listen, type UnlistenFn } from "@tauri-apps/api/event";
+  import { listen, type UnlistenFn } from "@tauri-apps/api/event";
   import * as api from "../api";
   import type { AudioStatus } from "../types";
 
-  // Dictation: microphone speech → text, with filler words cut as it arrives.
-  // Everything here lives in RAM only — the dictated text is never written to
-  // disk, matching the app's no-transcripts privacy design. (While Listening is
-  // on, the orderless History tallies still count the words, as always.)
+  // Dictation, the SpeakEasy way: press Start, speak, press Stop — the WHOLE
+  // recording is transcribed in one pass (coherent punctuation, no seams),
+  // filler words are cut, corrections applied, and the text lands here.
+  // Everything stays in RAM; dictated text is never written to disk. The
+  // backend owns the session (same flow as the dictate hotkey) and restores
+  // Listening to however you had it afterwards.
 
   let { audio }: { audio: AudioStatus } = $props();
 
-  let active = $state(false); // are we currently appending dictation?
+  type Phase = "idle" | "recording" | "computing";
+  let phase = $state<Phase>("idle");
   let text = $state("");
   let fillersCut = $state(0);
-  let fillerWords = $state<Set<string>>(new Set());
-  let micEnabled = $state(true); // mirrors config.listen_microphone
+  let polished = $state(false);
   let hotkey = $state(""); // config.hotkey_dictate, shown as a reference only
-  let startedListening = false; // we turned Listening on → turn it off after
   let copied = $state(false);
   let error = $state("");
 
-  /** The bottom-center indicator pill tracks view sessions too. */
-  function indicator(active: boolean) {
-    emitTo("dictate", "ts://dictate", { active }).catch(() => {});
-  }
-
-  /** Same normalization as the Rust tokenizer: lowercase alphanumeric core. */
-  function norm(word: string): string {
-    return word.toLowerCase().replace(/[^a-z0-9]/g, "");
-  }
-
-  /** Collapse letter runs to at most n ("ummmmm" → "um"/"umm"/"ummm"). */
-  function collapseRuns(s: string, n: number): string {
-    return s.replace(new RegExp(`(.)\\1{${n},}`, "g"), "$1".repeat(n));
-  }
-
-  function isFiller(word: string): boolean {
-    const core = norm(word);
-    if (!core) return false;
-    return (
-      fillerWords.has(core) ||
-      fillerWords.has(collapseRuns(core, 3)) ||
-      fillerWords.has(collapseRuns(core, 2)) ||
-      fillerWords.has(collapseRuns(core, 1))
-    );
-  }
-
-  /** Cut filler words (stretched forms too) from an utterance. */
-  function clean(utterance: string): string {
-    const kept: string[] = [];
-    for (const w of utterance.split(/\s+/)) {
-      if (!w) continue;
-      if (isFiller(w)) {
-        fillersCut += 1;
-        continue;
-      }
-      kept.push(w);
-    }
-    return kept.join(" ");
-  }
-
-  function append(utterance: string) {
-    const cleaned = clean(utterance);
-    if (!cleaned) return;
-    text = text ? `${text} ${cleaned}` : cleaned;
-  }
-
-  async function refreshMicEnabled() {
-    try {
-      const cfg = await api.getConfig();
-      micEnabled = cfg.listen_microphone;
-      hotkey = cfg.hotkey_dictate;
-    } catch {}
-  }
-
   async function start() {
     error = "";
-    await refreshMicEnabled();
-    if (!micEnabled) return; // the inline warning shows the fix
-    if (!audio.listening) {
-      try {
-        await api.toggleListening();
-        startedListening = true;
-      } catch (e) {
-        error = String(e);
-        return;
-      }
+    try {
+      await api.dictationBegin();
+      // phase flips via ts://dictate so hotkey + view sessions stay in sync
+    } catch (e) {
+      error = String(e);
     }
-    active = true;
-    indicator(true);
   }
 
   async function stop() {
-    active = false;
-    indicator(false);
-    // If dictation turned Listening on, turn it back off — leave the app the
-    // way the user had it.
-    if (startedListening) {
-      startedListening = false;
-      try {
-        if ((await api.isListening()) === true) await api.toggleListening();
-      } catch {}
-    }
-  }
-
-  async function enableMic() {
     try {
-      await api.setConfigKey("listen_microphone", true);
-      micEnabled = true;
+      await api.dictationEnd();
     } catch (e) {
       error = String(e);
     }
@@ -133,6 +59,7 @@
   function clear() {
     text = "";
     fillersCut = 0;
+    polished = false;
   }
 
   let words = $derived(text.trim() ? text.trim().split(/\s+/).length : 0);
@@ -141,27 +68,43 @@
     const unlisteners: UnlistenFn[] = [];
     (async () => {
       try {
-        fillerWords = new Set(await api.getFillerWords());
+        hotkey = (await api.getConfig()).hotkey_dictate;
       } catch {}
-      await refreshMicEnabled();
       unlisteners.push(
-        await listen<{ text: string; source?: string }>("ts://heard", (e) => {
-          // Microphone only: dictation is what YOU say, never system audio.
-          if (active && e.payload.source === "microphone") {
-            append(e.payload.text);
-          }
-        }),
+        await listen<{ active: boolean; computing?: boolean; error?: string }>(
+          "ts://dictate",
+          (e) => {
+            if (e.payload.error) {
+              error = e.payload.error;
+              phase = "idle";
+            } else if (e.payload.active) {
+              phase = "recording";
+            } else if (e.payload.computing) {
+              phase = "computing";
+            } else {
+              phase = "idle";
+            }
+          },
+        ),
+      );
+      unlisteners.push(
+        await listen<{ text: string; fillersCut: number; polished: boolean }>(
+          "ts://dictation-result",
+          (e) => {
+            phase = "idle";
+            if (e.payload.text) {
+              text = text ? `${text}\n${e.payload.text}` : e.payload.text;
+            }
+            fillersCut += e.payload.fillersCut;
+            polished = e.payload.polished;
+          },
+        ),
       );
     })();
     return () => {
       unlisteners.forEach((u) => u());
-      if (active) indicator(false); // leaving the view ends the session
-      if (startedListening) {
-        // Leaving the view mid-dictation: release the mic we turned on.
-        api.isListening().then((on) => {
-          if (on) api.toggleListening().catch(() => {});
-        });
-      }
+      // Leaving mid-recording ends the session (backend restores Listening).
+      if (phase !== "idle") api.dictationEnd().catch(() => {});
     };
   });
 </script>
@@ -171,8 +114,8 @@
     <div>
       <h1>Dictation</h1>
       <p class="subtitle">
-        Speak into your microphone — your words appear here with the filler cut
-        out.
+        Speak, stop, and the whole recording is transcribed in one pass — with
+        the filler cut out.
       </p>
       <p class="hotkey-ref">
         {#if hotkey}
@@ -186,36 +129,33 @@
     </div>
     <button
       class="rec-btn"
-      class:active
-      onclick={() => (active ? stop() : start())}
+      class:active={phase === "recording"}
+      disabled={phase === "computing"}
+      onclick={() => (phase === "recording" ? stop() : start())}
     >
-      {active ? "■ Stop" : "● Start dictating"}
+      {#if phase === "recording"}■ Stop{:else if phase === "computing"}Computing…{:else}● Start dictating{/if}
     </button>
   </header>
 
-  {#if !micEnabled}
-    <div class="warn">
-      The microphone is disabled in Settings, so there's nothing to dictate
-      from.
-      <button class="warn-fix" onclick={enableMic}>Enable microphone</button>
-    </div>
-  {/if}
   {#if error}
     <div class="warn">{error}</div>
   {/if}
-  {#if active && !audio.ready}
+  {#if phase === "recording" && !audio.ready}
     <div class="note">
-      {audio.reason || "Starting the transcriber…"} — dictation begins once
+      {audio.reason || "Starting the transcriber…"} — recording begins once
       audio is captured.
     </div>
+  {/if}
+  {#if phase === "computing"}
+    <div class="note">Transcribing your recording…</div>
   {/if}
 
   <textarea
     class="pad"
     bind:value={text}
-    placeholder={active
-      ? "Listening… start talking."
-      : "Press “Start dictating”, then speak. Your cleaned-up words land here — edit them freely."}
+    placeholder={phase === "recording"
+      ? "Recording… speak freely, then press Stop."
+      : "Press “Start dictating”, speak, then Stop. The transcript lands here — edit it freely."}
   ></textarea>
 
   <div class="toolbar">
@@ -223,6 +163,9 @@
       {words.toLocaleString()} word{words === 1 ? "" : "s"}
       {#if fillersCut > 0}
         &nbsp;·&nbsp; <span class="cut">{fillersCut} filler{fillersCut === 1 ? "" : "s"} cut ✂</span>
+      {/if}
+      {#if polished}
+        &nbsp;·&nbsp; <span class="pol">polished ✦</span>
       {/if}
     </span>
     <div class="actions">
@@ -234,8 +177,9 @@
   </div>
 
   <p class="privacy">
-    🔒 Dictated text lives only in this window and is never saved to disk.
-    Closing the app (or Clear) discards it — copy what you want to keep.
+    🔒 Recordings and dictated text live only in memory and are never saved to
+    disk. Closing the app (or Clear) discards the text — copy what you want to
+    keep.
   </p>
 </div>
 
@@ -286,13 +230,17 @@
     font-weight: 600;
     transition: background 0.12s;
   }
-  .rec-btn:hover {
+  .rec-btn:hover:not(:disabled) {
     background: var(--accent);
     color: var(--bg);
   }
   .rec-btn.active {
     background: var(--red);
     color: var(--bg);
+  }
+  .rec-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
   }
 
   .warn {
@@ -303,20 +251,6 @@
     padding: 10px 14px;
     font-size: 12px;
     margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    justify-content: space-between;
-  }
-  .warn-fix {
-    flex-shrink: 0;
-    height: 28px;
-    padding: 0 12px;
-    border-radius: 8px;
-    background: var(--red);
-    color: var(--bg);
-    font-size: 12px;
-    font-weight: 600;
   }
   .note {
     background: color-mix(in srgb, var(--gold) 14%, transparent);
@@ -360,6 +294,9 @@
   }
   .cut {
     color: var(--gold);
+  }
+  .pol {
+    color: var(--purple);
   }
   .actions {
     display: flex;

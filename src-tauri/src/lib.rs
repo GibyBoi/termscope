@@ -5,6 +5,7 @@
 mod audio;
 mod commands;
 mod config;
+mod corrections;
 mod dictionary;
 mod history;
 mod knowledge;
@@ -12,6 +13,7 @@ mod library;
 mod matcher;
 mod notifier;
 mod paths;
+mod polish;
 mod removed;
 mod selection;
 mod startup;
@@ -182,6 +184,11 @@ pub fn run() {
             commands::is_listening,
             commands::audio_status,
             commands::toggle_listening,
+            commands::dictation_begin,
+            commands::dictation_end,
+            commands::get_corrections,
+            commands::add_correction,
+            commands::remove_correction,
         ])
         .build(tauri::generate_context!())
         .expect("error while building TermScope")

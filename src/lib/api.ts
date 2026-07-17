@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type {
   AudioStatus,
   Config,
+  Correction,
   Detail,
   Entry,
   History,
@@ -50,6 +51,14 @@ export const setStartup = (enabled: boolean) =>
 export const audioStatus = () => invoke<AudioStatus>("audio_status");
 export const isListening = () => invoke<boolean>("is_listening");
 export const toggleListening = () => invoke<boolean>("toggle_listening");
+
+export const dictationBegin = () => invoke("dictation_begin");
+export const dictationEnd = () => invoke("dictation_end");
+export const getCorrections = () => invoke<Correction[]>("get_corrections");
+export const addCorrection = (hears: string, write: string) =>
+  invoke("add_correction", { hears, write });
+export const removeCorrection = (index: number) =>
+  invoke("remove_correction", { index });
 
 const CATEGORY_COLORS: Record<string, string> = {
   tech: "var(--cyan)",

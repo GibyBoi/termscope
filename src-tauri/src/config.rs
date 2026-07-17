@@ -62,6 +62,15 @@ pub struct Config {
     /// filler (e.g. 5.0 = "at most 5% filler"). 0 disables the goal display.
     pub filler_goal_percent: f64,
 
+    /// Transcription engine: "whisper" | "moonshine" | "parakeet". Non-whisper
+    /// engines need sherpa-onnx installed; the model downloads on first use.
+    /// Applies the next time the sidecar starts.
+    pub transcribe_engine: String,
+    /// Optional LLM polish of dictation output: "off" | "ollama" (local only).
+    pub polish_provider: String,
+    /// Ollama model tag for polish (e.g. "llama3.2:1b").
+    pub polish_model: String,
+
     /// Forward compatibility: settings this build doesn't know (written by a
     /// newer version, or by the legacy Python app) are retained here and
     /// round-tripped on save instead of being silently deleted. Rolling back a
@@ -102,6 +111,9 @@ impl Default for Config {
             minimize_hint_shown: false,
             track_history: true,
             filler_goal_percent: 5.0,
+            transcribe_engine: "whisper".into(),
+            polish_provider: "off".into(),
+            polish_model: "llama3.2:1b".into(),
             extra: serde_json::Map::new(),
         }
     }

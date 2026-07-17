@@ -407,7 +407,7 @@ pub fn run_dictate_event(app: AppHandle, pressed: bool) {
         };
         if hold {
             if pressed && !state.audio.is_dictating() {
-                if let Err(e) = state.audio.dictate_start(&app) {
+                if let Err(e) = state.audio.dictate_start(&app, crate::audio::Deliver::Paste) {
                     report(e);
                 }
             } else if !pressed && state.audio.is_dictating() {
@@ -427,10 +427,44 @@ pub fn run_dictate_event(app: AppHandle, pressed: bool) {
         }
         if state.audio.is_dictating() {
             state.audio.dictate_stop(&app);
-        } else if let Err(e) = state.audio.dictate_start(&app) {
+        } else if let Err(e) = state.audio.dictate_start(&app, crate::audio::Deliver::Paste) {
             report(e);
         }
     });
+}
+
+/// Start a dictation session from the hub's Dictation view; the finished text
+/// arrives there as a `ts://dictation-result` event.
+#[tauri::command]
+pub fn dictation_begin(app: AppHandle, state: State<AppState>) -> Result<(), String> {
+    state.audio.dictate_start(&app, crate::audio::Deliver::View)
+}
+
+/// Stop recording and kick off the one-pass transcription ("Computing…").
+#[tauri::command]
+pub fn dictation_end(app: AppHandle, state: State<AppState>) {
+    state.audio.dictate_stop(&app);
+}
+
+// ---- dictation corrections ---------------------------------------------------
+
+#[tauri::command]
+pub fn get_corrections(state: State<AppState>) -> Vec<crate::corrections::Correction> {
+    state.corrections.list()
+}
+
+#[tauri::command]
+pub fn add_correction(state: State<AppState>, hears: String, write: String) -> Result<(), String> {
+    if write.trim().is_empty() {
+        return Err("the replacement text can't be empty".into());
+    }
+    state.corrections.add(hears.trim().to_string(), write.trim().to_string());
+    Ok(())
+}
+
+#[tauri::command]
+pub fn remove_correction(state: State<AppState>, index: usize) {
+    state.corrections.remove(index);
 }
 
 /// Worker for the toggle-listening global hotkey.

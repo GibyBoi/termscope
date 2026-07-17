@@ -78,6 +78,18 @@ export interface Config {
   track_history: boolean;
   /** Filler-reduction goal: max % of mic words that may be filler; 0 = off. */
   filler_goal_percent: number;
+  /** Transcription engine: "whisper" | "moonshine" | "parakeet". */
+  transcribe_engine: string;
+  /** Optional dictation polish: "off" | "ollama" (local only). */
+  polish_provider: string;
+  /** Ollama model tag used for polish. */
+  polish_model: string;
+}
+
+/** One dictation correction: what the model hears → what to write. */
+export interface Correction {
+  hears: string;
+  write: string;
 }
 
 export interface AudioStatus {

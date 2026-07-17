@@ -10,6 +10,7 @@ use tauri::{AppHandle, Manager};
 
 use crate::audio::Audio;
 use crate::config::Config;
+use crate::corrections::Corrections;
 use crate::dictionary::{self, TermEntry};
 use crate::history::History;
 use crate::knowledge::Knowledge;
@@ -33,6 +34,8 @@ pub struct AppState {
     pub filler_words: HashSet<String>,
     /// User-deleted terms/words (the "not jargon" overlay) — see `removed.rs`.
     pub removed: Removed,
+    /// Dictation "hears X, write Y" dictionary — see `corrections.rs`.
+    pub corrections: Corrections,
 }
 
 impl AppState {
@@ -54,6 +57,7 @@ impl AppState {
         let knowledge = Knowledge::new(paths::knowledge_path());
         let history = History::new(paths::history_path());
         let removed = Removed::new(paths::removed_path());
+        let corrections = Corrections::new(paths::corrections_path());
 
         Self {
             config: Mutex::new(config),
@@ -67,6 +71,7 @@ impl AppState {
             audio: Audio::new(),
             filler_words,
             removed,
+            corrections,
         }
     }
 

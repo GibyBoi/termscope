@@ -18,6 +18,7 @@
   const BOTTOM_MARGIN = 64; // logical px above the screen's bottom edge
 
   let active = $state(false);
+  let computing = $state(false); // stopped, waiting on the one-pass transcription
   let error = $state("");
   let amp = $state(0.45); // 0.3–1, follows the mic level
   let pillEl = $state<HTMLDivElement>();
@@ -47,7 +48,7 @@
   }
 
   async function refresh() {
-    if (active || error) await reposition();
+    if (active || computing || error) await reposition();
     else await getCurrentWindow().hide();
   }
 
@@ -59,8 +60,9 @@
     }, 250);
     (async () => {
       unlisteners.push(
-        await listen<{ active: boolean; error?: string }>("ts://dictate", (e) => {
+        await listen<{ active: boolean; computing?: boolean; error?: string }>("ts://dictate", (e) => {
           active = e.payload.active;
+          computing = e.payload.computing ?? false;
           clearTimeout(errTimer);
           error = e.payload.error ?? "";
           if (error) {
@@ -111,6 +113,15 @@
           <span class="bar" style="animation-delay: {(i * 0.11).toFixed(2)}s"></span>
         {/each}
       </div>
+    </div>
+  {:else if computing}
+    <div class="pill" bind:this={pillEl}>
+      <svg class="mic" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3Zm-6.5 8a.9.9 0 0 1 1.8 0 4.7 4.7 0 0 0 9.4 0 .9.9 0 0 1 1.8 0 6.5 6.5 0 0 1-5.6 6.42V20h2.2a.9.9 0 0 1 0 1.8H8.9a.9.9 0 0 1 0-1.8h2.2v-2.58A6.5 6.5 0 0 1 5.5 11Z"
+        />
+      </svg>
+      <span class="computing">Computing<span class="d1">.</span><span class="d2">.</span><span class="d3">.</span></span>
     </div>
   {/if}
 </div>
@@ -174,6 +185,29 @@
   .pill.error {
     border-radius: 14px;
     max-width: 380px;
+  }
+  .computing {
+    color: #c0caf5;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .computing span {
+    animation: blink 1.2s infinite;
+  }
+  .computing .d2 {
+    animation-delay: 0.2s;
+  }
+  .computing .d3 {
+    animation-delay: 0.4s;
+  }
+  @keyframes blink {
+    0%,
+    60% {
+      opacity: 1;
+    }
+    30% {
+      opacity: 0.2;
+    }
   }
   .err-text {
     color: #ff8a8a;

@@ -1,17 +1,27 @@
 #!/usr/bin/env python
-"""TermScope audio sidecar (faster-whisper, fully offline) — continuous capture.
+"""TermScope audio sidecar (fully offline) — continuous capture + dictation.
 
 Spawned by the Tauri app. Continuously captures system audio (WASAPI loopback)
-and/or the microphone, reports a live audio level, and transcribes speech offline
-with faster-whisper. Emits JSON lines on stdout:
+and/or the microphone, reports a live audio level, and transcribes speech
+offline. Engines: faster-whisper (default), or Moonshine / NVIDIA Parakeet via
+sherpa-onnx (`--engine`, models auto-downloaded on first use). Emits JSON lines
+on stdout:
 
-  {"event":"status","ready":true,"model":"whisper-<size>"}
+  {"event":"status","ready":true,"model":"..."}
   {"event":"status","ready":false,"reason":"..."}
   {"event":"warn","source":"...","reason":"..."}
   {"event":"level","source":"...","value":0-100}        ~3x/sec, for the UI meter
   {"event":"text","text":"...","source":"system"|"microphone"}
+  {"event":"dictation","text":"..."}                    a finished dictation
 
-Stops when the parent closes our stdin or the process is killed.
+Commands arrive as JSON lines on stdin (`{"cmd":"dictate","on":true|false}`);
+stdin EOF still means shut down. While dictation is ON, raw microphone audio is
+buffered (RAM only) and mic utterance streaming pauses; on OFF the WHOLE
+recording is transcribed in one pass (split at quiet points only past the
+engine's decode limit) — the SpeakEasy approach: one pass over the full audio
+gives coherent punctuation and can never double a word at a seam. The
+utterance streaming (Endpointer) remains the pipeline for Listening — jargon
+cards and History tallies — where live, incremental text is the point.
 
 IMPORTANT: one shared PyAudio instance is used for all sources and is terminated
 exactly once at shutdown. Per-worker PyAudio()/terminate() caused a native
@@ -23,10 +33,13 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import queue
 import sys
+import tarfile
 import threading
 import time
+import urllib.request
 
 MODEL_SIZE = "base.en"      # tiny.en | base.en | small.en | medium.en
 SILENCE_FLOOR = 60          # int16 peak below which audio counts as silence
@@ -54,12 +67,231 @@ def emit(obj: dict) -> None:
 
 
 def _resample_16k(x_f32, src_rate, np):
-    """float32 mono [-1,1] -> float32 mono at 16 kHz (what Whisper expects)."""
+    """float32 mono [-1,1] -> float32 mono at 16 kHz (what the engines expect)."""
     if src_rate == 16000:
         return x_f32
     n = max(1, int(len(x_f32) * 16000 / src_rate))
     idx = np.linspace(0, len(x_f32) - 1, n)
     return np.interp(idx, np.arange(len(x_f32)), x_f32).astype(np.float32)
+
+
+# ---------------------------------------------------------------------------
+# Transcription engines
+# ---------------------------------------------------------------------------
+
+# sherpa-onnx model catalog (same release archives SpeakEasy ships).
+SHERPA_MODELS = {
+    "moonshine": {
+        "label": "Moonshine Base",
+        "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-moonshine-base-en-int8.tar.bz2",
+        "dir": "sherpa-onnx-moonshine-base-en-int8",
+    },
+    "parakeet": {
+        "label": "Parakeet 0.6B v2",
+        "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-nemo-parakeet-tdt-0.6b-v2-int8.tar.bz2",
+        "dir": "sherpa-onnx-nemo-parakeet-tdt-0.6b-v2-int8",
+    },
+}
+
+
+def _find_model_file(model_dir, patterns, prefer_int8=True):
+    files = sorted(os.listdir(model_dir))
+    matches = [f for f in files if any(p in f.lower() for p in patterns)]
+    if not matches:
+        raise FileNotFoundError(f"no {patterns} file in {model_dir}")
+    if prefer_int8:
+        for f in matches:
+            if "int8" in f:
+                return os.path.join(model_dir, f)
+    for f in matches:
+        if "int8" not in f:
+            return os.path.join(model_dir, f)
+    return os.path.join(model_dir, matches[0])
+
+
+def _ensure_sherpa_model(engine, models_dir):
+    """Download + extract the engine's model archive on first use. Progress is
+    surfaced through status events so Settings can show what's happening."""
+    info = SHERPA_MODELS[engine]
+    dest = os.path.join(models_dir, info["dir"])
+    if os.path.isdir(dest) and any(f.endswith(".onnx") for f in os.listdir(dest)):
+        return dest
+    os.makedirs(models_dir, exist_ok=True)
+    archive = os.path.join(models_dir, info["dir"] + ".tar.bz2")
+    last_pct = [-10]
+
+    def hook(blocks, block_size, total):
+        if total <= 0:
+            return
+        pct = int(min(99, blocks * block_size * 100 / total))
+        if pct >= last_pct[0] + 5:
+            last_pct[0] = pct
+            emit({"event": "status", "ready": False,
+                  "reason": f"downloading {info['label']} model… {pct}%"})
+
+    emit({"event": "status", "ready": False,
+          "reason": f"downloading {info['label']} model…"})
+    urllib.request.urlretrieve(info["url"], archive, reporthook=hook)
+    emit({"event": "status", "ready": False,
+          "reason": f"unpacking {info['label']} model…"})
+    with tarfile.open(archive, "r:bz2") as tar:
+        try:
+            tar.extractall(models_dir, filter="data")
+        except TypeError:  # Python < 3.12 has no extract filters
+            tar.extractall(models_dir)
+    try:
+        os.remove(archive)
+    except OSError:
+        pass
+    if not os.path.isdir(dest):
+        raise FileNotFoundError(f"archive did not contain {info['dir']}")
+    return dest
+
+
+class WhisperEngine:
+    """faster-whisper (the original engine). Decodes ~30s max per pass, so
+    long dictations are split at quiet points (`needs_split`)."""
+
+    needs_split = True
+
+    def __init__(self, model_size, models_dir):
+        from faster_whisper import WhisperModel
+
+        self._model = WhisperModel(model_size, device="cpu", compute_type="int8",
+                                   download_root=(models_dir or None))
+        self.name = f"whisper-{model_size}"
+
+    def transcribe(self, audio_16k):
+        segments, _ = self._model.transcribe(audio_16k, language="en", beam_size=1,
+                                             vad_filter=True,
+                                             condition_on_previous_text=False)
+        return " ".join(s.text.strip() for s in segments).strip()
+
+
+class SherpaEngine:
+    """Moonshine / Parakeet via sherpa-onnx. Transducer-family models: faster
+    than Whisper on CPU and far less prone to hallucinated punctuation."""
+
+    needs_split = False
+
+    def __init__(self, engine, models_dir):
+        import sherpa_onnx
+
+        model_dir = _ensure_sherpa_model(engine, models_dir)
+        tokens = _find_model_file(model_dir, ["tokens"], prefer_int8=False)
+        if engine == "moonshine":
+            self._rec = sherpa_onnx.OfflineRecognizer.from_moonshine(
+                preprocessor=_find_model_file(model_dir, ["preprocess"]),
+                encoder=_find_model_file(model_dir, ["encode"]),
+                uncached_decoder=_find_model_file(model_dir, ["uncached_decode"]),
+                cached_decoder=_find_model_file(model_dir, ["cached_decode"]),
+                tokens=tokens,
+                num_threads=4,
+            )
+        else:  # parakeet
+            self._rec = sherpa_onnx.OfflineRecognizer.from_transducer(
+                encoder=_find_model_file(model_dir, ["encoder"]),
+                decoder=_find_model_file(model_dir, ["decoder"]),
+                joiner=_find_model_file(model_dir, ["joiner"]),
+                tokens=tokens,
+                num_threads=4,
+                model_type="nemo_transducer",
+            )
+        self.name = SHERPA_MODELS[engine]["label"]
+
+    def transcribe(self, audio_16k):
+        s = self._rec.create_stream()
+        s.accept_waveform(16000, audio_16k)
+        self._rec.decode_stream(s)
+        return (s.result.text or "").strip()
+
+
+def make_engine(engine, model_size, models_dir):
+    """Build the requested engine; sherpa problems fall back to whisper with a
+    visible warning rather than dying silently."""
+    if engine in SHERPA_MODELS:
+        try:
+            return SherpaEngine(engine, models_dir)
+        except ImportError:
+            emit({"event": "warn", "source": "engine",
+                  "reason": f"{engine} needs sherpa-onnx (pip install sherpa-onnx); using whisper"})
+        except Exception as exc:
+            emit({"event": "warn", "source": "engine",
+                  "reason": f"{engine} unavailable ({exc}); using whisper"})
+    return WhisperEngine(model_size, models_dir)
+
+
+WHISPER_MAX_SECONDS = 28  # whisper decodes ~30s max per pass
+
+
+def split_at_quiet(samples, rate, max_seconds, np):
+    """Split long audio at the quietest 200ms of each boundary window so a
+    limited decoder never silently truncates. A split, never an overlap."""
+    limit = int(max_seconds * rate)
+    if len(samples) <= limit:
+        return [samples]
+    parts = []
+    start = 0
+    while len(samples) - start > limit:
+        lo = start + int((max_seconds - 8) * rate)
+        hi = start + limit
+        win = int(0.2 * rate)
+        seg = np.abs(samples[lo:hi])
+        csum = np.concatenate([[0.0], np.cumsum(seg, dtype=np.float64)])
+        sums = csum[win:] - csum[:-win]
+        cut = lo + int(np.argmin(sums)) + win // 2
+        parts.append(samples[start:cut])
+        start = cut
+    parts.append(samples[start:])
+    return parts
+
+
+# ---------------------------------------------------------------------------
+# Dictation recording
+# ---------------------------------------------------------------------------
+
+DICTATION_MAX_SECONDS = 300  # hard RAM cap on one recording (~19 MB at 16k)
+
+
+class DictationRecorder:
+    """Buffers raw microphone audio (RAM only) while dictation is on. On stop
+    the whole recording is queued for a single transcription pass."""
+
+    def __init__(self, np, jobs):
+        self._np = np
+        self._jobs = jobs
+        self._lock = threading.Lock()
+        self._chunks = []
+        self._rate = 16000
+        self.on = False
+
+    def feed(self, arr, rate):
+        with self._lock:
+            if not self.on:
+                return
+            self._rate = rate
+            if sum(len(c) for c in self._chunks) < rate * DICTATION_MAX_SECONDS:
+                self._chunks.append(arr.copy())
+
+    def set(self, on):
+        np = self._np
+        with self._lock:
+            if on and not self.on:
+                self._chunks = []
+                self.on = True
+                return
+            if not on and self.on:
+                self.on = False
+                chunks, rate = self._chunks, self._rate
+                self._chunks = []
+            else:
+                return
+        audio = np.concatenate(chunks) if chunks else np.zeros(0, dtype=np.float32)
+        try:
+            # Always queued, even empty — the app is waiting on a completion.
+            self._jobs.put(( _resample_16k(audio, rate, np), "microphone", False, True))
+        except Exception:
+            pass
 
 
 class Endpointer:
@@ -149,7 +381,7 @@ class SourceWorker(threading.Thread):
     Uses the SHARED PyAudio instance `p`; it never creates or terminates one.
     """
 
-    def __init__(self, source, pa_module, p, numpy, jobs, stop):
+    def __init__(self, source, pa_module, p, numpy, jobs, stop, recorder=None):
         super().__init__(daemon=True)
         self.source = source
         self._pa = pa_module   # module, for constants (paInt16, paWASAPI)
@@ -157,6 +389,7 @@ class SourceWorker(threading.Thread):
         self._np = numpy
         self._jobs = jobs
         self._stop = stop
+        self._recorder = recorder  # DictationRecorder, mic worker only
         self.peak = 0          # most recent capture peak, read by the heartbeat
 
     def _resolve_device(self):
@@ -212,6 +445,7 @@ class SourceWorker(threading.Thread):
         st, rate, ch, is_float = opened
 
         endpointer = Endpointer(rate, np)
+        was_dictating = False
         while not self._stop.is_set():
             try:
                 data = st.read(4000, exception_on_overflow=False)
@@ -225,9 +459,21 @@ class SourceWorker(threading.Thread):
                 arr = arr.reshape(-1, ch).mean(axis=1)
             if arr.size:
                 self.peak = max(self.peak, int(float(np.abs(arr).max()) * 32768))
+
+            # Dictation (mic only): buffer raw audio for the one-pass
+            # transcription and pause utterance streaming so nothing is
+            # transcribed twice. The endpointer restarts fresh afterwards.
+            dictating = bool(self._recorder and self._recorder.on)
+            if dictating:
+                self._recorder.feed(arr, rate)
+                was_dictating = True
+                continue
+            if was_dictating:
+                was_dictating = False
+                endpointer = Endpointer(rate, np)
             for utt, forced in endpointer.feed(arr):
                 try:
-                    self._jobs.put_nowait((_resample_16k(utt, rate, np), self.source, forced))
+                    self._jobs.put_nowait((_resample_16k(utt, rate, np), self.source, forced, False))
                 except queue.Full:
                     pass
         try:
@@ -237,10 +483,19 @@ class SourceWorker(threading.Thread):
             pass
 
 
-def _watch_stdin(stop):
+def _watch_stdin(stop, recorder):
+    """stdin carries commands as JSON lines; EOF still means shut down."""
     try:
-        for _ in sys.stdin:
-            pass
+        for line in sys.stdin:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                cmd = json.loads(line)
+            except Exception:
+                continue
+            if cmd.get("cmd") == "dictate" and recorder is not None:
+                recorder.set(bool(cmd.get("on")))
     except Exception:
         pass
     stop.set()
@@ -256,33 +511,37 @@ def main() -> int:
     ap.add_argument("--model", default=MODEL_SIZE)
     ap.add_argument("--models-dir", default="")
     ap.add_argument("--sources", default="system,microphone")
+    ap.add_argument("--engine", default="whisper",
+                    choices=["whisper", "moonshine", "parakeet"])
     args = ap.parse_args()
 
     try:
         import numpy
         import pyaudiowpatch as pyaudio
-        from faster_whisper import WhisperModel
     except ImportError as exc:
         emit({"event": "status", "ready": False, "reason": f"audio deps missing: {exc}"})
         return 1
 
     try:
-        model = WhisperModel(args.model, device="cpu", compute_type="int8",
-                             download_root=(args.models_dir or None))
+        engine = make_engine(args.engine, args.model, args.models_dir)
     except Exception as exc:
-        emit({"event": "status", "ready": False, "reason": f"whisper load failed: {exc}"})
+        emit({"event": "status", "ready": False, "reason": f"engine load failed: {exc}"})
         return 1
 
-    emit({"event": "status", "ready": True, "model": f"whisper-{args.model}"})
+    emit({"event": "status", "ready": True, "model": engine.name})
 
     stop = threading.Event()
-    threading.Thread(target=_watch_stdin, args=(stop,), daemon=True).start()
+    # The queue is unbounded-ish for dictation completions (put), bounded for
+    # streaming (put_nowait + drop) — a dictation result must never be lost.
     jobs: "queue.Queue" = queue.Queue(maxsize=8)
+    recorder = DictationRecorder(numpy, jobs)
+    threading.Thread(target=_watch_stdin, args=(stop, recorder), daemon=True).start()
 
     pa = pyaudio.PyAudio()  # ONE shared instance for all sources
     workers = []
     for src in [s.strip() for s in args.sources.split(",") if s.strip()]:
-        w = SourceWorker(src, pyaudio, pa, numpy, jobs, stop)
+        w = SourceWorker(src, pyaudio, pa, numpy, jobs, stop,
+                         recorder=(recorder if src == "microphone" else None))
         w.start()
         workers.append(w)
 
@@ -308,13 +567,25 @@ def main() -> int:
 
     while not stop.is_set():
         try:
-            audio, source, forced = jobs.get(timeout=0.3)
+            audio, source, forced, is_dictation = jobs.get(timeout=0.3)
         except queue.Empty:
             continue
+        if is_dictation:
+            # A finished dictation: one pass over the whole recording (split at
+            # quiet points only when the engine's decoder demands it). Always
+            # answered, even empty — the app is waiting on this completion.
+            text = ""
+            try:
+                if audio.size:
+                    parts = (split_at_quiet(audio, 16000, WHISPER_MAX_SECONDS, numpy)
+                             if engine.needs_split else [audio])
+                    text = " ".join(t for t in (engine.transcribe(p) for p in parts) if t).strip()
+            except Exception as exc:
+                emit({"event": "warn", "source": "dictation", "reason": str(exc)})
+            emit({"event": "dictation", "text": text})
+            continue
         try:
-            segments, _ = model.transcribe(audio, language="en", beam_size=1,
-                                           vad_filter=True, condition_on_previous_text=False)
-            text = " ".join(s.text.strip() for s in segments).strip()
+            text = engine.transcribe(audio)
         except Exception:
             text = ""
         if text:

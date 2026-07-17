@@ -3,21 +3,53 @@
   import { listen, type UnlistenFn } from "@tauri-apps/api/event";
   import { ask, save as saveDialog } from "@tauri-apps/plugin-dialog";
   import {
+    addCorrection,
     beginCardPlacement,
     exportProgress,
     getConfig,
+    getCorrections,
+    removeCorrection,
     resetHotkey,
     setConfigKey,
     setHotkey,
     setStartup,
     startupEnabled,
   } from "../api";
-  import type { Config } from "../types";
+  import type { Config, Correction } from "../types";
 
   let { config, onReset }: { config: Config; onReset: () => void } = $props();
 
   let cfg = $state({ ...config });
   let startup = $state(false);
+  let corrections = $state<Correction[]>([]);
+  let newHears = $state("");
+  let newWrite = $state("");
+  let correctionError = $state("");
+
+  async function refreshCorrections() {
+    try {
+      corrections = await getCorrections();
+    } catch {}
+  }
+
+  async function doAddCorrection() {
+    correctionError = "";
+    try {
+      await addCorrection(newHears, newWrite);
+      newHears = "";
+      newWrite = "";
+      await refreshCorrections();
+    } catch (e) {
+      correctionError = String(e);
+    }
+  }
+
+  async function doRemoveCorrection(index: number) {
+    try {
+      await removeCorrection(index);
+      await refreshCorrections();
+    } catch {}
+  }
 
   // Refetch when config changes elsewhere (e.g. the cards window saving a
   // custom placement) so hints like "Saved at x, y" don't go stale. Debounced:
@@ -33,6 +65,7 @@
       try {
         startup = await startupEnabled();
       } catch {}
+      await refreshCorrections();
       unlisten = await listen("ts://config", () => {
         clearTimeout(cfgRefetch);
         cfgRefetch = setTimeout(async () => {
@@ -217,6 +250,32 @@
       <span class="track"></span>
       <span>Start listening automatically on launch</span>
     </label>
+
+    <div class="field-label">Transcription model</div>
+    <div class="segmented">
+      <button
+        class:active={cfg.transcribe_engine === "whisper"}
+        onclick={() => save("transcribe_engine", "whisper")}
+        title="OpenAI Whisper base.en via faster-whisper (the original engine)"
+        >Whisper</button
+      >
+      <button
+        class:active={cfg.transcribe_engine === "moonshine"}
+        onclick={() => save("transcribe_engine", "moonshine")}
+        title="Fastest. 240 MB download on first use.">Moonshine</button
+      >
+      <button
+        class:active={cfg.transcribe_engine === "parakeet"}
+        onclick={() => save("transcribe_engine", "parakeet")}
+        title="Best accuracy. 460 MB download on first use.">Parakeet</button
+      >
+    </div>
+    <div class="note">
+      Moonshine (fastest) and Parakeet (most accurate) run via sherpa-onnx
+      (<code>pip install sherpa-onnx</code>) and download their model on first
+      use — watch the Listening status for progress. Applies the next time
+      Listening or dictation starts; falls back to Whisper if unavailable.
+    </div>
   </section>
 
   <section class="group">
@@ -333,6 +392,62 @@
         title="Hold the keys while speaking, release to finish">Key release</button
       >
     </div>
+
+    <div class="field-label">AI polish (optional)</div>
+    <div class="segmented">
+      <button
+        class:active={cfg.polish_provider !== "ollama"}
+        onclick={() => save("polish_provider", "off")}>Off</button
+      >
+      <button
+        class:active={cfg.polish_provider === "ollama"}
+        onclick={() => save("polish_provider", "ollama")}
+        title="Second cleanup pass through a local Ollama model">Ollama (local)</button
+      >
+    </div>
+    {#if cfg.polish_provider === "ollama"}
+      <div class="polish-row">
+        <span class="field-label">Model</span>
+        <input
+          class="text-input"
+          value={cfg.polish_model}
+          onchange={(e) => save("polish_model", e.currentTarget.value.trim())}
+          placeholder="llama3.2:1b"
+        />
+      </div>
+      <div class="note">
+        Runs entirely on this machine against Ollama at 127.0.0.1. Removes
+        false starts and self-corrections. Adds roughly 1 to 3 seconds per
+        dictation with a warm 1B-class model (about 1 GB of RAM while loaded;
+        kept warm for 30 minutes after use). If Ollama isn't running or the
+        model isn't pulled, dictation silently falls back to the unpolished
+        text.
+      </div>
+    {/if}
+
+    <div class="subhead">Corrections ("it hears X, write Y")</div>
+    <div class="note">
+      Fix words the transcriber reliably gets wrong: names, clients, jargon.
+      Leave "hears" empty to only enforce the casing of the written form
+      (e.g. GitHub).
+    </div>
+    {#each corrections as c, i}
+      <div class="corr-row">
+        <span class="corr-hears">{c.hears || "(any casing)"}</span>
+        <span class="corr-arrow">→</span>
+        <span class="corr-write">{c.write}</span>
+        <button class="corr-del" title="Remove" onclick={() => doRemoveCorrection(i)}>✕</button>
+      </div>
+    {/each}
+    <div class="corr-add">
+      <input class="text-input" placeholder="hears… (optional)" bind:value={newHears} />
+      <span class="corr-arrow">→</span>
+      <input class="text-input" placeholder="write…" bind:value={newWrite} />
+      <button class="corr-add-btn" onclick={doAddCorrection} disabled={!newWrite.trim()}>Add</button>
+    </div>
+    {#if correctionError}
+      <p class="hotkey-error">{correctionError}</p>
+    {/if}
   </section>
 
   <section class="group">
@@ -556,6 +671,86 @@
   .reset-btn:hover {
     color: var(--text);
     background: var(--surface3);
+  }
+  .text-input {
+    height: 30px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 0 10px;
+    font-size: 12px;
+  }
+  .text-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .polish-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 6px 0;
+  }
+  .corr-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: 12px;
+  }
+  .corr-hears {
+    color: var(--text-muted);
+    min-width: 120px;
+  }
+  .corr-arrow {
+    color: var(--text-faint);
+  }
+  .corr-write {
+    font-weight: 600;
+    flex: 1;
+  }
+  .corr-del {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    color: var(--text-faint);
+    font-size: 11px;
+  }
+  .corr-del:hover {
+    color: var(--red);
+    background: var(--surface3);
+  }
+  .corr-add {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .corr-add .text-input {
+    flex: 1;
+  }
+  .corr-add-btn {
+    height: 30px;
+    padding: 0 14px;
+    border-radius: 8px;
+    background: var(--accent-dim);
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .corr-add-btn:hover:not(:disabled) {
+    background: var(--accent);
+    color: var(--bg);
+  }
+  .corr-add-btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+  code {
+    background: var(--surface2);
+    border-radius: 4px;
+    padding: 1px 5px;
+    font-size: 10px;
   }
   .kbd.recording {
     color: var(--gold);
