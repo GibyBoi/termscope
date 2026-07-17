@@ -24,11 +24,12 @@ export default defineConfig({
     },
   },
   build: {
-    // Two windows = two HTML entry points (hub + floating cards).
+    // One HTML entry point per window (hub + floating cards + dictation pill).
     rollupOptions: {
       input: {
         main: "index.html",
         cards: "cards.html",
+        dictate: "dictate.html",
       },
     },
   },

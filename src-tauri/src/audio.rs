@@ -210,11 +210,8 @@ impl Audio {
                     "level" => {
                         let value = v.get("value").and_then(|x| x.as_i64()).unwrap_or(0);
                         let source = v.get("source").and_then(|s| s.as_str()).unwrap_or("system");
-                        let _ = app2.emit_to(
-                            "main",
-                            "ts://level",
-                            json!({ "value": value, "source": source }),
-                        );
+                        // The dictation pill scales its wave by the mic level.
+                        broadcast(&app2, "ts://level", json!({ "value": value, "source": source }));
                     }
                     _ => {}
                 }
@@ -329,10 +326,9 @@ impl Audio {
     }
 }
 
-/// Emit to both windows — the cards overlay draws the speaking indicator and
-/// the hub may mirror the state.
+/// Emit to the indicator pill window and the hub.
 fn broadcast(app: &AppHandle, event: &str, payload: serde_json::Value) {
-    let _ = app.emit_to("cards", event, payload.clone());
+    let _ = app.emit_to("dictate", event, payload.clone());
     let _ = app.emit_to("main", event, payload);
 }
 

@@ -21,9 +21,9 @@
   let copied = $state(false);
   let error = $state("");
 
-  /** The speaking badge in the cards overlay tracks view sessions too. */
+  /** The bottom-center indicator pill tracks view sessions too. */
   function indicator(active: boolean) {
-    emitTo("cards", "ts://dictate", { active }).catch(() => {});
+    emitTo("dictate", "ts://dictate", { active }).catch(() => {});
   }
 
   /** Same normalization as the Rust tokenizer: lowercase alphanumeric core. */

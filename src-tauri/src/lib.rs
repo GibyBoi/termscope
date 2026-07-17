@@ -91,6 +91,22 @@ pub fn run() {
                 .visible(false)
                 .build()?;
 
+            // The dictation indicator: a tiny transparent always-on-top pill,
+            // positioned bottom-center by its own frontend while dictation is
+            // live (see Dictate.svelte). Hidden otherwise.
+            WebviewWindowBuilder::new(app, "dictate", WebviewUrl::App("dictate.html".into()))
+                .title("TermScope Dictation Indicator")
+                .inner_size(240.0, 64.0)
+                .decorations(false)
+                .transparent(true)
+                .always_on_top(true)
+                .skip_taskbar(true)
+                .resizable(false)
+                .shadow(false)
+                .focused(false)
+                .visible(false)
+                .build()?;
+
             // Register the configured global hotkeys.
             #[cfg(desktop)]
             {

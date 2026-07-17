@@ -402,7 +402,7 @@ pub fn run_dictate_event(app: AppHandle, pressed: bool) {
         let report = |e: String| {
             eprintln!("[termscope] dictate hotkey: {e}");
             let payload = json!({ "active": false, "error": e });
-            let _ = app.emit_to("cards", "ts://dictate", payload.clone());
+            let _ = app.emit_to("dictate", "ts://dictate", payload.clone());
             let _ = app.emit_to("main", "ts://dictate", payload);
         };
         if hold {
