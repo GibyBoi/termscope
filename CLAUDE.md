@@ -37,6 +37,24 @@ its data. The separation knobs, and the checklist to revert when v3 ships:
   filler words as utterances arrive (`ts://heard` now carries `source`; the view
   keeps only `microphone`). Start auto-enables Listening (and turns it back off
   if dictation turned it on); Copy/Clear; the text is RAM-only, never persisted.
+- **Hotkey dictation** (`audio.rs::{dictate_start,dictate_stop}`): the
+  `hotkey_dictate` global hotkey starts a backend dictation session — borrows or
+  spawns the sidecar for the mic (`PriorAudio` records what to restore), cleans
+  filler per utterance (`clean_fillers`, unit-tested), and on finish puts the
+  text on the clipboard and synthesizes Ctrl+V (`selection::paste_text`) so it
+  lands at the cursor; no focused field → it's simply on the clipboard. Finish
+  is `config.dictate_mode`: "toggle" (second press, 500ms autorepeat debounce
+  in `commands::run_dictate_event`) or "hold" (key release — `lib.rs` forwards
+  BOTH shortcut edges for this hotkey only). While live, `ts://dictate
+  {active}` drives a pulsing red mic badge in the cards overlay (the overlay
+  window now shows when `dictating` even with zero cards).
+- **Hotkeys are unbindable**: "" = unbound (skipped at registration; Esc in the
+  Settings recorder unbinds; `set_hotkey` accepts empty; `reset_hotkey` restores
+  the build default and returns it; per-row ↺ button in Settings).
+- **Clipboard safety** (`selection.rs`): capture stashes text OR images and
+  restores on every path (clears if there was nothing to restore); the sentinel
+  is printable so a killed-mid-capture process can't leave an
+  invisible-looking clipboard.
 
 Local-only Windows 11 desktop app that explains tech/business/company jargon. A
 **Rust (Tauri V2) backend** + **Svelte 5 (Vite) frontend** rewrite of the original

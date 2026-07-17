@@ -26,6 +26,7 @@
   }
 
   let items: Item[] = $state([]);
+  let dictating = $state(false); // hotkey dictation live → show the speaking badge
   let queue: Item[] = [];
   const activeIds = new Set<string>();
   let maxCards = 6;
@@ -64,7 +65,7 @@
     if (placementMode) return; // placement drives its own layout
     await tick();
     const win = getCurrentWindow();
-    if (items.length === 0) {
+    if (items.length === 0 && !dictating) {
       await win.hide();
       return;
     }
@@ -223,6 +224,12 @@
         ),
       );
       unlisteners.push(
+        await listen<{ active: boolean }>("ts://dictate", (e) => {
+          dictating = e.payload.active;
+          relayout();
+        }),
+      );
+      unlisteners.push(
         await listen<{
           timeout: number;
           maxCards: number;
@@ -263,6 +270,12 @@
 {/if}
 
 <div class="stack" bind:this={stackEl} class:hidden={placementMode}>
+  {#if dictating}
+    <div class="dictate-badge" transition:fly={{ y: 10, duration: 150 }}>
+      <span class="dictate-dot"></span>
+      <span class="dictate-mic">🎙</span> Transcribing…
+    </div>
+  {/if}
   {#each items as item (item.key)}
     <div animate:flip={{ duration: 220 }} transition:fly={{ x: 60, duration: 200 }}>
       <Card
@@ -291,6 +304,41 @@
   }
   .stack.hidden {
     display: none;
+  }
+
+  /* speaking indicator while hotkey dictation is live */
+  .dictate-badge {
+    align-self: flex-end;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--surface, #1b1b22);
+    border: 1px solid #e33b3b;
+    color: var(--text, #eee);
+    font-family: system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    white-space: nowrap;
+  }
+  .dictate-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #e33b3b;
+    animation: dictate-pulse 1.1s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  .dictate-mic {
+    font-size: 13px;
+  }
+  @keyframes dictate-pulse {
+    50% {
+      opacity: 0.35;
+      transform: scale(0.8);
+    }
   }
 
   /* placement sample card (custom-location picker) */

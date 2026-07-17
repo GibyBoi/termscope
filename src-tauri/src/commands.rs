@@ -282,9 +282,21 @@ pub fn remove_word(app: AppHandle, state: State<AppState>, word: String) {
 
 // ---- hotkeys ------------------------------------------------------------------
 
+/// Read a hotkey field by its config key name.
+fn hotkey_of(cfg: &Config, key: &str) -> Option<String> {
+    match key {
+        "hotkey_explain_selection" => Some(cfg.hotkey_explain_selection.clone()),
+        "hotkey_mark_last_learned" => Some(cfg.hotkey_mark_last_learned.clone()),
+        "hotkey_toggle_listening" => Some(cfg.hotkey_toggle_listening.clone()),
+        "hotkey_dictate" => Some(cfg.hotkey_dictate.clone()),
+        _ => None,
+    }
+}
+
 /// Rebind a global hotkey. Validates and registers the new combo BEFORE saving:
 /// on a bad/unavailable combo the old binding is restored and an error returned,
-/// so the user is never left with a dead hotkey.
+/// so the user is never left with a dead hotkey. An EMPTY combo unbinds the
+/// action entirely — nothing registered, nothing listening for it.
 #[tauri::command]
 pub fn set_hotkey(
     app: AppHandle,
@@ -295,43 +307,45 @@ pub fn set_hotkey(
     use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 
     let combo = combo.trim().to_lowercase();
-    let new_sc: Shortcut = combo
-        .parse()
-        .map_err(|_| format!("\"{combo}\" is not a usable shortcut"))?;
 
     let (old, conflicts) = {
         let cfg = state.config.lock().unwrap();
-        let old = match key.as_str() {
-            "hotkey_explain_selection" => cfg.hotkey_explain_selection.clone(),
-            "hotkey_mark_last_learned" => cfg.hotkey_mark_last_learned.clone(),
-            "hotkey_toggle_listening" => cfg.hotkey_toggle_listening.clone(),
-            _ => return Err(format!("unknown hotkey \"{key}\"")),
-        };
+        let old = hotkey_of(&cfg, &key).ok_or_else(|| format!("unknown hotkey \"{key}\""))?;
         let mut others = vec![
             ("Explain selection", cfg.hotkey_explain_selection.clone()),
             ("Mark last learned", cfg.hotkey_mark_last_learned.clone()),
             ("Toggle listening", cfg.hotkey_toggle_listening.clone()),
+            ("Dictate", cfg.hotkey_dictate.clone()),
         ];
-        others.retain(|(_, c)| c.to_lowercase() != old.to_lowercase());
+        // Unbound entries can't conflict; nor can the binding being replaced.
+        others.retain(|(_, c)| !c.is_empty() && c.to_lowercase() != old.to_lowercase());
         (old, others)
     };
-    if let Some((label, _)) = conflicts
-        .iter()
-        .find(|(_, c)| c.to_lowercase() == combo)
-    {
-        return Err(format!("\"{combo}\" is already used by {label}"));
-    }
 
     let gs = app.global_shortcut();
-    if let Ok(old_sc) = old.parse::<Shortcut>() {
-        let _ = gs.unregister(old_sc);
-    }
-    if let Err(e) = gs.register(new_sc) {
-        // Roll back so the previous binding keeps working.
+
+    if combo.is_empty() {
+        // Unbind: release the old registration and save the empty binding.
         if let Ok(old_sc) = old.parse::<Shortcut>() {
-            let _ = gs.register(old_sc);
+            let _ = gs.unregister(old_sc);
         }
-        return Err(format!("could not register \"{combo}\": {e}"));
+    } else {
+        let new_sc: Shortcut = combo
+            .parse()
+            .map_err(|_| format!("\"{combo}\" is not a usable shortcut"))?;
+        if let Some((label, _)) = conflicts.iter().find(|(_, c)| c.to_lowercase() == combo) {
+            return Err(format!("\"{combo}\" is already used by {label}"));
+        }
+        if let Ok(old_sc) = old.parse::<Shortcut>() {
+            let _ = gs.unregister(old_sc);
+        }
+        if let Err(e) = gs.register(new_sc) {
+            // Roll back so the previous binding keeps working.
+            if let Ok(old_sc) = old.parse::<Shortcut>() {
+                let _ = gs.register(old_sc);
+            }
+            return Err(format!("could not register \"{combo}\": {e}"));
+        }
     }
 
     let payload = {
@@ -340,6 +354,7 @@ pub fn set_hotkey(
             "hotkey_explain_selection" => cfg.hotkey_explain_selection = combo,
             "hotkey_mark_last_learned" => cfg.hotkey_mark_last_learned = combo,
             "hotkey_toggle_listening" => cfg.hotkey_toggle_listening = combo,
+            "hotkey_dictate" => cfg.hotkey_dictate = combo,
             _ => unreachable!(),
         }
         cfg.save();
@@ -347,6 +362,67 @@ pub fn set_hotkey(
     };
     let _ = app.emit_to("main", "ts://config", payload);
     Ok(())
+}
+
+/// Restore a hotkey to this build's default combo and return it.
+#[tauri::command]
+pub fn reset_hotkey(
+    app: AppHandle,
+    state: State<AppState>,
+    key: String,
+) -> Result<String, String> {
+    let default = hotkey_of(&Config::default(), &key)
+        .ok_or_else(|| format!("unknown hotkey \"{key}\""))?;
+    set_hotkey(app, state, key, default.clone())?;
+    Ok(default)
+}
+
+/// Dictate-hotkey events, dispatched by mode:
+/// - "toggle": press starts, next press stops (releases ignored). Key
+///   autorepeat can deliver a burst of presses while held, so presses within a
+///   short window of the last transition are ignored.
+/// - "hold": press starts, release stops (push-to-talk).
+///
+/// The actual start/stop is heavyweight (may spawn the sidecar, pastes on
+/// stop), so it runs off the shortcut handler's thread.
+pub fn run_dictate_event(app: AppHandle, pressed: bool) {
+    use std::sync::Mutex;
+    use std::time::{Duration, Instant};
+    static LAST_TOGGLE: Mutex<Option<Instant>> = Mutex::new(None);
+
+    let hold = {
+        let state = app.state::<AppState>();
+        let mode = state.config.lock().unwrap().dictate_mode.clone();
+        mode == "hold"
+    };
+    std::thread::spawn(move || {
+        let state = app.state::<AppState>();
+        if hold {
+            if pressed && !state.audio.is_dictating() {
+                if let Err(e) = state.audio.dictate_start(&app) {
+                    eprintln!("[termscope] dictate hotkey: {e}");
+                }
+            } else if !pressed && state.audio.is_dictating() {
+                state.audio.dictate_stop(&app);
+            }
+            return;
+        }
+        if !pressed {
+            return; // toggle mode acts on presses only
+        }
+        {
+            let mut last = LAST_TOGGLE.lock().unwrap();
+            if last.is_some_and(|t| t.elapsed() < Duration::from_millis(500)) {
+                return; // autorepeat burst — not a deliberate second press
+            }
+            *last = Some(Instant::now());
+        }
+        if state.audio.is_dictating() {
+            state.audio.dictate_stop(&app);
+        } else if let Err(e) = state.audio.dictate_start(&app) {
+            eprintln!("[termscope] dictate hotkey: {e}");
+        }
+    });
 }
 
 /// Worker for the toggle-listening global hotkey.

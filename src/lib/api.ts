@@ -27,6 +27,8 @@ export const removeTerm = (id: string) => invoke("remove_term", { id });
 export const removeWord = (word: string) => invoke("remove_word", { word });
 export const setHotkey = (key: string, combo: string) =>
   invoke("set_hotkey", { key, combo });
+export const resetHotkey = (key: string) =>
+  invoke<string>("reset_hotkey", { key });
 
 export const markLearned = (id: string) => invoke("mark_learned", { id });
 export const unlearn = (id: string) => invoke("unlearn", { id });

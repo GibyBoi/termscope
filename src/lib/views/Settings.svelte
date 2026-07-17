@@ -6,6 +6,7 @@
     beginCardPlacement,
     exportProgress,
     getConfig,
+    resetHotkey,
     setConfigKey,
     setHotkey,
     setStartup,
@@ -100,6 +101,7 @@
     { key: "hotkey_explain_selection", label: "Explain selection", value: cfg.hotkey_explain_selection },
     { key: "hotkey_mark_last_learned", label: "Mark last term learned", value: cfg.hotkey_mark_last_learned },
     { key: "hotkey_toggle_listening", label: "Toggle listening", value: cfg.hotkey_toggle_listening },
+    { key: "hotkey_dictate", label: "Dictate (speech → text)", value: cfg.hotkey_dictate },
   ]);
 
   // ---- hotkey recorder --------------------------------------------------------
@@ -138,7 +140,15 @@
     e.preventDefault();
     e.stopPropagation();
     if (e.key === "Escape") {
+      // Esc = unbind: the action gets NO hotkey and nothing listens for one.
+      const key = recordingKey!;
       stopRecording();
+      try {
+        await setHotkey(key, "");
+        cfg = { ...cfg, [key]: "" };
+      } catch (err) {
+        hotkeyError = String(err);
+      }
       return;
     }
     const combo = comboFromEvent(e);
@@ -152,6 +162,17 @@
     stopRecording();
     try {
       await setHotkey(key, combo);
+      cfg = { ...cfg, [key]: combo };
+    } catch (err) {
+      hotkeyError = String(err);
+    }
+  }
+
+  async function doResetHotkey(key: string) {
+    hotkeyError = "";
+    if (recordingKey === key) stopRecording();
+    try {
+      const combo = await resetHotkey(key);
       cfg = { ...cfg, [key]: combo };
     } catch (err) {
       hotkeyError = String(err);
@@ -256,28 +277,62 @@
 
   <section class="group">
     <h2>Global hotkeys</h2>
-    <p class="hotkey-hint">Click a binding, then press the new key combination.</p>
+    <p class="hotkey-hint">
+      Click a binding, then press the new key combination — or press Esc to set
+      it to none (the action goes inactive). ↺ restores the default.
+    </p>
     {#each hotkeys as h}
       <div class="hotkey-row">
         <span>{h.label}</span>
-        {#if recordingKey === h.key}
-          <button class="kbd recording" onclick={stopRecording}>
-            Press keys… (Esc cancels)
-          </button>
-        {:else}
+        <span class="hotkey-controls">
+          {#if recordingKey === h.key}
+            <button class="kbd recording" onclick={stopRecording}>
+              Press keys… (Esc = none)
+            </button>
+          {:else}
+            <button
+              class="kbd kbd-btn"
+              class:unbound={!h.value}
+              title={h.value
+                ? "Click to change this hotkey"
+                : "No hotkey — click to set one"}
+              onclick={() => startRecording(h.key)}
+            >
+              {h.value ? h.value.toUpperCase() : "None"}
+            </button>
+          {/if}
           <button
-            class="kbd kbd-btn"
-            title="Click to change this hotkey"
-            onclick={() => startRecording(h.key)}
+            class="reset-btn"
+            title="Reset to default"
+            onclick={() => doResetHotkey(h.key)}
           >
-            {h.value.toUpperCase()}
+            ↺
           </button>
-        {/if}
+        </span>
       </div>
     {/each}
     {#if hotkeyError}
       <p class="hotkey-error">{hotkeyError}</p>
     {/if}
+
+    <div class="subhead">Dictation</div>
+    <p class="hotkey-hint">
+      The dictate hotkey turns your speech into text with filler words cut. On
+      finish it pastes at your cursor — and stays on the clipboard either way.
+    </p>
+    <div class="field-label">Finish dictating on</div>
+    <div class="segmented">
+      <button
+        class:active={cfg.dictate_mode !== "hold"}
+        onclick={() => save("dictate_mode", "toggle")}
+        title="Press once to start, press again to finish">Second press</button
+      >
+      <button
+        class:active={cfg.dictate_mode === "hold"}
+        onclick={() => save("dictate_mode", "hold")}
+        title="Hold the keys while speaking, release to finish">Key release</button
+      >
+    </div>
   </section>
 
   <section class="group">
@@ -473,12 +528,34 @@
     border-radius: 6px;
     padding: 4px 8px;
   }
+  .hotkey-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
   .kbd-btn {
     border: 1px solid transparent;
     cursor: pointer;
   }
   .kbd-btn:hover {
     border-color: var(--accent);
+  }
+  .kbd.unbound {
+    color: var(--text-faint);
+    font-style: italic;
+  }
+  .reset-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    color: var(--text-faint);
+    background: var(--surface2);
+    font-size: 13px;
+    transition: color 0.12s, background 0.12s;
+  }
+  .reset-btn:hover {
+    color: var(--text);
+    background: var(--surface3);
   }
   .kbd.recording {
     color: var(--gold);

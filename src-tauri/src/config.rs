@@ -38,10 +38,15 @@ pub struct Config {
     pub listen_microphone: bool,
     pub listen_on_startup: bool,
 
-    // Global hotkeys.
+    // Global hotkeys. An empty string means "unbound" — the action has no
+    // hotkey and nothing is registered for it.
     pub hotkey_explain_selection: String,
     pub hotkey_mark_last_learned: String,
     pub hotkey_toggle_listening: String,
+    /// Start/stop hotkey dictation (speech → cleaned text at the cursor).
+    pub hotkey_dictate: String,
+    /// How hotkey dictation ends: "toggle" (press again) | "hold" (key release).
+    pub dictate_mode: String,
 
     // Window / app behavior.
     pub close_to_tray: bool,
@@ -90,6 +95,8 @@ impl Default for Config {
             hotkey_explain_selection: "ctrl+shift+alt+e".into(),
             hotkey_mark_last_learned: "ctrl+shift+alt+k".into(),
             hotkey_toggle_listening: "ctrl+shift+alt+space".into(),
+            hotkey_dictate: "ctrl+shift+alt+d".into(),
+            dictate_mode: "toggle".into(),
             close_to_tray: false,
             appearance: "dark".into(),
             minimize_hint_shown: false,

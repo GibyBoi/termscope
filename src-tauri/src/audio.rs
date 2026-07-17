@@ -22,9 +22,29 @@ pub struct AudioStatus {
     pub model: String,
 }
 
+/// What Listening looked like before hotkey dictation borrowed the sidecar,
+/// so stopping dictation puts things back exactly as the user had them.
+enum PriorAudio {
+    /// Listening was off — dictation started the sidecar, so stop it after.
+    Off,
+    /// Listening was already capturing the microphone — nothing was touched.
+    OnUntouched,
+    /// Listening was on WITHOUT the mic — dictation restarted the sidecar with
+    /// the mic added, so restart with the configured sources after.
+    OnRestarted,
+}
+
+/// A live hotkey-dictation session: mic speech accumulating as cleaned text.
+/// RAM only — the buffer is never persisted; on stop it goes to the clipboard.
+struct Dictation {
+    buffer: String,
+    prior: PriorAudio,
+}
+
 pub struct Audio {
     child: Mutex<Option<Child>>,
     status: Mutex<AudioStatus>,
+    dictation: Mutex<Option<Dictation>>,
 }
 
 impl Audio {
@@ -32,6 +52,7 @@ impl Audio {
         Self {
             child: Mutex::new(None),
             status: Mutex::new(AudioStatus::default()),
+            dictation: Mutex::new(None),
         }
     }
 
@@ -44,6 +65,12 @@ impl Audio {
     }
 
     pub fn start(&self, app: &AppHandle) -> Result<(), String> {
+        self.start_with(app, None)
+    }
+
+    /// Start the sidecar. `sources_override` (e.g. `["microphone"]` for hotkey
+    /// dictation) wins over the configured sources when given.
+    fn start_with(&self, app: &AppHandle, sources_override: Option<Vec<&str>>) -> Result<(), String> {
         let mut guard = self.child.lock().unwrap();
         if let Some(child) = guard.as_mut() {
             match child.try_wait() {
@@ -53,18 +80,24 @@ impl Audio {
         }
         let script = resolve_sidecar(app)?;
         let models_dir = crate::paths::user_data_dir().join("models");
-        let (sys, mic) = {
-            let state = app.state::<AppState>();
-            let cfg = state.config.lock().unwrap();
-            (cfg.listen_system_audio, cfg.listen_microphone)
+        let sources = match sources_override {
+            Some(s) => s,
+            None => {
+                let (sys, mic) = {
+                    let state = app.state::<AppState>();
+                    let cfg = state.config.lock().unwrap();
+                    (cfg.listen_system_audio, cfg.listen_microphone)
+                };
+                let mut sources = Vec::new();
+                if sys {
+                    sources.push("system");
+                }
+                if mic {
+                    sources.push("microphone");
+                }
+                sources
+            }
         };
-        let mut sources = Vec::new();
-        if sys {
-            sources.push("system");
-        }
-        if mic {
-            sources.push("microphone");
-        }
         if sources.is_empty() {
             return Err("Enable system audio and/or microphone in Settings first.".into());
         }
@@ -161,6 +194,16 @@ impl Audio {
                     "text" => {
                         if let Some(text) = v.get("text").and_then(|s| s.as_str()) {
                             let source = v.get("source").and_then(|s| s.as_str()).unwrap_or("system");
+                            // Live dictation taps the mic stream (filler cut here,
+                            // RAM only) — and the normal pipeline still runs, so
+                            // cards and history behave exactly as when listening.
+                            if source == "microphone" {
+                                let state = app2.state::<AppState>();
+                                if state.audio.is_dictating() {
+                                    let cleaned = clean_fillers(text, &state.filler_words);
+                                    state.audio.dictation_append(&cleaned);
+                                }
+                            }
                             handle_heard_text(&app2, text, source);
                         }
                     }
@@ -204,6 +247,110 @@ impl Audio {
         st.listening = false;
         st.reason = "off".into();
     }
+
+    // ---- hotkey dictation -----------------------------------------------------
+
+    pub fn is_dictating(&self) -> bool {
+        self.dictation.lock().unwrap().is_some()
+    }
+
+    /// Begin a dictation session: make sure the microphone is being captured
+    /// (borrowing or starting the sidecar as needed) and start accumulating.
+    pub fn dictate_start(&self, app: &AppHandle) -> Result<(), String> {
+        {
+            let dict = self.dictation.lock().unwrap();
+            if dict.is_some() {
+                return Ok(()); // already dictating
+            }
+        }
+        let mic_configured = {
+            let state = app.state::<AppState>();
+            let cfg = state.config.lock().unwrap();
+            cfg.listen_microphone
+        };
+        let prior = if !self.is_listening() {
+            self.start_with(app, Some(vec!["microphone"]))?;
+            PriorAudio::Off
+        } else if mic_configured {
+            // The running sidecar already captures the mic; just tap the stream.
+            PriorAudio::OnUntouched
+        } else {
+            // Listening is on but system-only: restart with the mic added.
+            self.stop();
+            self.start_with(app, Some(vec!["system", "microphone"]))?;
+            PriorAudio::OnRestarted
+        };
+        *self.dictation.lock().unwrap() = Some(Dictation {
+            buffer: String::new(),
+            prior,
+        });
+        broadcast(app, "ts://dictate", json!({ "active": true }));
+        let _ = app.emit_to("main", "ts://audio-status", self.status());
+        Ok(())
+    }
+
+    /// End the dictation session: restore Listening to how the user had it,
+    /// then deliver the cleaned text — pasted at the cursor via a synthesized
+    /// Ctrl+V, and left on the clipboard either way.
+    pub fn dictate_stop(&self, app: &AppHandle) {
+        let session = match self.dictation.lock().unwrap().take() {
+            Some(s) => s,
+            None => return,
+        };
+        broadcast(app, "ts://dictate", json!({ "active": false }));
+        match session.prior {
+            PriorAudio::Off => self.stop(),
+            PriorAudio::OnUntouched => {}
+            PriorAudio::OnRestarted => {
+                self.stop();
+                if let Err(e) = self.start(app) {
+                    eprintln!("[termscope] dictation: could not restore listening: {e}");
+                }
+            }
+        }
+        let _ = app.emit_to("main", "ts://audio-status", self.status());
+        let text = session.buffer.trim().to_string();
+        if !text.is_empty() {
+            crate::selection::paste_text(&text);
+        }
+    }
+
+    /// Feed a mic utterance into the live dictation buffer (filler already cut).
+    fn dictation_append(&self, cleaned: &str) {
+        if cleaned.is_empty() {
+            return;
+        }
+        if let Some(d) = self.dictation.lock().unwrap().as_mut() {
+            if !d.buffer.is_empty() {
+                d.buffer.push(' ');
+            }
+            d.buffer.push_str(cleaned);
+        }
+    }
+}
+
+/// Emit to both windows — the cards overlay draws the speaking indicator and
+/// the hub may mirror the state.
+fn broadcast(app: &AppHandle, event: &str, payload: serde_json::Value) {
+    let _ = app.emit_to("cards", event, payload.clone());
+    let _ = app.emit_to("main", event, payload);
+}
+
+/// Remove filler words from an utterance, keeping everything else verbatim.
+/// Tokens are matched by their normalized (lowercase alphanumeric) core, same
+/// as the tallies, so "Um," and "um" both drop.
+fn clean_fillers(text: &str, fillers: &std::collections::HashSet<String>) -> String {
+    text.split_whitespace()
+        .filter(|w| {
+            let core: String = w
+                .chars()
+                .filter(|c| c.is_ascii_alphanumeric())
+                .collect::<String>()
+                .to_lowercase();
+            core.is_empty() || !fillers.contains(&core)
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 impl Default for Audio {
@@ -280,6 +427,25 @@ fn handle_heard_text(app: &AppHandle, text: &str, source: &str) {
             "customY": custom_y,
         });
         let _ = app.emit_to("cards", "ts://card", payload);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::clean_fillers;
+    use std::collections::HashSet;
+
+    #[test]
+    fn clean_fillers_drops_normalized_tokens_keeps_rest() {
+        let f: HashSet<String> = ["um".to_string(), "basically".to_string()].into();
+        assert_eq!(
+            clean_fillers("Um, so basically we ship Friday.", &f),
+            "so we ship Friday."
+        );
+        assert_eq!(clean_fillers("um UM Um.", &f), "");
+        assert_eq!(clean_fillers("", &f), "");
+        // Punctuation-only tokens are never treated as filler.
+        assert_eq!(clean_fillers("wait — um — what", &f), "wait — — what");
     }
 }
 

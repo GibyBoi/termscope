@@ -29,11 +29,17 @@ fn handle_shortcut(
     event: tauri_plugin_global_shortcut::ShortcutEvent,
 ) {
     use tauri_plugin_global_shortcut::ShortcutState;
-    if event.state() != ShortcutState::Pressed {
-        return;
-    }
+    let pressed = event.state() == ShortcutState::Pressed;
     let cfg = app.state::<AppState>().config.lock().unwrap().clone();
     let parse = |s: &str| s.parse::<tauri_plugin_global_shortcut::Shortcut>().ok();
+    // Dictate wants BOTH edges (hold mode stops on release); the rest fire on press.
+    if parse(&cfg.hotkey_dictate).as_ref() == Some(shortcut) {
+        commands::run_dictate_event(app.clone(), pressed);
+        return;
+    }
+    if !pressed {
+        return;
+    }
     if parse(&cfg.hotkey_explain_selection).as_ref() == Some(shortcut) {
         commands::run_explain_selection(app.clone());
     } else if parse(&cfg.hotkey_mark_last_learned).as_ref() == Some(shortcut) {
@@ -95,7 +101,9 @@ pub fn run() {
                     &cfg.hotkey_explain_selection,
                     &cfg.hotkey_mark_last_learned,
                     &cfg.hotkey_toggle_listening,
+                    &cfg.hotkey_dictate,
                 ] {
+                    // Unbound ("") or invalid combos simply don't parse — skipped.
                     if let Ok(sc) = combo.parse::<tauri_plugin_global_shortcut::Shortcut>() {
                         let _ = gs.register(sc);
                     }
@@ -138,6 +146,7 @@ pub fn run() {
             commands::get_config,
             commands::set_config_key,
             commands::set_hotkey,
+            commands::reset_hotkey,
             commands::remove_term,
             commands::remove_word,
             commands::begin_card_placement,

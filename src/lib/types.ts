@@ -65,9 +65,13 @@ export interface Config {
   listen_system_audio: boolean;
   listen_microphone: boolean;
   listen_on_startup: boolean;
+  /** Global hotkeys; an empty string means unbound (action inactive). */
   hotkey_explain_selection: string;
   hotkey_mark_last_learned: string;
   hotkey_toggle_listening: string;
+  hotkey_dictate: string;
+  /** How hotkey dictation ends: "toggle" (second press) | "hold" (release). */
+  dictate_mode: string;
   close_to_tray: boolean;
   appearance: string;
   minimize_hint_shown: boolean;
