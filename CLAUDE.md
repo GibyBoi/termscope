@@ -1,25 +1,32 @@
 # TermScope (Tauri V2) — notes for Claude
 
-## v3-dev branch: the red "TermScope 3 Dev" edition (this branch)
-This branch is TermScope 3 **as a separate development app** that runs alongside
-the user's installed TermScope 2.x — nothing here may touch the 2.x install or
-its data. The separation knobs, and the checklist to revert when v3 ships:
-- `tauri.conf.json`: productName **"TermScope 3 Dev"**, identifier
-  `com.0xygenbreather.termscope.dev` (own single-instance mutex + install dir),
-  window title. → On release: back to "TermScope" / `com.0xygenbreather.termscope`.
-- `paths.rs`: `APP_NAME = "TermScope3Dev"` → data in `%APPDATA%\TermScope3Dev`
-  (seeded once with COPIES of the real history/knowledge + synthetic `mic_days`
-  for chart development — safe to wipe). → On release: `"TermScope"` again; the
-  additive history schema needs no migration.
-- `config.rs`: default hotkeys are `ctrl+shift+alt+…` so they don't collide with
-  a running 2.x (`ctrl+alt+…`). → On release: revert defaults.
-- Icon: all-red via `python scripts/make_icon.py --dev` (writes `assets/` +
-  `src/assets/` PNGs) + `npm run tauri icon assets/termscope.png`. The sidebar
-  badge ("x.y dev", red) is in `App.svelte`; tray labels in `tray.rs`.
-  → On release: rerun `make_icon.py` WITHOUT `--dev`, regenerate icons,
-  `cargo clean` (icon cache gotcha below), un-red the badge/tray.
+## Version status
+`main` is the released app: **TermScope 3.4 "Polished"** — the v3 line
+(dictation, filler goals, corrections, engines, polish) promoted from the
+v3-dev branch to the real "TermScope" identity. It reads the same
+`%APPDATA%\TermScope` data 2.x used (additive schema, no migration).
 
-### v3 features (this branch)
+### Spinning up a dev edition (the red-app recipe, used for v3, reusable for v4)
+The `v3-dev` branch (kept, frozen at 3.3.0) shows the full pattern: a branch
+that builds a **separate development app** running alongside the installed
+TermScope without touching its install or data. The knobs, and what release
+reverts (all reverted on `main` for 3.4):
+- `tauri.conf.json`: productName "TermScope N Dev", identifier
+  `com.0xygenbreather.termscope.dev` (own single-instance mutex + install dir),
+  window title. Release: "TermScope" / `com.0xygenbreather.termscope`.
+- `paths.rs`: `APP_NAME = "TermScopeNDev"` → own data dir in `%APPDATA%`,
+  seeded with COPIES of real data, safe to wipe. Release: `"TermScope"`.
+  (`%APPDATA%\TermScope3Dev` still exists on this machine; it holds the v3 dev
+  copies + synthetic `mic_days` and can be deleted whenever.)
+- `config.rs`: shifted default hotkeys (`ctrl+shift+alt+…`) so they don't
+  collide with the installed app (`ctrl+alt+…`). Release: revert.
+- Icon: all-red via `python scripts/make_icon.py --dev` (writes `assets/` +
+  `src/assets/` PNGs) + `npm run tauri icon assets/termscope.png`; red version
+  badge in `App.svelte`, dev tray labels in `tray.rs`. Release: rerun
+  `make_icon.py` WITHOUT `--dev`, regenerate icons, `cargo clean` (icon cache
+  gotcha below), un-red the badge/tray.
+
+### v3 features (shipped in 3.4)
 - **Mic-only filler tracking** (`history.rs`): the sidecar has always tagged text
   events with `source`; `audio.rs` now passes `mic = source=="microphone"` into
   `record_audio`, which additionally tallies `mic_filler_counts` (per filler

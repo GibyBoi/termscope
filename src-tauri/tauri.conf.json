@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "TermScope 3 Dev",
-  "version": "3.3.0",
-  "identifier": "com.0xygenbreather.termscope.dev",
+  "productName": "TermScope",
+  "version": "3.4.0",
+  "identifier": "com.0xygenbreather.termscope",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "TermScope 3 Dev",
+        "title": "TermScope",
         "width": 960,
         "height": 620,
         "minWidth": 860,

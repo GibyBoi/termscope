@@ -101,13 +101,10 @@ impl Default for Config {
             listen_system_audio: true,
             listen_microphone: true,
             listen_on_startup: false,
-            // v3-dev branch: shifted defaults so the dev app's global hotkeys
-            // don't collide with an installed TermScope 2.x running alongside
-            // (its defaults are ctrl+alt+…). Revert on release — CLAUDE.md.
-            hotkey_explain_selection: "ctrl+shift+alt+e".into(),
-            hotkey_mark_last_learned: "ctrl+shift+alt+k".into(),
-            hotkey_toggle_listening: "ctrl+shift+alt+space".into(),
-            hotkey_dictate: "ctrl+shift+alt+d".into(),
+            hotkey_explain_selection: "ctrl+alt+e".into(),
+            hotkey_mark_last_learned: "ctrl+alt+k".into(),
+            hotkey_toggle_listening: "ctrl+alt+space".into(),
+            hotkey_dictate: "ctrl+alt+d".into(),
             dictate_mode: "toggle".into(),
             dictate_tail_seconds: 1.5,
             close_to_tray: false,

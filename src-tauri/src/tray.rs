@@ -8,13 +8,13 @@ use tauri::{
 };
 
 pub fn build_tray(app: &AppHandle) -> tauri::Result<()> {
-    let open = MenuItem::with_id(app, "open", "Open TermScope 3 Dev", true, None::<&str>)?;
+    let open = MenuItem::with_id(app, "open", "Open TermScope", true, None::<&str>)?;
     let sep = PredefinedMenuItem::separator(app)?;
-    let quit = MenuItem::with_id(app, "quit", "Quit TermScope 3 Dev", true, None::<&str>)?;
+    let quit = MenuItem::with_id(app, "quit", "Quit TermScope", true, None::<&str>)?;
     let menu = Menu::with_items(app, &[&open, &sep, &quit])?;
 
     let mut builder = TrayIconBuilder::with_id("termscope-tray")
-        .tooltip("TermScope 3 Dev")
+        .tooltip("TermScope")
         .menu(&menu)
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id.as_ref() {

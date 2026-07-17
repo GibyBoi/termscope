@@ -132,7 +132,7 @@
     <div class="brand">
       <img class="logo" src={logoUrl} alt="TermScope" />
       <span class="brand-name">TermScope</span>
-      <span class="brand-ver">{version} dev</span>
+      <span class="brand-ver">{version}</span>
     </div>
 
     <nav>
@@ -232,8 +232,7 @@
   .brand-ver {
     font-size: 11px;
     font-weight: 600;
-    /* red on the v3-dev branch, matching the dev icon — revert on release */
-    color: var(--red);
+    color: var(--accent);
     background: var(--surface3);
     border-radius: 6px;
     padding: 1px 6px;
