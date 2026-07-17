@@ -152,6 +152,23 @@ works through a Python sidecar (`sidecar/listen.py`, faster-whisper) — see the
   frontend requires a modifier (F-keys exempt). All three hotkeys (explain selection,
   mark last learned, toggle listening) are registered at startup and live-rebound.
 
+## SpeakEasy comparison — adopted + candidate ideas (v3)
+ForgeAISystem/speakeasy is Harsh's local dictation app (Electron + sherpa-onnx,
+hold-to-talk, Wispr Flow replacement). Reviewed 2026-07-17 for transcript
+quality. **Adopted**: stretched-filler collapse, doubled-punctuation collapse,
+first-letter capitalization (`audio.rs::{clean_fillers,finalize_dictation}`,
+mirrored in `Dictation.svelte`). **Candidates worth stealing later**:
+- Whole-recording transcription for dictation (one Whisper pass over the full
+  session instead of per-utterance emission — best possible punctuation).
+- Better models via sherpa-onnx: NVIDIA Parakeet (accuracy), Moonshine (speed);
+  transducer models don't hallucinate punctuation the way Whisper does.
+- Dictionary corrections ("it hears X, write Y") and voice snippets.
+- Optional LLM polish pass (Ollama local / Claude API) for false starts and
+  self-corrections — off by default; SpeakEasy's system prompt is a good base.
+- Audio safety net: recordings hit disk before transcription, retryable from
+  History on failure, recovered after a crash (TermScope would need this to
+  stay consistent with its no-audio-on-disk privacy stance — likely skip).
+
 ## Growing the dictionary (discover-jargon skill)
 - `.claude/skills/discover-jargon/` (SKILL.md + `jargon_tool.py`): the model generates
   candidate jargon, `jargon_tool.py check` reports which TermScope is missing (same
