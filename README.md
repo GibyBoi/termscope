@@ -6,8 +6,34 @@ pops up in front of everything with a plain-English definition. It also keeps a
 searchable library (with fuller, Wikipedia-sourced definitions) and tracks which terms
 you've learned. Everything runs offline.
 
-This is the **Tauri V2 rewrite** (Rust + Svelte 5). The original Python/customtkinter
-app lives under [`legacy/`](legacy/) for reference.
+Built with **Rust (Tauri v2)**, **Svelte 5 + TypeScript**, and a small Python audio
+sidecar running **Whisper** locally. Current release: **3.4**. The original
+Python/customtkinter app lives under [`legacy/`](legacy/) for reference.
+
+## How it works
+
+```
+ system audio (WASAPI loopback) ─┐
+ microphone ─────────────────────┤  Python sidecar            Rust core (Tauri v2)             Svelte 5 UI
+                                 └─▶ Endpointer ─▶ Whisper ─▶ matcher ─▶ knowledge ─▶ notifier ─▶ floating cards
+ highlighted text + hotkey ────────────────────────────────▶  (JSON lines over stdin/stdout)      hub · dictation pill
+```
+
+- **Utterance endpointing, not fixed windows.** Audio is cut into whole utterances by a pure
+  state machine (0.6 s hang, 0.25 s pre-roll, forced split at the quietest point after 12 s
+  of unbroken speech). It replaced fixed 3 s overlapping windows, which transcribed every
+  overlap twice and doubled words at each boundary. Covered by synthetic-audio tests.
+- **No LLM in the hot path.** Terms are found by a longest-match, plural-aware token scan
+  with strict rules for acronyms, so detection is instant, deterministic and offline.
+  Cooldowns and a rate limiter keep cards from spamming you.
+- **Three windows.** The hub, a transparent click-through always-on-top overlay that
+  resizes itself to hug the card stack, and a dictation pill with a live waveform.
+- **Privacy by construction.** Audio is never written to disk. History keeps only
+  orderless word counts, so a conversation cannot be reconstructed from it. The only
+  network use is the one-time model download.
+- **User data is never lost.** Atomic saves, unreadable files are quarantined rather than
+  overwritten, and unknown config keys survive a round trip between versions.
+- 34 Tauri commands, 34 Rust unit tests (`cargo test`) plus Python endpointer tests.
 
 > The project (and this repository) is named **TermScope**. An earlier release carried
 > the codename “WhisperOfHistory” — that's when TermScope started using the **Whisper**
@@ -21,6 +47,10 @@ app lives under [`legacy/`](legacy/) for reference.
   surface as floating cards (Learn more / ✓ Learned / Dismiss), stacked in a corner.
 - **Listening (Whisper STT)** — optionally transcribe system audio + mic offline with the
   **Whisper** model to catch jargon as it's spoken and surface the same floating cards.
+- **Dictation** — hold or toggle a hotkey, speak, and the text is pasted at your cursor
+  with filler words removed. The whole recording is transcribed in one pass for coherent
+  punctuation; an optional polish pass can run through a local model only (never cloud).
+  Whisper is the default engine; Moonshine and Parakeet are selectable.
 - **History** — a tally of how often each spoken word and each detected jargon term has
   come up. Stored as **orderless frequency counts only** (no order, timestamps, or log),
   so the file can't be replayed as a conversation.
@@ -98,3 +128,10 @@ Listening is first enabled, and "Learn more", which opens a source link in your 
 only when you click it.
 
 See [CLAUDE.md](CLAUDE.md) for architecture notes.
+
+## Attribution
+
+Extended definitions in [`data/library.json`](data/library.json) are adapted from
+[Wikipedia](https://www.wikipedia.org/) and are available under the
+[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) license; each entry links
+its source article. Speech recognition uses [faster-whisper](https://github.com/SYSTRAN/faster-whisper).

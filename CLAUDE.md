@@ -160,7 +160,7 @@ works through a Python sidecar (`sidecar/listen.py`, faster-whisper) — see the
   mark last learned, toggle listening) are registered at startup and live-rebound.
 
 ## SpeakEasy comparison — adopted ideas (v3)
-ForgeAISystem/speakeasy is Harsh's local dictation app (Electron + sherpa-onnx,
+SpeakEasy is a colleague's local dictation app (Electron + sherpa-onnx,
 hold-to-talk, Wispr Flow replacement). Reviewed 2026-07-17. **Adopted**:
 - Rule-based cleanup: stretched-filler collapse, doubled-punctuation collapse,
   first-letter capitalization (`audio.rs::{clean_fillers,finalize_dictation}`).
